@@ -12,7 +12,7 @@ Hi there! I am your AI-powered IELTS Writing Examiner, powered by <b>Google Gemi
 2. Send the Essay Question (or skip it).
 3. Submit your Essay (text or .pdf/.docx file).
 4. Get instant detailed feedback!`,
-    
+
     help: `📖 <b>How to Use IELTS Essay Examiner</b>
 
 Follow these simple steps to grade your writing:
@@ -79,21 +79,23 @@ You can:
 • Copy-paste your essay text directly.
 • Upload a document file (<code>.pdf</code> or <code>.docx</code>).`,
 
-    invalidFile: "⚠️ <b>Invalid File Type!</b> Please upload only <code>.pdf</code> or <code>.docx</code> documents, or send plain text.",
-    processing: "⏳ <b>Processing and Analyzing your essay...</b> \nOur IELTS AI Examiner is evaluating your writing. Please wait up to 30 seconds.",
-    processingImage: "📸 <b>Processing question image and analyzing essay...</b>",
-    
+    invalidFile:
+      "⚠️ <b>Invalid File Type!</b> Please upload only <code>.pdf</code> or <code>.docx</code> documents, or send plain text.",
+    processing:
+      "⏳ <b>Processing and Analyzing your essay...</b> \nOur IELTS AI Examiner is evaluating your writing. Please wait up to 30 seconds.",
+    processingImage:
+      "📸 <b>Processing question image and analyzing essay...</b>",
+
     insufficientCredits: `🚫 <b>Out of Credits!</b>
 
 You have <code>0</code> essay credits remaining. To grade more essays, please purchase a premium package.
 
 💳 <b>Premium Packages:</b>
-• <b>IELTS Express (5 credits)</b>: 25,000 UZS / $2.00 USD
-• <b>IELTS Master (15 credits)</b>: 60,000 UZS / $5.00 USD
+• <b>IELTS Express (5 credits)</b>: 25,000 UZS
 
 🔒 <b>Payment Details (Manual Uzcard/Humo):</b>
-• <b>Card Number:</b> <code>8600 1234 5678 9012</code>
-• <b>Recipient Name:</b> Bot Premium Upgrade
+• <b>Card Number:</b> <code>5614 6822 1586 0018</code>
+• <b>Recipient Name:</b> Nurmatov Muydin.
 
 <b>How to Pay:</b>
 1. Transfer the amount to the card above.
@@ -102,12 +104,16 @@ You have <code>0</code> essay credits remaining. To grade more essays, please pu
 
 Once you send the photo, our admin will verify and credit your account immediately.`,
 
-    receiptReceived: "✅ <b>Receipt Received!</b> Your receipt has been sent to the administrator for verification. You will be notified once it is approved.",
-    
-    errorDocx: "❌ Failed to read the Word Document (.docx). Please check if it is corrupted or send plain text.",
-    errorPdf: "❌ Failed to read the PDF document. Please ensure it has selectable text or copy-paste it directly.",
-    errorGeneral: "❌ An error occurred while processing your request. Please try again or contact support /contact.",
-    
+    receiptReceived:
+      "✅ <b>Receipt Received!</b> Your receipt has been sent to the administrator for verification. You will be notified once it is approved.",
+
+    errorDocx:
+      "❌ Failed to read the Word Document (.docx). Please check if it is corrupted or send plain text.",
+    errorPdf:
+      "❌ Failed to read the PDF document. Please ensure it has selectable text or copy-paste it directly.",
+    errorGeneral:
+      "❌ An error occurred while processing your request. Please try again or contact support /contact.",
+
     // Admin notifications (sent in English to the admin always)
     adminReceiptNotify: `🔔 <b>New Payment Receipt!</b>
 👤 <b>User:</b> @{username}
@@ -115,12 +121,14 @@ Once you send the photo, our admin will verify and credit your account immediate
 🌐 <b>Language:</b> {language}
 
 Please verify the receipt image and choose an action below.`,
-    
+
     adminApproved: "✅ Approved user @{username} (+5 credits).",
     adminDenied: "❌ Denied user @{username}.",
 
-    paymentApproved: "🎉 <b>Your payment has been approved!</b> \n5 essay credits have been added to your balance. You can now grade more essays. Type /check to start!",
-    paymentDenied: "❌ <b>Your payment verification was rejected.</b> \nIf you believe this is a mistake, please contact support: @identitynull."
+    paymentApproved:
+      "🎉 <b>Your payment has been approved!</b> \n5 essay credits have been added to your balance. You can now grade more essays. Type /check to start!",
+    paymentDenied:
+      "❌ <b>Your payment verification was rejected.</b> \nIf you believe this is a mistake, please contact support: @identitynull.",
   },
 
   uz: {
@@ -136,7 +144,7 @@ Assalomu alaykum! Men sizning <b>Google Gemini</b> texnologiyasida ishlaydigan s
 2. Insho savolini yuboring (yoki uni o'tkazib yuboring).
 3. Inshongizni matn yoki <code>.pdf</code> / <code>.docx</code> fayl ko'rinishida yuboring.
 4. Bir necha soniyada batafsil natijani oling!`,
-    
+
     help: `📖 <b>IELTS Essay Examiner'dan foydalanish yo'riqnomasi</b>
 
 Inshongizni tekshirish uchun quyidagi oddiy qadamlarni bajaring:
@@ -203,21 +211,23 @@ Siz:
 • Insho matnini to'g'ridan-to'g'ri yozib yuborishingiz,
 • Yoki <code>.pdf</code> / <code>.docx</code> formatdagi fayl yuklashingiz mumkin.`,
 
-    invalidFile: "⚠️ <b>Noto'g'ri fayl turi!</b> Iltimos, faqat <code>.pdf</code> yoki <code>.docx</code> hujjat yuklang yoki oddiy matn ko'rinishida yuboring.",
-    processing: "⏳ <b>Insho tahlil qilinmoqda...</b> \nIELTS AI Examiner inshongizni tekshirmoqda. Iltimos, 30 soniyagacha kuting.",
-    processingImage: "📸 <b>Rasm tahlil qilinmoqda va insho tekshirilmoqda...</b>",
-    
+    invalidFile:
+      "⚠️ <b>Noto'g'ri fayl turi!</b> Iltimos, faqat <code>.pdf</code> yoki <code>.docx</code> hujjat yuklang yoki oddiy matn ko'rinishida yuboring.",
+    processing:
+      "⏳ <b>Insho tahlil qilinmoqda...</b> \nIELTS AI Examiner inshongizni tekshirmoqda. Iltimos, 30 soniyagacha kuting.",
+    processingImage:
+      "📸 <b>Rasm tahlil qilinmoqda va insho tekshirilmoqda...</b>",
+
     insufficientCredits: `🚫 <b>Hisobingizda urinishlar qolmadi!</b>
 
 Sizda <code>0</code> ta urinish qoldi. Insho tekshirishda davom etish uchun premium paket xarid qiling.
 
 💳 <b>Premium Paketlar:</b>
-• <b>IELTS Express (5 ta urinish)</b>: 25,000 so'm / $2.00 USD
-• <b>IELTS Master (15 ta urinish)</b>: 60,000 so'm / $5.00 USD
+• <b>IELTS Express (5 ta urinish)</b>: 25,000 so'm
 
 🔒 <b>To'lov ma'lumotlari (Uzcard/Humo):</b>
-• <b>Karta raqami:</b> <code>8600 1234 5678 9012</code>
-• <b>Karta egasi:</b> Bot Premium Upgrade
+• <b>Karta raqami:</b> <code>5614 6822 1586 0018</code>
+• <b>Karta egasi:</b> Nurmatov Muydin.
 
 <b>To'lov qilish usuli:</b>
 1. Yuqoridagi kartaga to'lovni amalga oshiring.
@@ -226,14 +236,20 @@ Sizda <code>0</code> ta urinish qoldi. Insho tekshirishda davom etish uchun prem
 
 Rasm qabul qilingandan so'ng, adminimiz kavolatni tekshiradi va hisobingizga urinishlarni qo'shib beradi.`,
 
-    receiptReceived: "✅ <b>Chek qabul qilindi!</b> Sizning to'lov chekingiz tasdiqlash uchun adminga yuborildi. To'lov tasdiqlangach, sizga xabar yuboriladi.",
-    
-    errorDocx: "❌ Word hujjatini (.docx) o'qib bo'lmadi. Fayl buzilmaganligini tekshiring yoki matn sifatida yuboring.",
-    errorPdf: "❌ PDF hujjatini o'qib bo'lmadi. Undagi matn tanlanadigan ekanligiga ishonch hosil qiling yoki matn sifatida yuboring.",
-    errorGeneral: "❌ Xatolik yuz berdi. Iltimos, qaytadan urinib ko'ring yoki /contact orqali bog'laning.",
-    
-    paymentApproved: "🎉 <b>Sizning to'lovingiz tasdiqlandi!</b> \nHisobingizga 5 ta urinish qo'shildi. Insholaringizni tekshirishingiz mumkin. Boshlash uchun /check yozing!",
-    paymentDenied: "❌ <b>Sizning to'lovingiz tasdiqlanmadi.</b> \nAgar xatolik yuz bergan deb o'ylasangiz, admin bilan bog'laning: @identitynull."
+    receiptReceived:
+      "✅ <b>Chek qabul qilindi!</b> Sizning to'lov chekingiz tasdiqlash uchun adminga yuborildi. To'lov tasdiqlangach, sizga xabar yuboriladi.",
+
+    errorDocx:
+      "❌ Word hujjatini (.docx) o'qib bo'lmadi. Fayl buzilmaganligini tekshiring yoki matn sifatida yuboring.",
+    errorPdf:
+      "❌ PDF hujjatini o'qib bo'lmadi. Undagi matn tanlanadigan ekanligiga ishonch hosil qiling yoki matn sifatida yuboring.",
+    errorGeneral:
+      "❌ Xatolik yuz berdi. Iltimos, qaytadan urinib ko'ring yoki /contact orqali bog'laning.",
+
+    paymentApproved:
+      "🎉 <b>Sizning to'lovingiz tasdiqlandi!</b> \nHisobingizga 5 ta urinish qo'shildi. Insholaringizni tekshirishingiz mumkin. Boshlash uchun /check yozing!",
+    paymentDenied:
+      "❌ <b>Sizning to'lovingiz tasdiqlanmadi.</b> \nAgar xatolik yuz bergan deb o'ylasangiz, admin bilan bog'laning: @identitynull.",
   },
 
   ru: {
@@ -249,7 +265,7 @@ Rasm qabul qilingandan so'ng, adminimiz kavolatni tekshiradi va hisobingizga uri
 2. Отправьте тему эссе (или пропустите этот шаг).
 3. Отправьте эссе в виде текста или документа <code>.pdf</code> / <code>.docx</code>.
 4. Получите детальный отчет о баллах за несколько секунд!`,
-    
+
     help: `📖 <b>Руководство по использованию бота</b>
 
 Чтобы проверить эссе, выполните следующие действия:
@@ -316,21 +332,22 @@ Rasm qabul qilingandan so'ng, adminimiz kavolatni tekshiradi va hisobingizga uri
 • Скопировать и вставить текст вашего эссе.
 • Загрузить файл документа (<code>.pdf</code> или <code>.docx</code>).`,
 
-    invalidFile: "⚠️ <b>Неверный формат файла!</b> Пожалуйста, загружайте только документы <code>.pdf</code> или <code>.docx</code> или отправьте текст напрямую.",
-    processing: "⏳ <b>Обработка и анализ вашего эссе...</b> \nИИ-экзаменатор оценивает ваше письмо. Пожалуйста, подождите до 30 секунд.",
+    invalidFile:
+      "⚠️ <b>Неверный формат файла!</b> Пожалуйста, загружайте только документы <code>.pdf</code> или <code>.docx</code> или отправьте текст напрямую.",
+    processing:
+      "⏳ <b>Обработка и анализ вашего эссе...</b> \nИИ-экзаменатор оценивает ваше письмо. Пожалуйста, подождите до 30 секунд.",
     processingImage: "📸 <b>Обработка изображения темы и анализ эссе...</b>",
-    
+
     insufficientCredits: `🚫 <b>Закончились доступные попытки!</b>
 
 У вас осталось <code>0</code> доступных проверок. Для продолжения приобретите премиум-пакет.
 
 💳 <b>Премиум-пакеты:</b>
-• <b>IELTS Express (5 проверок)</b>: 25,000 сум / $2.00 USD
-• <b>IELTS Master (15 проверок)</b>: 60,000 сум / $5.00 USD
+• <b>IELTS Express (5 проверок)</b>: 25,000 сум 
 
 🔒 <b>Реквизиты для оплаты (Uzcard/Humo):</b>
-• <b>Номер карты:</b> <code>8600 1234 5678 9012</code>
-• <b>Получатель:</b> Bot Premium Upgrade
+• <b>Номер карты:</b> <code>5614 6822 1586 0018</code>
+• <b>Получатель:</b> Нурматов Муйдин.
 
 <b>Как оплатить:</b>
 1. Переведите сумму на указанную карту.
@@ -339,13 +356,19 @@ Rasm qabul qilingandan so'ng, adminimiz kavolatni tekshiradi va hisobingizga uri
 
 После получения фото наш администратор проверит транзакцию и моментально пополнит ваш баланс.`,
 
-    receiptReceived: "✅ <b>Чек получен!</b> Ваш чек отправлен администратору на верификацию. Вы получите уведомление после подтверждения платежа.",
-    
-    errorDocx: "❌ Не удалось прочитать документ Word (.docx). Проверьте файл или отправьте текст напрямую.",
-    errorPdf: "❌ Не удалось прочитать PDF-документ. Убедитесь, что текст в нем выделяется, или скопируйте его напрямую.",
-    errorGeneral: "❌ Произошла ошибка. Пожалуйста, попробуйте еще раз или свяжитесь с поддержкой /contact.",
-    
-    paymentApproved: "🎉 <b>Ваш платеж подтвержден!</b> \nВам начислено 5 проверок эссе. Теперь вы можете оценивать свои эссе. Наберите /check для старта!",
-    paymentDenied: "❌ <b>Ваш платеж отклонен.</b> \nЕсли вы считаете это ошибкой, обратитесь к администратору: @identitynull."
-  }
+    receiptReceived:
+      "✅ <b>Чек получен!</b> Ваш чек отправлен администратору на верификацию. Вы получите уведомление после подтверждения платежа.",
+
+    errorDocx:
+      "❌ Не удалось прочитать документ Word (.docx). Проверьте файл или отправьте текст напрямую.",
+    errorPdf:
+      "❌ Не удалось прочитать PDF-документ. Убедитесь, что текст в нем выделяется, или скопируйте его напрямую.",
+    errorGeneral:
+      "❌ Произошла ошибка. Пожалуйста, попробуйте еще раз или свяжитесь с поддержкой /contact.",
+
+    paymentApproved:
+      "🎉 <b>Ваш платеж подтвержден!</b> \nВам начислено 5 проверок эссе. Теперь вы можете оценивать свои эссе. Наберите /check для старта!",
+    paymentDenied:
+      "❌ <b>Ваш платеж отклонен.</b> \nЕсли вы считаете это ошибкой, обратитесь к администратору: @identitynull.",
+  },
 };
