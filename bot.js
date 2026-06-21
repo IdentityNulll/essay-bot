@@ -84,11 +84,22 @@ async function getAdminChatId() {
   return null;
 }
 
+// Helper: Generate unique promo code
+function generatePromoCode() {
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+  let code = '';
+  for (let i = 0; i < 8; i++) {
+    code += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return code;
+}
+
 // Helper: Dynamic Main Menu Keyboard (Reply Keyboard)
 const getMainMenu = (ctx) => {
   return Markup.keyboard([
     [ctx.translate('btnCheck'), ctx.translate('btnContact')],
-    [ctx.translate('btnHelp'), ctx.translate('btnChangeLanguage')]
+    [ctx.translate('btnHelp'), ctx.translate('btnChangeLanguage')],
+    [ctx.translate('btnBonus')]
   ]).resize();
 };
 
@@ -271,11 +282,32 @@ async function handleContactCommand(ctx) {
   });
 }
 
+async function handleBonusCommand(ctx) {
+  const user = ctx.state.user;
+  user.currentState = 'START';
+  await user.save();
+
+  if (ctx.callbackQuery) {
+    try { await ctx.answerCbQuery(); } catch (e) {}
+  }
+
+  await ctx.reply(ctx.translate('menuUpdated'), getMainMenu(ctx));
+
+  return ctx.reply(ctx.translate('bonusInstructions'), {
+    parse_mode: 'HTML',
+    ...Markup.inlineKeyboard([
+      [Markup.button.callback(ctx.translate('btnGetPromoCode'), 'get_promo_code')],
+      [Markup.button.callback(ctx.translate('btnEnterPromoCode'), 'enter_promo_code')]
+    ])
+  });
+}
+
 // Bind Command Routes
 bot.command('start', handleStartCommand);
 bot.command('check', handleCheckCommand);
 bot.command('help', handleHelpCommand);
 bot.command('contact', handleContactCommand);
+bot.command('bonus', handleBonusCommand);
 bot.command('language', async (ctx) => {
   const user = ctx.state.user;
   user.currentState = 'START';
@@ -363,7 +395,43 @@ bot.action('already_paid', async (ctx) => {
   user.currentState = 'AWAITING_RECEIPT';
   await user.save();
 
-  return ctx.reply("📷 Please send the payment receipt image (screenshot or photo of the confirmation).", {
+  return ctx.reply(ctx.translate('alreadyPaidPrompt'), {
+    parse_mode: 'HTML'
+  });
+});
+
+// Bonus Promo Code Callback Actions
+bot.action('get_promo_code', async (ctx) => {
+  try { await ctx.answerCbQuery(); } catch (e) {}
+  const user = ctx.state.user;
+
+  if (!user.promoCode) {
+    user.promoCode = generatePromoCode();
+    await user.save();
+  }
+
+  return ctx.reply(ctx.translate('promoCodeGenerated', {
+    promoCode: user.promoCode,
+    count: user.promoCodeCount
+  }), {
+    parse_mode: 'HTML'
+  });
+});
+
+bot.action('enter_promo_code', async (ctx) => {
+  try { await ctx.answerCbQuery(); } catch (e) {}
+  const user = ctx.state.user;
+
+  if (user.usedPromoCode) {
+    return ctx.reply(ctx.translate('promoCodeAlreadyUsed'), {
+      parse_mode: 'HTML'
+    });
+  }
+
+  user.currentState = 'AWAITING_PROMO_CODE';
+  await user.save();
+
+  return ctx.reply(ctx.translate('enterPromoCodePrompt'), {
     parse_mode: 'HTML'
   });
 });
@@ -408,7 +476,7 @@ bot.action('cancel_check', async (ctx) => {
 
   try { await ctx.answerCbQuery('Check cancelled.'); } catch (e) {}
 
-  return ctx.reply('✅ Check cancelled. No credits were used.', {
+  return ctx.reply(ctx.translate('checkCancelled'), {
     parse_mode: 'HTML',
     ...getMainMenu(ctx)
   });
@@ -430,6 +498,9 @@ bot.on('text', async (ctx) => {
   }
   if (text === translations.en.btnContact || text === translations.uz.btnContact || text === translations.ru.btnContact) {
     return handleContactCommand(ctx);
+  }
+  if (text === translations.en.btnBonus || text === translations.uz.btnBonus || text === translations.ru.btnBonus) {
+    return handleBonusCommand(ctx);
   }
   if (text === translations.en.btnChangeLanguage || text === translations.uz.btnChangeLanguage || text === translations.ru.btnChangeLanguage) {
     user.currentState = 'START';
@@ -462,6 +533,55 @@ bot.on('text', async (ctx) => {
       return ctx.reply("⚠️ Your essay is too short. Please submit a complete IELTS writing essay (e.g. > 100 words).");
     }
     return processEssayGrading(ctx, text);
+  }
+
+  if (user.currentState === 'AWAITING_PROMO_CODE') {
+    const promoCode = text.trim().toUpperCase();
+
+    try {
+      const promoUser = await User.findOne({ promoCode: promoCode });
+
+      if (!promoUser) {
+        return ctx.reply(ctx.translate('promoCodeInvalid'), {
+          parse_mode: 'HTML',
+          ...getMainMenu(ctx)
+        });
+      }
+
+      // Mark promo code as used
+      user.usedPromoCode = promoCode;
+      user.receivedBonusDiscount = true;
+      user.currentState = 'START';
+      await user.save();
+
+      // Increment promo code usage count for the original user
+      promoUser.promoCodeCount += 1;
+      await promoUser.save();
+
+      // Notify the original user
+      try {
+        await ctx.telegram.sendMessage(promoUser.userId, ctx.translate('promoCodeUsed', {
+          count: promoUser.promoCodeCount
+        }), {
+          parse_mode: 'HTML'
+        });
+      } catch (err) {
+        console.error(`Could not notify promo user ${promoUser.userId}:`, err.message);
+      }
+
+      await ctx.reply(ctx.translate('promoCodeSuccess'), {
+        parse_mode: 'HTML',
+        ...getMainMenu(ctx)
+      });
+
+      return;
+    } catch (error) {
+      console.error('Error processing promo code:', error);
+      return ctx.reply(ctx.translate('errorGeneral'), {
+        parse_mode: 'HTML',
+        ...getMainMenu(ctx)
+      });
+    }
   }
 
   if (user.currentState === 'AWAITING_RECEIPT') {
@@ -699,7 +819,7 @@ bot.action(/^approve_pay_(.+)$/, async (ctx) => {
       return ctx.answerCbQuery('User not found in database.');
     }
 
-    targetUser.creditCount += 5; // Give 5 credits on approval
+    targetUser.creditCount += 10; // Give 10 credits on approval
     targetUser.currentState = 'START';
     await targetUser.save();
 
@@ -720,15 +840,16 @@ bot.action(/^approve_pay_(.+)$/, async (ctx) => {
 
     // Update Admin's view
     const originalCaption = ctx.callbackQuery.message.caption || '';
+    const bonusStatus = targetUser.receivedBonusDiscount ? ' (Bonus Discount: 15,000)' : ' (Regular: 25,000)';
     await ctx.editMessageCaption(
-      `${originalCaption}\n\n✅ <b>Status: APPROVED (+5 Credits)</b>`,
+      `${originalCaption}\n\n✅ <b>Status: APPROVED (+10 Credits${bonusStatus})</b>`,
       {
         parse_mode: 'HTML',
         reply_markup: null // remove inline buttons
       }
     );
 
-    return ctx.answerCbQuery('Payment approved, 5 credits added.');
+    return ctx.answerCbQuery('Payment approved, 10 credits added.');
 
   } catch (error) {
     console.error('Error handling payment approval:', error);

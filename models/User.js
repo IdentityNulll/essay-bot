@@ -31,6 +31,23 @@ const UserSchema = new mongoose.Schema({
   tempQuestionPhotoId: {
     type: String,
     default: null
+  },
+  // Bonus/Referral program fields
+  promoCode: {
+    type: String,
+    default: null
+  },
+  promoCodeCount: {
+    type: Number,
+    default: 0
+  },
+  usedPromoCode: {
+    type: String,
+    default: null
+  },
+  receivedBonusDiscount: {
+    type: Boolean,
+    default: false
   }
 }, {
   timestamps: true

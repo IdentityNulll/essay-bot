@@ -57,6 +57,7 @@ Join our community group for help, support, and questions:
     btnContact: "📞 Contact Admin",
     btnChangeLanguage: "🌐 Change Language",
     btnBuyCredits: "💳 Buy Credits",
+    btnBonus: "🎁 Bonus",
     btnContactDirectly: "👤 Chat with Admin",
     menuUpdated: "⬇️ You can use the menu buttons below:",
 
@@ -90,7 +91,8 @@ You can:
 You currently have <code>{credits} credits</code> remaining. To grade more essays, purchase a premium package.
 
 💳 <b>Premium Packages:</b>
-• <b>IELTS Express (5 credits)</b>: 25,000 UZS
+• <b>IELTS Express (10 credits)</b>: 25,000 UZS
+• <b>IELTS Bonus (10 credits)</b>: 15,000 UZS (with promo code)
 
 🔒 <b>Payment Details (Manual Uzcard/Humo):</b>
 • <b>Card Number:</b> <code>5614 6822 1586 0018</code>
@@ -105,6 +107,54 @@ Once you send the photo, our admin will verify and credit your account immediate
 
     receiptReceived:
       "✅ <b>Receipt Received!</b> Your receipt has been sent to the administrator for verification. You will be notified once it is approved.",
+
+    alreadyPaidPrompt: "📷 Please send the payment receipt image (screenshot or photo of the confirmation).",
+
+    checkCancelled: "✅ Check cancelled. No credits were used.",
+
+    bonusInstructions: `🎁 <b>Bonus Referral Program</b>
+
+Share your promo code with friends and earn discounts!
+
+📋 <b>How it works:</b>
+1. Click "Get Promo Code" to receive your unique code
+2. Share it with your friends
+3. When 5 friends use your code, you unlock <b>10 credits for only 15,000 UZS</b> instead of 25,000!
+4. Each user can redeem 1 promo code maximum
+
+🎯 <b>Requirements:</b>
+• You can only redeem 1 promo code
+• Your friends get no discount, but you do!`,
+
+    btnGetPromoCode: "📲 Get Promo Code",
+    btnEnterPromoCode: "✅ Enter Promo Code",
+
+    promoCodeGenerated: `✨ <b>Your Promo Code:</b>
+
+<code>{promoCode}</code>
+
+Share this code with your friends! When 5 friends use your code, you'll unlock a special bonus discount.
+
+<b>Your Progress:</b> {count}/5 friends used your code`,
+
+    enterPromoCodePrompt: "📝 Please send the promo code (just the code, nothing else):",
+
+    promoCodeInvalid: "❌ Invalid promo code. Please check and try again.",
+
+    promoCodeAlreadyUsed: "❌ You have already used a promo code. You can only use one.",
+
+    promoCodeSuccess: `✅ <b>Promo code applied!</b>
+
+You now have access to the special bonus: 10 credits for 15,000 UZS instead of 25,000!
+Enjoy your discount when purchasing credits.`,
+
+    promoCodeUsed: `🎉 <b>Your code was used!</b>
+
+User has redeemed your promo code.
+
+<b>Progress:</b> {count}/5 users completed
+
+${"{count}"} Completed - Unlock your bonus discount!`,
 
     errorDocx:
       "❌ Failed to read the Word Document (.docx). Please check if it is corrupted or send plain text.",
@@ -125,7 +175,7 @@ Please verify the receipt image and choose an action below.`,
     adminDenied: "❌ Denied user @{username}.",
 
     paymentApproved:
-      "🎉 <b>Your payment has been approved!</b> \n5 essay credits have been added to your balance. You can now grade more essays. Type /check to start!",
+      "🎉 <b>Your payment has been approved!</b> \n10 essay credits have been added to your balance. You can now grade more essays. Type /check to start!",
     paymentDenied:
       "❌ <b>Your payment verification was rejected.</b> \nIf you believe this is a mistake, please contact support: @identitynull.",
   },
@@ -188,6 +238,7 @@ Yordam, qo'llab-quvvatlash va savollar uchun bizning jamoaviy guruhga qo'shiling
     btnContact: "📞 Admin bilan aloqa",
     btnChangeLanguage: "🌐 Tilni o'zgartirish",
     btnBuyCredits: "💳 Kredit sotib olish",
+    btnBonus: "🎁 Bonus",
     btnContactDirectly: "👤 Admin bilan bog'lanish",
     menuUpdated: "⬇️ Quyidagi tugmalardan foydalanishingiz mumkin:",
 
@@ -221,7 +272,8 @@ Siz:
 Sizda hozir <code>{credits} ta kredit</code> qoldi. Insho tekshirishda davom etish uchun premium paket xarid qiling.
 
 💳 <b>Premium Paketlar:</b>
-• <b>IELTS Express (5 ta urinish)</b>: 25,000 so'm
+• <b>IELTS Express (10 ta urinish)</b>: 25,000 so'm
+• <b>IELTS Bonus (10 ta urinish)</b>: 15,000 so'm (promo kod bilan)
 
 🔒 <b>To'lov ma'lumotlari (Uzcard/Humo):</b>
 • <b>Karta raqami:</b> <code>5614 6822 1586 0018</code>
@@ -237,6 +289,54 @@ Rasm qabul qilingandan so'ng, adminimiz kavolatni tekshiradi va hisobingizga uri
     receiptReceived:
       "✅ <b>Chek qabul qilindi!</b> Sizning to'lov chekingiz tasdiqlash uchun adminga yuborildi. To'lov tasdiqlangach, sizga xabar yuboriladi.",
 
+    alreadyPaidPrompt: "📷 Iltimos, to'lov chekining rasmini yuboring (skrinshot yoki tasdiqlash fotosurati).",
+
+    checkCancelled: "✅ Tekshirish bekor qilindi. Kredit ishlatilmadi.",
+
+    bonusInstructions: `🎁 <b>Bonus Referral Dasturi</b>
+
+Promo kodingizni do'stlaringiz bilan baham ko'ring va chegirma oling!
+
+📋 <b>Qanday ishlaydi:</b>
+1. "Get Promo Code" tugmasini bosing va kodingizni oling
+2. Uni do'stlaringiz bilan baham ko'ring
+3. 5 odam kodingizdan foydalanganida, siz <b>10 kreditni 15,000 so'mga</b> almashtirasiz (25,000 o'rniga)!
+4. Har bir foydalanuvchi faqat 1 ta promo koddan foydalana oladi
+
+🎯 <b>Shartlar:</b>
+• Siz faqat 1 ta promo koddan foydalana olasiz
+• Do'stlaringiz chegirma olmaydi, lekin siz olasiz!`,
+
+    btnGetPromoCode: "📲 Promo Kod Oling",
+    btnEnterPromoCode: "✅ Promo Kod Kiriting",
+
+    promoCodeGenerated: `✨ <b>Sizning Promo Kodingiz:</b>
+
+<code>{promoCode}</code>
+
+Ushbu kodni do'stlaringiz bilan baham ko'ring! 5 odam kodingizdan foydalanganida, siz bonus chegirmasini ochgan bo'lasiz.
+
+<b>Sizning Jarayoningiz:</b> {count}/5 do'st kodingizdan foydalandi`,
+
+    enterPromoCodePrompt: "📝 Promo kodini yuboring (faqat kod, boshqa hech nima yo'q):",
+
+    promoCodeInvalid: "❌ Noto'g'ri promo kod. Iltimos, tekshiring va qaytadan urinib ko'ring.",
+
+    promoCodeAlreadyUsed: "❌ Siz allaqachon promo koddan foydalandingiz. Siz faqat birdan foydalana olasiz.",
+
+    promoCodeSuccess: `✅ <b>Promo kod qo'shildi!</b>
+
+Endi sizda maxsus bonus mavjud: 25,000 o'rniga 10 kreditni 15,000 so'mga!
+Kredit sotib olganizda chegirmadan foydalaning.`,
+
+    promoCodeUsed: `🎉 <b>Sizning kodi ishlatildi!</b>
+
+Foydalanuvchi sizning promo kodingizni qabul qildi.
+
+<b>Jarayon:</b> {count}/5 foydalanuvchi tugadi
+
+{count} Tugadi - Bonus chegirmasini oching!`,
+
     errorDocx:
       "❌ Word hujjatini (.docx) o'qib bo'lmadi. Fayl buzilmaganligini tekshiring yoki matn sifatida yuboring.",
     errorPdf:
@@ -245,7 +345,7 @@ Rasm qabul qilingandan so'ng, adminimiz kavolatni tekshiradi va hisobingizga uri
       "❌ Xatolik yuz berdi. Iltimos, qaytadan urinib ko'ring yoki /contact orqali bog'laning.",
 
     paymentApproved:
-      "🎉 <b>Sizning to'lovingiz tasdiqlandi!</b> \nHisobingizga 5 ta urinish qo'shildi. Insholaringizni tekshirishingiz mumkin. Boshlash uchun /check yozing!",
+      "🎉 <b>Sizning to'lovingiz tasdiqlandi!</b> \nHisobingizga 10 ta urinish qo'shildi. Insholaringizni tekshirishingiz mumkin. Boshlash uchun /check yozing!",
     paymentDenied:
       "❌ <b>Sizning to'lovingiz tasdiqlanmadi.</b> \nAgar xatolik yuz bergan deb o'ylasangiz, admin bilan bog'laning: @identitynull.",
   },
@@ -308,6 +408,7 @@ Rasm qabul qilingandan so'ng, adminimiz kavolatni tekshiradi va hisobingizga uri
     btnContact: "📞 Связь с админом",
     btnChangeLanguage: "🌐 Изменить язык",
     btnBuyCredits: "💳 Купить попытки",
+    btnBonus: "🎁 Бонус",
     btnContactDirectly: "👤 Написать админу",
     menuUpdated: "⬇️ Вы можете использовать кнопки ниже:",
 
@@ -340,7 +441,8 @@ Rasm qabul qilingandan so'ng, adminimiz kavolatni tekshiradi va hisobingizga uri
 У вас осталось <code>{credits} кредитов</code>. Для продолжения приобретите премиум-пакет.
 
 💳 <b>Премиум-пакеты:</b>
-• <b>IELTS Express (5 проверок)</b>: 25,000 сум
+• <b>IELTS Express (10 проверок)</b>: 25,000 сум
+• <b>IELTS Bonus (10 проверок)</b>: 15,000 сум (с промо-кодом)
 
 🔒 <b>Реквизиты для оплаты (Uzcard/Humo):</b>
 • <b>Номер карты:</b> <code>5614 6822 1586 0018</code>
@@ -356,6 +458,54 @@ Rasm qabul qilingandan so'ng, adminimiz kavolatni tekshiradi va hisobingizga uri
     receiptReceived:
       "✅ <b>Чек получен!</b> Ваш чек отправлен администратору на верификацию. Вы получите уведомление после подтверждения платежа.",
 
+    alreadyPaidPrompt: "📷 Пожалуйста, отправьте фото чека об оплате (скриншот или фото подтверждения).",
+
+    checkCancelled: "✅ Проверка отменена. Кредиты не были использованы.",
+
+    bonusInstructions: `🎁 <b>Бонусная программа рефералов</b>
+
+Поделитесь своим промо-кодом с друзьями и получите скидку!
+
+📋 <b>Как это работает:</b>
+1. Нажмите "Get Promo Code" чтобы получить уникальный код
+2. Поделитесь им с друзьями
+3. Когда 5 друзей используют ваш код, вы разблокируете <b>10 проверок за 15,000 сум</b> вместо 25,000!
+4. Каждый пользователь может использовать только 1 промо-код
+
+🎯 <b>Условия:</b>
+• Вы можете использовать только 1 промо-код
+• Ваши друзья не получают скидку, но вы получите!`,
+
+    btnGetPromoCode: "📲 Получить Промо-код",
+    btnEnterPromoCode: "✅ Ввести Промо-код",
+
+    promoCodeGenerated: `✨ <b>Ваш Промо-код:</b>
+
+<code>{promoCode}</code>
+
+Поделитесь этим кодом с друзьями! Когда 5 друзей используют ваш код, вы разблокируете специальный бонус.
+
+<b>Ваш Прогресс:</b> {count}/5 друзей использовали код`,
+
+    enterPromoCodePrompt: "📝 Отправьте промо-код (только код, ничего больше):",
+
+    promoCodeInvalid: "❌ Неверный промо-код. Пожалуйста, проверьте и попробуйте снова.",
+
+    promoCodeAlreadyUsed: "❌ Вы уже использовали промо-код. Вы можете использовать только один.",
+
+    promoCodeSuccess: `✅ <b>Промо-код применен!</b>
+
+Теперь у вас есть доступ к специальному бонусу: 10 проверок за 15,000 сум вместо 25,000!
+Используйте скидку при покупке кредитов.`,
+
+    promoCodeUsed: `🎉 <b>Ваш код был использован!</b>
+
+Пользователь применил ваш промо-код.
+
+<b>Прогресс:</b> {count}/5 пользователей завершили
+
+{count} Завершено - Разблокируйте бонусную скидку!`,
+
     errorDocx:
       "❌ Не удалось прочитать документ Word (.docx). Проверьте файл или отправьте текст напрямую.",
     errorPdf:
@@ -364,7 +514,7 @@ Rasm qabul qilingandan so'ng, adminimiz kavolatni tekshiradi va hisobingizga uri
       "❌ Произошла ошибка. Пожалуйста, попробуйте еще раз или свяжитесь с поддержкой /contact.",
 
     paymentApproved:
-      "🎉 <b>Ваш платеж подтвержден!</b> \nВам начислено 5 проверок эссе. Теперь вы можете оценивать свои эссе. Наберите /check для старта!",
+      "🎉 <b>Ваш платеж подтвержден!</b> \nВам начислено 10 проверок эссе. Теперь вы можете оценивать свои эссе. Наберите /check для старта!",
     paymentDenied:
       "❌ <b>Ваш платеж отклонен.</b> \nЕсли вы считаете это ошибкой, обратитесь к администратору: @identitynull.",
   },
