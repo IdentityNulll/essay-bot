@@ -40,10 +40,9 @@ Follow these simple steps to grade your writing:
 
     contact: `📞 <b>Contact & Support</b>
 
-For payment verification, questions, or custom support, please contact our administrator directly:
-👤 <b>Admin:</b> @identitynull
+Join our community group for help, support, and questions:
 
-Send your payment receipt screenshot to the bot or contact the admin if you face any issues.`,
+👥 <b>Community Group:</b> Click the button below to join`,
 
     profile: `👤 <b>Your Profile</b>
 
@@ -86,9 +85,9 @@ You can:
     processingImage:
       "📸 <b>Processing question image and analyzing essay...</b>",
 
-    insufficientCredits: `🚫 <b>Out of Credits!</b>
+    insufficientCredits: `🚫 <b>Buy Credits!</b>
 
-You have <code>0</code> essay credits remaining. To grade more essays, please purchase a premium package.
+You currently have <code>{credits} credits</code> remaining. To grade more essays, purchase a premium package.
 
 💳 <b>Premium Packages:</b>
 • <b>IELTS Express (5 credits)</b>: 25,000 UZS
@@ -100,7 +99,7 @@ You have <code>0</code> essay credits remaining. To grade more essays, please pu
 <b>How to Pay:</b>
 1. Transfer the amount to the card above.
 2. <b>Screenshot/Photo the receipt</b>.
-3. <b>Reply directly to this message</b> with the receipt photo!
+3. <b>Send the receipt photo</b> using the "Already Paid" button!
 
 Once you send the photo, our admin will verify and credit your account immediately.`,
 
@@ -172,10 +171,9 @@ Inshongizni tekshirish uchun quyidagi oddiy qadamlarni bajaring:
 
     contact: `📞 <b>Aloqa va Qo'llab-quvvatlash</b>
 
-To'lovni tasdiqlash, savollar yoki takliflar bo'yicha to'g'ridan-to'g'ri administratorimizga murojaat qiling:
-👤 <b>Admin:</b> @identitynull
+Yordam, qo'llab-quvvatlash va savollar uchun bizning jamoaviy guruhga qo'shiling:
 
-To'lov chekini botga yuboring yoki muammolar yuzaga kelsa admin bilan bog'laning.`,
+👥 <b>Jamoaviy Guruhi:</b> Qo'shilish uchun quyidagi tugmani bosing`,
 
     profile: `👤 <b>Sizning Profilingiz</b>
 
@@ -218,9 +216,9 @@ Siz:
     processingImage:
       "📸 <b>Rasm tahlil qilinmoqda va insho tekshirilmoqda...</b>",
 
-    insufficientCredits: `🚫 <b>Hisobingizda urinishlar qolmadi!</b>
+    insufficientCredits: `🚫 <b>Kredit xarid qiling!</b>
 
-Sizda <code>0</code> ta urinish qoldi. Insho tekshirishda davom etish uchun premium paket xarid qiling.
+Sizda hozir <code>{credits} ta kredit</code> qoldi. Insho tekshirishda davom etish uchun premium paket xarid qiling.
 
 💳 <b>Premium Paketlar:</b>
 • <b>IELTS Express (5 ta urinish)</b>: 25,000 so'm
@@ -232,7 +230,7 @@ Sizda <code>0</code> ta urinish qoldi. Insho tekshirishda davom etish uchun prem
 <b>To'lov qilish usuli:</b>
 1. Yuqoridagi kartaga to'lovni amalga oshiring.
 2. <b>To'lov chekini rasmga/skrinshotga oling</b>.
-3. <b>Ushbu xabarga javob (reply)</b> sifatida chek rasmini yuboring!
+3. <b>Chek rasmini "Already Paid" tugmasi bilan yuboring!</b>
 
 Rasm qabul qilingandan so'ng, adminimiz kavolatni tekshiradi va hisobingizga urinishlarni qo'shib beradi.`,
 
@@ -293,10 +291,9 @@ Rasm qabul qilingandan so'ng, adminimiz kavolatni tekshiradi va hisobingizga uri
 
     contact: `📞 <b>Контакты и Поддержка</b>
 
-Для подтверждения оплаты, по вопросам или предложениям обращайтесь напрямую к администратору:
-👤 <b>Админ:</b> @identitynull
+Присоединяйтесь к нашей группе сообщества для помощи и поддержки:
 
-Отправьте скриншот чека об оплате в бота или свяжитесь с админом при возникновении трудностей.`,
+👥 <b>Группа Сообщества:</b> Нажмите кнопку ниже, чтобы присоединиться`,
 
     profile: `👤 <b>Ваш профиль</b>
 
@@ -338,12 +335,12 @@ Rasm qabul qilingandan so'ng, adminimiz kavolatni tekshiradi va hisobingizga uri
       "⏳ <b>Обработка и анализ вашего эссе...</b> \nИИ-экзаменатор оценивает ваше письмо. Пожалуйста, подождите до 30 секунд.",
     processingImage: "📸 <b>Обработка изображения темы и анализ эссе...</b>",
 
-    insufficientCredits: `🚫 <b>Закончились доступные попытки!</b>
+    insufficientCredits: `🚫 <b>Купите кредиты!</b>
 
-У вас осталось <code>0</code> доступных проверок. Для продолжения приобретите премиум-пакет.
+У вас осталось <code>{credits} кредитов</code>. Для продолжения приобретите премиум-пакет.
 
 💳 <b>Премиум-пакеты:</b>
-• <b>IELTS Express (5 проверок)</b>: 25,000 сум 
+• <b>IELTS Express (5 проверок)</b>: 25,000 сум
 
 🔒 <b>Реквизиты для оплаты (Uzcard/Humo):</b>
 • <b>Номер карты:</b> <code>5614 6822 1586 0018</code>
@@ -352,7 +349,7 @@ Rasm qabul qilingandan so'ng, adminimiz kavolatni tekshiradi va hisobingizga uri
 <b>Как оплатить:</b>
 1. Переведите сумму на указанную карту.
 2. <b>Сделайте скриншот чека</b> об оплате.
-3. <b>Отправьте фото чека в ответ (reply) на это сообщение!</b>
+3. <b>Отправьте фото чека</b> нажав кнопку "Already Paid"!
 
 После получения фото наш администратор проверит транзакцию и моментально пополнит ваш баланс.`,
 

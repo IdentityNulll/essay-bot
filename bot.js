@@ -87,10 +87,8 @@ async function getAdminChatId() {
 // Helper: Dynamic Main Menu Keyboard (Reply Keyboard)
 const getMainMenu = (ctx) => {
   return Markup.keyboard([
-    [ctx.translate('btnCheck')],
-    [ctx.translate('btnProfile'), ctx.translate('btnBuyCredits')],
-    [ctx.translate('btnHelp'), ctx.translate('btnContact')],
-    [ctx.translate('btnChangeLanguage')]
+    [ctx.translate('btnCheck'), ctx.translate('btnContact')],
+    [ctx.translate('btnHelp'), ctx.translate('btnChangeLanguage')]
   ]).resize();
 };
 
@@ -99,7 +97,6 @@ const getWelcomeInline = (ctx) => {
   return Markup.inlineKeyboard([
     [Markup.button.callback(ctx.translate('btnCheck'), 'cmd_check')],
     [
-      Markup.button.callback(ctx.translate('btnProfile'), 'cmd_profile'),
       Markup.button.callback(ctx.translate('btnBuyCredits'), 'cmd_buy')
     ],
     [
@@ -117,19 +114,7 @@ const getHelpInline = (ctx) => {
   ]);
 };
 
-const getProfileInline = (ctx) => {
-  return Markup.inlineKeyboard([
-    [Markup.button.callback(ctx.translate('btnBuyCredits'), 'cmd_buy')],
-    [Markup.button.callback(ctx.translate('btnChangeLanguage'), 'cmd_language')]
-  ]);
-};
 
-const getContactInline = (ctx) => {
-  return Markup.inlineKeyboard([
-    [Markup.button.url(ctx.translate('btnContactDirectly'), 'https://t.me/identitynull')],
-    [Markup.button.callback(ctx.translate('btnBuyCredits'), 'cmd_buy')]
-  ]);
-};
 
 // Helper: Safely sends long HTML messages by splitting them
 async function sendLongMessage(ctx, text, options = {}) {
@@ -207,10 +192,9 @@ async function handleStartCommand(ctx) {
   // Load the reply menu keyboard to keep it active
   await ctx.reply(ctx.translate('menuUpdated'), getMainMenu(ctx));
 
-  // Welcome user with inline keyboard
+  // Welcome user without inline keyboard
   return ctx.reply(ctx.translate('welcome', { credits: user.creditCount }), {
-    parse_mode: 'HTML',
-    ...getWelcomeInline(ctx)
+    parse_mode: 'HTML'
   });
 }
 
@@ -226,9 +210,11 @@ async function handleCheckCommand(ctx) {
     await user.save();
 
     await ctx.reply(ctx.translate('menuUpdated'), getMainMenu(ctx));
-    return ctx.reply(ctx.translate('insufficientCredits'), {
+    return ctx.reply(ctx.translate('insufficientCredits', { credits: user.creditCount }), {
       parse_mode: 'HTML',
-      ...getProfileInline(ctx)
+      ...Markup.inlineKeyboard([
+        [Markup.button.callback(ctx.translate('btnBuyCredits'), 'cmd_buy')]
+      ])
     });
   }
 
@@ -242,31 +228,12 @@ async function handleCheckCommand(ctx) {
   return ctx.reply(ctx.translate('promptQuestion'), {
     parse_mode: 'HTML',
     ...Markup.inlineKeyboard([
-      [Markup.button.callback(ctx.translate('btnSkipQuestion'), 'skip_question')]
+      [Markup.button.callback(ctx.translate('btnSkipQuestion'), 'skip_question')],
+      [Markup.button.callback('❌ Cancel', 'cancel_check')]
     ])
   });
 }
 
-async function handleProfileCommand(ctx) {
-  const user = ctx.state.user;
-  user.currentState = 'START';
-  await user.save();
-
-  if (ctx.callbackQuery) {
-    try { await ctx.answerCbQuery(); } catch (e) {}
-  }
-
-  await ctx.reply(ctx.translate('menuUpdated'), getMainMenu(ctx));
-
-  return ctx.reply(ctx.translate('profile', {
-    username: user.username || ctx.from.username || 'user',
-    userId: user.userId,
-    credits: user.creditCount
-  }), {
-    parse_mode: 'HTML',
-    ...getProfileInline(ctx)
-  });
-}
 
 async function handleHelpCommand(ctx) {
   const user = ctx.state.user;
@@ -298,14 +265,15 @@ async function handleContactCommand(ctx) {
 
   return ctx.reply(ctx.translate('contact'), {
     parse_mode: 'HTML',
-    ...getContactInline(ctx)
+    ...Markup.inlineKeyboard([
+      [Markup.button.url(ctx.translate('btnContactDirectly'), 'https://t.me/+BMjBYcW4_oNjNjNi')]
+    ])
   });
 }
 
 // Bind Command Routes
 bot.command('start', handleStartCommand);
 bot.command('check', handleCheckCommand);
-bot.command('profile', handleProfileCommand);
 bot.command('help', handleHelpCommand);
 bot.command('contact', handleContactCommand);
 bot.command('language', async (ctx) => {
@@ -361,7 +329,6 @@ bot.action('lang_en', (ctx) => handleLangSelection(ctx, 'en'));
 
 // Section Callback Actions
 bot.action('cmd_check', handleCheckCommand);
-bot.action('cmd_profile', handleProfileCommand);
 bot.action('cmd_help', handleHelpCommand);
 bot.action('cmd_contact', handleContactCommand);
 bot.action('cmd_language', async (ctx) => {
@@ -382,7 +349,21 @@ bot.action('cmd_buy', async (ctx) => {
   await user.save();
 
   await ctx.reply(ctx.translate('menuUpdated'), getMainMenu(ctx));
-  return ctx.reply(ctx.translate('insufficientCredits'), {
+  return ctx.reply(ctx.translate('insufficientCredits', { credits: user.creditCount }), {
+    parse_mode: 'HTML',
+    ...Markup.inlineKeyboard([
+      [Markup.button.callback('✅ Already Paid', 'already_paid')]
+    ])
+  });
+});
+
+bot.action('already_paid', async (ctx) => {
+  try { await ctx.answerCbQuery(); } catch (e) {}
+  const user = ctx.state.user;
+  user.currentState = 'AWAITING_RECEIPT';
+  await user.save();
+
+  return ctx.reply("📷 Please send the payment receipt image (screenshot or photo of the confirmation).", {
     parse_mode: 'HTML'
   });
 });
@@ -411,6 +392,24 @@ bot.action('skip_question', async (ctx) => {
 
   return ctx.reply(ctx.translate('promptEssay'), {
     parse_mode: 'HTML',
+    ...Markup.inlineKeyboard([
+      [Markup.button.callback('❌ Cancel', 'cancel_check')]
+    ])
+  });
+});
+
+// Cancel Check Callback Action
+bot.action('cancel_check', async (ctx) => {
+  const user = ctx.state.user;
+  user.currentState = 'START';
+  user.tempQuestionText = null;
+  user.tempQuestionPhotoId = null;
+  await user.save();
+
+  try { await ctx.answerCbQuery('Check cancelled.'); } catch (e) {}
+
+  return ctx.reply('✅ Check cancelled. No credits were used.', {
+    parse_mode: 'HTML',
     ...getMainMenu(ctx)
   });
 });
@@ -425,9 +424,6 @@ bot.on('text', async (ctx) => {
   // 1. Check for localized menu button clicks
   if (text === translations.en.btnCheck || text === translations.uz.btnCheck || text === translations.ru.btnCheck) {
     return handleCheckCommand(ctx);
-  }
-  if (text === translations.en.btnProfile || text === translations.uz.btnProfile || text === translations.ru.btnProfile) {
-    return handleProfileCommand(ctx);
   }
   if (text === translations.en.btnHelp || text === translations.uz.btnHelp || text === translations.ru.btnHelp) {
     return handleHelpCommand(ctx);
@@ -446,14 +442,6 @@ bot.on('text', async (ctx) => {
         [Markup.button.callback('🇬🇧 English', 'lang_en')]
       ])
     );
-  }
-  if (text === translations.en.btnBuyCredits || text === translations.uz.btnBuyCredits || text === translations.ru.btnBuyCredits) {
-    user.currentState = 'AWAITING_RECEIPT';
-    await user.save();
-    await ctx.reply(ctx.translate('menuUpdated'), getMainMenu(ctx));
-    return ctx.reply(ctx.translate('insufficientCredits'), {
-      parse_mode: 'HTML'
-    });
   }
 
   // 2. Handle text input based on the state machine
@@ -585,7 +573,9 @@ async function processEssayGrading(ctx, essayText) {
     await user.save();
     return ctx.reply(ctx.translate('insufficientCredits'), {
       parse_mode: 'HTML',
-      ...getProfileInline(ctx)
+      ...Markup.inlineKeyboard([
+        [Markup.button.callback(ctx.translate('btnBuyCredits'), 'cmd_buy')]
+      ])
     });
   }
 
@@ -652,15 +642,10 @@ async function processEssayGrading(ctx, essayText) {
   }
 }
 
-// Handle forwarding receipt to Administrator
+// Handle forwarding receipt to Payment Channel
 async function handleReceiptPhoto(ctx, fileId) {
   const user = ctx.state.user;
-  const adminChatId = await getAdminChatId();
-
-  if (!adminChatId) {
-    console.error('No Admin chat ID available. Cannot forward payment receipt.');
-    return ctx.reply(ctx.translate('errorGeneral'), { parse_mode: 'HTML' });
-  }
+  const paymentChannelId = process.env.PAYMENT_CHANNEL_ID || '-1001234567890'; // Channel ID
 
   // Create keyboard with inline approval buttons containing target user's ID
   const adminMarkup = Markup.inlineKeyboard([
@@ -677,8 +662,8 @@ async function handleReceiptPhoto(ctx, fileId) {
   });
 
   try {
-    // Send photo to admin
-    await ctx.telegram.sendPhoto(adminChatId, fileId, {
+    // Send photo to payment channel
+    await ctx.telegram.sendPhoto(paymentChannelId, fileId, {
       caption: captionText,
       parse_mode: 'HTML',
       ...adminMarkup
@@ -694,7 +679,7 @@ async function handleReceiptPhoto(ctx, fileId) {
     });
 
   } catch (error) {
-    console.error('Failed to send payment receipt to admin:', error);
+    console.error('Failed to send payment receipt to channel:', error);
     return ctx.reply(ctx.translate('errorGeneral'), {
       parse_mode: 'HTML',
       ...getMainMenu(ctx)
