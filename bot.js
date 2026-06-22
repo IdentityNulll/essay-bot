@@ -765,7 +765,15 @@ async function processEssayGrading(ctx, essayText) {
 // Handle forwarding receipt to Payment Channel
 async function handleReceiptPhoto(ctx, fileId) {
   const user = ctx.state.user;
-  const paymentChannelId = process.env.PAYMENT_CHANNEL_ID || '-1001234567890'; // Channel ID
+  const paymentChannelId = process.env.PAYMENT_CHANNEL_ID;
+
+  if (!paymentChannelId) {
+    console.error('PAYMENT_CHANNEL_ID is not set in environment variables.');
+    return ctx.reply('❌ Payment system is not configured. Please contact admin.', {
+      parse_mode: 'HTML',
+      ...getMainMenu(ctx)
+    });
+  }
 
   // Create keyboard with inline approval buttons containing target user's ID
   const adminMarkup = Markup.inlineKeyboard([
