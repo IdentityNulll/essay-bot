@@ -9,7 +9,6 @@
 
 [dev]
   command = "npm run dev"
-  port = 3000
   framework = "react"
 
 [build.environment]
