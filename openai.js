@@ -25,10 +25,10 @@ function escapeHtml(text) {
  * @param {string} language - Target language code ('en', 'uz', 'ru')
  * @returns {string} Structured Mock report in HTML
  */
-function getMockReport(questionText, essayText, language = 'en') {
+function getMockReport(questionText, essayText, language = "en") {
   const wordCount = essayText.split(/\s+/).filter(Boolean).length;
 
-  if (language === 'uz') {
+  if (language === "uz") {
     return `<b>📊 IELTS Yozma Ishi Tahlili Hisoboti</b>
 
 <b>Umumiy Baho (Overall Estimated Band Score): 7.0</b>
@@ -64,7 +64,7 @@ function getMockReport(questionText, essayText, language = 'en') {
 • Tekshiruv tizimi: IELTS AI Examiner (v2.5)`;
   }
 
-  if (language === 'ru') {
+  if (language === "ru") {
     return `<b>📊 Отчет об Оценке Эссе IELTS</b>
 
 <b>Общий Балл (Overall Estimated Band Score): 7.0</b>
@@ -152,7 +152,7 @@ export async function gradeIeltsEssay(
   essayText,
   questionImageBase64 = null,
   questionImageMimeType = null,
-  language = 'en'
+  language = "en",
 ) {
   const apiKey = process.env.GEMINI_API_KEY;
 
@@ -163,14 +163,14 @@ export async function gradeIeltsEssay(
   }
 
   const langNames = {
-    'en': 'English',
-    'uz': 'Uzbek',
-    'ru': 'Russian'
+    en: "English",
+    uz: "Uzbek",
+    ru: "Russian",
   };
-  const targetLanguage = langNames[language] || 'English';
+  const targetLanguage = langNames[language] || "English";
 
   const templateInstructions = {
-    'en': {
+    en: {
       title: "📊 IELTS Writing Assessment Report",
       overall: "Overall Estimated Band Score:",
       strengths: "Strengths:",
@@ -180,9 +180,9 @@ export async function gradeIeltsEssay(
       correct: "Correct:",
       stats: "📝 Statistics:",
       wordCount: "Word Count:",
-      system: "Evaluation System: IELTS AI Examiner (v2.5)"
+      system: "Evaluation System: IELTS AI Examiner (v2.5)",
     },
-    'uz': {
+    uz: {
       title: "📊 IELTS Yozma Ishi Tahlili Hisoboti",
       overall: "Umumiy Baho (Overall Estimated Band Score):",
       strengths: "Kuchli tomonlari:",
@@ -192,9 +192,9 @@ export async function gradeIeltsEssay(
       correct: "To'g'ri:",
       stats: "📝 Statistika:",
       wordCount: "So'zlar soni:",
-      system: "Tekshiruv tizimi: IELTS AI Examiner (v2.5)"
+      system: "Tekshiruv tizimi: IELTS AI Examiner (v2.5)",
     },
-    'ru': {
+    ru: {
       title: "📊 Отчет об Оценке Эссе IELTS",
       overall: "Общий Балл (Overall Estimated Band Score):",
       strengths: "Сильные стороны:",
@@ -204,73 +204,84 @@ export async function gradeIeltsEssay(
       correct: "Правильно:",
       stats: "📝 Статистика:",
       wordCount: "Количество слов:",
-      system: "Система оценки: IELTS AI Examiner (v2.5)"
-    }
+      system: "Система оценки: IELTS AI Examiner (v2.5)",
+    },
   };
 
-  const layout = templateInstructions[language] || templateInstructions['en'];
+  const layout = templateInstructions[language] || templateInstructions["en"];
 
-  const systemPrompt = `You are an expert, highly professional official IELTS Writing Examiner with 15+ years of grading experience. 
-Your goal is to evaluate the user's essay thoroughly and provide detailed, constructive, and realistic feedback exactly according to the official IELTS Band Descriptors for Task 1/Task 2.
+  const systemPrompt = `
+  You are grading IELTS essays. Your scores will be audited against official IELTS Band Descriptors. Inflated scores are considered examiner misconduct. Grade only what is on the page.
+  
+  You are a strict, no-nonsense official IELTS Writing Examiner with 20+ years of experience. You are known for being accurate, blunt, and completely unaffected by a candidate's effort or feelings. Your only job is to reflect what the writing truly deserves — nothing more, nothing less.
 
-Guidelines for grading:
-1. You must assess the essay based on the four official criteria:
-   - Task Achievement / Task Response (TR): Grade how well the question was addressed.
-   - Coherence and Cohesion (CC): Grade structure, paragraphing, and linking devices.
-   - Lexical Resource (LR): Grade vocabulary range, accuracy, and collocations.
-   - Grammatical Range and Accuracy (GRA): Grade sentence structure, punctuation, and grammar.
-2. Provide an individual band score (from 0 to 9.0, in steps of 0.5) for each criterion.
-3. Calculate the Overall Estimated Band Score using official IELTS rules (average of the 4 scores, rounded to the nearest half band. E.g., 6.25 rounds to 6.5, 6.75 rounds to 7.0, 6.125 rounds to 6.0).
-4. For each section, provide 2-3 detailed sentences for strengths and areas for improvement. Do not leave them brief or empty.
-5. Provide a "Corrections & Improvements" section where you list critical errors (grammar, spelling, collocations) with their corrected versions.
-6. Provide an "Alternative Vocabulary & Collocations" section suggesting premium lexical choices.
+CRITICAL GRADING RULES:
+- You MUST assign scores that reflect the actual quality of the writing, not the potential or effort.
+- Do NOT give benefit of the doubt. If something is weak, say it is weak and deduct accordingly.
+- Do NOT inflate scores. A Band 5 essay must score 5. A Band 6 essay must score 6. Never round up generously.
+- Do NOT use encouraging language like "very good", "commendable", or "well done". Be factual.
+- If the essay has limited vocabulary, repetitive grammar, basic ideas, or poor cohesion — penalize it.
+- You must be internally consistent: if you describe Band 5 weaknesses, the score must be 5, not 6 or 6.5.
+
+OFFICIAL BAND DESCRIPTOR ANCHORS (use these strictly):
+- Band 5: Addresses task only partially. Ideas are limited and not always clear. Repetitive vocabulary, noticeable errors in grammar. Cohesion is faulty or mechanical.
+- Band 6: Addresses main points but detail/extension is insufficient. Some inaccuracies. Vocabulary and grammar are adequate but limited in range. Errors are present but do not impede communication.
+- Band 7: Addresses all parts, clear progression. Sufficient range of vocabulary and grammar with some flexibility. Some errors but they are not frequent or serious.
+- Band 8+: Rare. Only assign if the writing is near-flawless with sophisticated lexical and grammatical range.
+
+SCORING RULES:
+1. Assess the essay on four official criteria:
+   - Task Achievement / Task Response (TR)
+   - Coherence and Cohesion (CC)
+   - Lexical Resource (LR)
+   - Grammatical Range and Accuracy (GRA)
+2. Assign a band score (0–9, in steps of 0.5) per criterion based strictly on the descriptors above.
+3. Calculate Overall Band Score: average of the 4 scores, rounded to nearest 0.5 using official IELTS rules.
+4. For each criterion, provide 2–3 factual sentences on strengths (if any exist) and 2–3 direct sentences on weaknesses. Be specific — reference the actual text.
+5. Corrections section: identify real errors in the essay. Quote them exactly. Do not invent corrections for things that are acceptable — only flag genuine mistakes.
 
 Formatting instructions:
-- Do NOT use Markdown (no asterisks **, no underscores _, no hashes #, no markdown tables).
-- Use ONLY standard Telegram HTML tags for all formatting:
-  • Use <b>text</b> for bold headers and scores.
-  • Use <i>text</i> for italics.
-  • Use <code>text</code> for corrections or code snippets.
-  • Use standard bullet characters (•) or hyphens (-) for lists.
-- CRUCIAL: You must close every single HTML tag you open (e.g., every <b> must have a closing </b>). Never leave a tag open at the end of a sentence.
-- You must strictly use the following layout for the report, written in "${targetLanguage}":
+- Do NOT use Markdown (no **, no _, no #, no tables).
+- Use ONLY standard Telegram HTML tags: <b>, <i>, <code>.
+- Close every tag you open. Never leave an open tag.
+- Use bullet character (•) for lists.
+- Strictly follow this layout, written in "${targetLanguage}":
 
 <b>${layout.title}</b>
 
-<b>${layout.overall} [Insert Score]</b>
+<b>${layout.overall} [Score]</b>
 
 ───────────────────
 
 <b>1. Task Achievement (TA/TR): [Score]</b>
-• <b>${layout.strengths}</b> [Provide 2-3 detailed sentences here in ${targetLanguage}]
-• <b>${layout.improvements}</b> [Provide 2-3 detailed sentences here in ${targetLanguage}]
+- <b>${layout.strengths}</b> [2–3 factual sentences in ${targetLanguage}]
+- <b>${layout.improvements}</b> [2–3 direct, critical sentences in ${targetLanguage}]
 
 <b>2. Coherence and Cohesion (CC): [Score]</b>
-• <b>${layout.strengths}</b> [Provide 2-3 detailed sentences here in ${targetLanguage}]
-• <b>${layout.improvements}</b> [Provide 2-3 detailed sentences here in ${targetLanguage}]
+- <b>${layout.strengths}</b> [2–3 factual sentences in ${targetLanguage}]
+- <b>${layout.improvements}</b> [2–3 direct, critical sentences in ${targetLanguage}]
 
 <b>3. Lexical Resource (LR): [Score]</b>
-• <b>${layout.strengths}</b> [Provide 2-3 detailed sentences here in ${targetLanguage}]
-• <b>${layout.improvements}</b> [Provide 2-3 detailed sentences here in ${targetLanguage}]
+- <b>${layout.strengths}</b> [2–3 factual sentences in ${targetLanguage}]
+- <b>${layout.improvements}</b> [2–3 direct, critical sentences in ${targetLanguage}]
 
 <b>4. Grammatical Range and Accuracy (GRA): [Score]</b>
-• <b>${layout.strengths}</b> [Provide 2-3 detailed sentences here in ${targetLanguage}]
-• <b>${layout.improvements}</b> [Provide 2-3 detailed sentences here in ${targetLanguage}]
+- <b>${layout.strengths}</b> [2–3 factual sentences in ${targetLanguage}]
+- <b>${layout.improvements}</b> [2–3 direct, critical sentences in ${targetLanguage}]
 
 ───────────────────
 
 <b>${layout.corrections}</b>
-• <i>${layout.incorrect}</i> <code>[Quote Incorrect text from the essay]</code>
-  <b>${layout.correct}</b> <code>[Provide Corrected text]</code>
+- <i>${layout.incorrect}</i> <code>[Exact quote from essay]</code>
+  <b>${layout.correct}</b> <code>[Corrected version]</code>
 
 <b>${layout.stats}</b>
-• ${layout.wordCount} [Count]
-• ${layout.system}
+- ${layout.wordCount} [Count]
+- ${layout.system}
 
-- CRUCIAL LANGUAGE RULE: The user has selected the system language: "${targetLanguage}". You MUST write all the feedback descriptions, strengths, areas for improvement, critiques, corrections, and comments in the "${targetLanguage}" language. The IELTS criteria titles themselves (e.g. 'Task Achievement') can be kept, but everything else MUST be in "${targetLanguage}".
-- Crucial: If you quote or mention any text from the candidate's essay or question that contains '<', '>', or '&', you MUST escape them as '&lt;', '&gt;', and '&amp;'. Never output raw '<' or '>' characters unless they are part of the allowed HTML tags: <b>, <i>, <code>.
-- Keep the overall response length concise enough to fit in a single Telegram message (max 4096 characters).`;
-
+LANGUAGE RULE: Write all feedback in "${targetLanguage}". IELTS criterion titles may stay in English. Everything else must be in "${targetLanguage}".
+ESCAPING RULE: If quoting essay text that contains '<', '>', or '&', escape them as '&lt;', '&gt;', '&amp;'. Never output raw '<' or '>' outside of allowed HTML tags.
+LENGTH RULE: Keep total response under 4096 characters to fit in a single Telegram message.`;
   const parts = [];
 
   // Sanitize input texts to prevent breaking Telegram HTML
@@ -335,7 +346,7 @@ Formatting instructions:
     if (!response.ok) {
       const errText = await response.text();
       console.warn(
-          `Gemini API responded with status ${response.status}: ${errText}. Falling back to Mock Report.`,
+        `Gemini API responded with status ${response.status}: ${errText}. Falling back to Mock Report.`,
       );
       return getMockReport(questionText, essayText, language);
     }
@@ -345,7 +356,7 @@ Formatting instructions:
 
     if (!resultText) {
       console.warn(
-          "Empty response structure from Gemini. Falling back to Mock Report.",
+        "Empty response structure from Gemini. Falling back to Mock Report.",
       );
       return getMockReport(questionText, essayText, language);
     }
@@ -353,8 +364,8 @@ Formatting instructions:
     return resultText;
   } catch (error) {
     console.error(
-        "Error invoking Gemini API. Falling back to Mock Report:",
-        error,
+      "Error invoking Gemini API. Falling back to Mock Report:",
+      error,
     );
     return getMockReport(questionText, essayText, language);
   }

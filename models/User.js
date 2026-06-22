@@ -19,6 +19,10 @@ const UserSchema = new mongoose.Schema({
     type: Number,
     default: 1
   },
+  essaysCount: {
+    type: Number,
+    default: 0
+  },
   currentState: {
     type: String,
     default: 'START'

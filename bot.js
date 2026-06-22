@@ -2,6 +2,7 @@ import { Telegraf, Markup } from 'telegraf';
 import dotenv from 'dotenv';
 import { connectDB } from './config/db.js';
 import User from './models/User.js';
+import Essay from './models/Essay.js';
 import { translations } from './translations.js';
 import { gradeIeltsEssay } from './openai.js';
 import { parsePdf, parseDocx } from './documentParser.js';
@@ -728,10 +729,29 @@ async function processEssayGrading(ctx, essayText) {
 
     // Deduct credit and reset state ONLY after a successful grading
     user.creditCount = Math.max(0, user.creditCount - 1);
+    user.essaysCount = (user.essaysCount || 0) + 1;
     user.currentState = 'START';
     user.tempQuestionText = null;
     user.tempQuestionPhotoId = null;
     await user.save();
+
+    // Save essay record for admin panel
+    try {
+      const wordCount = essayText.split(/\s+/).filter(Boolean).length;
+      const essay = new Essay({
+        userId: user.userId,
+        questionText: user.tempQuestionText || null,
+        essayText: essayText.substring(0, 50000),
+        source: hasPhotoQuestion ? 'image' : 'text',
+        wordCount,
+        geminiReport: feedbackReport,
+        language: user.selectedLanguage || 'en',
+        processingTime: Date.now() - loadingMsg.date * 1000
+      });
+      await essay.save();
+    } catch (essayError) {
+      console.error('Error saving essay record:', essayError);
+    }
 
     // Delete temporary loading message
     try {
@@ -908,6 +928,8 @@ bot.action(/^deny_pay_(.+)$/, async (ctx) => {
 });
 
 // --- STARTUP LOGIC ---
+
+export default bot;
 
 async function startBot() {
   try {

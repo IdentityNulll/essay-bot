@@ -20,15 +20,41 @@ A production-ready, highly scalable, and beautifully designed Telegram bot that 
 ```text
 essay-bot/
 ├── config/
-│   └── db.js            # MongoDB connection configuration
+│   └── db.js                    # MongoDB connection configuration
 ├── models/
-│   └── User.js          # Mongoose schema for User profiles & state
-├── bot.js               # Entry point; contains Telegram bot & routing logic
-├── openai.js            # Gemini API integration & IELTS system prompts
-├── translations.js      # Localization dictionary (EN, UZ, RU)
-├── documentParser.js    # PDF & DOCX text extraction utilities
-├── .env.example         # Template for environment variables
-└── package.json         # Node.js project manifests & dependencies
+│   ├── User.js                  # User profiles & state
+│   ├── Essay.js                 # Essay submissions & grading data
+│   └── Admin.js                 # Admin accounts with JWT auth
+├── middleware/
+│   └── adminAuth.js             # JWT verification middleware
+├── routes/
+│   └── admin.js                 # Admin API routes
+├── controllers/
+│   └── adminController.js       # Admin business logic
+├── utils/
+│   └── jwt.js                   # JWT token utilities
+├── admin-dashboard/             # React + Vite admin panel
+│   ├── src/
+│   │   ├── App.jsx
+│   │   ├── pages/
+│   │   │   ├── LoginPage.jsx
+│   │   │   ├── DashboardPage.jsx
+│   │   │   ├── UsersPage.jsx
+│   │   │   ├── EssaysPage.jsx
+│   │   │   └── BroadcastPage.jsx
+│   │   ├── services/
+│   │   │   └── api.js
+│   │   └── index.css
+│   ├── vite.config.js
+│   └── package.json
+├── server.js                    # Express API server
+├── bot.js                       # Telegram bot core
+├── openai.js                    # Gemini API integration
+├── translations.js              # i18n dictionary
+├── documentParser.js            # PDF & DOCX parser
+├── .env.example                 # Environment template
+├── ADMIN_SETUP.md               # Admin panel setup guide
+└── package.json                 # Dependencies
 ```
 
 ---
@@ -133,3 +159,49 @@ npm start
 *   **Advanced Message Splitting:** Bypasses the Telegram 4096-character limit by splitting feedback reports cleanly at line breaks.
 *   **Robust Markdown Fallback:** Prevents Telegram entity parsing errors from blocking delivery by falling back to plain text if Markdown format fails to compile.
 *   **Auto Admin Discovery:** If `ADMIN_CHAT_ID` is left empty in `.env`, the bot automatically retrieves the chat ID of the user with the username `@identitynull` once they interact with the bot.
+
+---
+
+## 📊 Admin Panel Features
+
+A complete professional admin dashboard has been integrated! Access it at `http://localhost:3000`:
+
+### Key Features
+- **User Management**: View all users, manage credits, track essay submissions
+- **Essay Analytics**: Filter by band score, view full feedback reports
+- **Broadcast Messaging**: Send messages directly to user Telegram chats
+- **Dashboard Stats**: Overall user count, essay metrics, band distribution
+- **JWT Authentication**: Secure admin-only access
+- **Responsive UI**: Works on desktop and mobile
+
+### Setup Admin Panel
+See [**ADMIN_SETUP.md**](./ADMIN_SETUP.md) for complete setup instructions.
+
+**Quick Start:**
+```bash
+# 1. Install backend deps (if not done)
+npm install
+
+# 2. Create admin account in MongoDB
+mongosh
+use ielts_bot
+db.admins.insertOne({
+  username: "admin",
+  email: "admin@example.com",
+  password: "your_password",
+  role: "super_admin",
+  isActive: true
+})
+
+# 3. Start bot + API server
+npm start
+
+# 4. In another terminal, start dashboard
+cd admin-dashboard
+npm install
+npm run dev
+
+# 5. Open http://localhost:3000 and login
+```
+
+---
