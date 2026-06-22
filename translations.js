@@ -154,7 +154,27 @@ User has redeemed your promo code.
 
 <b>Progress:</b> {count}/5 users completed
 
-${"{count}"} Completed - Unlock your bonus discount!`,
+{progressMessage}`,
+
+    promoCodeFull: `🎉 <b>Congratulations! Your bonus is unlocked!</b>
+
+You now have 5/5 referrals completed! 🏆
+
+You can now buy <b>10 credits for 15,000 UZS</b> instead of 25,000!
+
+Use the /credits command or tap "💳 Buy Credits" button.`,
+
+    buyCreditsInfo: `💳 <b>Buy Credits</b>
+
+Choose your preferred plan:
+
+<b>Regular Price:</b>
+10 credits → 25,000 UZS
+
+<b>Special Bonus:</b>
+10 credits → 15,000 UZS (Only for referral bonus users)
+
+Send a screenshot of your payment to confirm your purchase.`,
 
     errorDocx:
       "❌ Failed to read the Word Document (.docx). Please check if it is corrupted or send plain text.",
@@ -335,7 +355,27 @@ Foydalanuvchi sizning promo kodingizni qabul qildi.
 
 <b>Jarayon:</b> {count}/5 foydalanuvchi tugadi
 
-{count} Tugadi - Bonus chegirmasini oching!`,
+{progressMessage}`,
+
+    promoCodeFull: `🎉 <b>Tabriklaymiz! Sizning bonus ochildi!</b>
+
+Siz 5/5 referralga erishdingiz! 🏆
+
+Endi siz <b>25,000 o'rniga 15,000 so'mga 10 kredit</b> sotib olishingiz mumkin!
+
+/credits buyruqidan yoki "💳 Kredit Sotib Olish" tugmasidan foydalaning.`,
+
+    buyCreditsInfo: `💳 <b>Kredit Sotib Olish</b>
+
+Sizga yoqqan rejani tanlang:
+
+<b>Odatiy Narx:</b>
+10 kredit → 25,000 so'm
+
+<b>Maxsus Bonus:</b>
+10 kredit → 15,000 so'm (Faqat referral bonus foydalanuvchilari uchun)
+
+To'lovning skrinshoti yuboring va bu joyda xabar yuboring.`,
 
     errorDocx:
       "❌ Word hujjatini (.docx) o'qib bo'lmadi. Fayl buzilmaganligini tekshiring yoki matn sifatida yuboring.",
@@ -504,7 +544,27 @@ Foydalanuvchi sizning promo kodingizni qabul qildi.
 
 <b>Прогресс:</b> {count}/5 пользователей завершили
 
-{count} Завершено - Разблокируйте бонусную скидку!`,
+{progressMessage}`,
+
+    promoCodeFull: `🎉 <b>Поздравляем! Ваш бонус разблокирован!</b>
+
+Вы достигли 5/5 рефералов! 🏆
+
+Теперь вы можете купить <b>10 проверок за 15,000 сум</b> вместо 25,000!
+
+Используйте команду /credits или нажмите кнопку "💳 Купить Кредиты".`,
+
+    buyCreditsInfo: `💳 <b>Купить Кредиты</b>
+
+Выберите подходящий план:
+
+<b>Обычная Цена:</b>
+10 проверок → 25,000 сум
+
+<b>Специальный Бонус:</b>
+10 проверок → 15,000 сум (Только для пользователей с бонусом рефералов)
+
+Отправьте скриншот платежа для подтверждения.`,
 
     errorDocx:
       "❌ Не удалось прочитать документ Word (.docx). Проверьте файл или отправьте текст напрямую.",

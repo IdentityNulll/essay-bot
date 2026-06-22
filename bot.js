@@ -97,11 +97,19 @@ function generatePromoCode() {
 
 // Helper: Dynamic Main Menu Keyboard (Reply Keyboard)
 const getMainMenu = (ctx) => {
-  return Markup.keyboard([
+  const user = ctx.state.user;
+  const buttons = [
     [ctx.translate('btnCheck'), ctx.translate('btnContact')],
     [ctx.translate('btnHelp'), ctx.translate('btnChangeLanguage')],
     [ctx.translate('btnBonus')]
-  ]).resize();
+  ];
+  
+  // Add buy credits button if user has zero credits
+  if (user && user.creditCount === 0) {
+    buttons.push([ctx.translate('btnBuyCredits')]);
+  }
+  
+  return Markup.keyboard(buttons).resize();
 };
 
 // Helpers: Dynamic Inline Keyboards for Main Sections
@@ -303,12 +311,32 @@ async function handleBonusCommand(ctx) {
   });
 }
 
+async function handleCreditsCommand(ctx) {
+  const user = ctx.state.user;
+  user.currentState = 'AWAITING_RECEIPT';
+  await user.save();
+
+  if (ctx.callbackQuery) {
+    try { await ctx.answerCbQuery(); } catch (e) {}
+  }
+
+  await ctx.reply(ctx.translate('menuUpdated'), getMainMenu(ctx));
+
+  return ctx.reply(ctx.translate('buyCreditsInfo'), {
+    parse_mode: 'HTML',
+    ...Markup.inlineKeyboard([
+      [Markup.button.callback(ctx.translate('btnBuyCredits'), 'cmd_buy')]
+    ])
+  });
+}
+
 // Bind Command Routes
 bot.command('start', handleStartCommand);
 bot.command('check', handleCheckCommand);
 bot.command('help', handleHelpCommand);
 bot.command('contact', handleContactCommand);
 bot.command('bonus', handleBonusCommand);
+bot.command('credits', handleCreditsCommand);
 bot.command('language', async (ctx) => {
   const user = ctx.state.user;
   user.currentState = 'START';
@@ -503,6 +531,9 @@ bot.on('text', async (ctx) => {
   if (text === translations.en.btnBonus || text === translations.uz.btnBonus || text === translations.ru.btnBonus) {
     return handleBonusCommand(ctx);
   }
+  if (text === translations.en.btnBuyCredits || text === translations.uz.btnBuyCredits || text === translations.ru.btnBuyCredits) {
+    return handleCreditsCommand(ctx);
+  }
   if (text === translations.en.btnChangeLanguage || text === translations.uz.btnChangeLanguage || text === translations.ru.btnChangeLanguage) {
     user.currentState = 'START';
     await user.save();
@@ -559,11 +590,24 @@ bot.on('text', async (ctx) => {
       promoUser.promoCodeCount += 1;
       await promoUser.save();
 
-      // Notify the original user
+      // Notify the original user with appropriate message
       try {
-        await ctx.telegram.sendMessage(promoUser.userId, ctx.translate('promoCodeUsed', {
-          count: promoUser.promoCodeCount
-        }), {
+        let notificationMessage;
+        
+        if (promoUser.promoCodeCount === 5) {
+          // Show bonus unlocked message only when reaching exactly 5
+          notificationMessage = ctx.translate('promoCodeFull');
+        } else {
+          // Show progress message
+          const remaining = 5 - promoUser.promoCodeCount;
+          const progressMessage = `${remaining === 0 ? '✅ All 5 referrals completed!' : `You have ${promoUser.promoCodeCount}/5 people. You need ${remaining} more to unlock the bonus!`}`;
+          notificationMessage = ctx.translate('promoCodeUsed', {
+            count: promoUser.promoCodeCount,
+            progressMessage: progressMessage
+          });
+        }
+
+        await ctx.telegram.sendMessage(promoUser.userId, notificationMessage, {
           parse_mode: 'HTML'
         });
       } catch (err) {
@@ -934,18 +978,41 @@ export default bot;
 async function startBot() {
   try {
     await connectDB();
-    bot.launch(); // Launch without await to prevent blocking the startup log
+    
+    // Stop any existing bot instance first
+    try {
+      await bot.stop();
+    } catch (e) {
+      // Ignore errors if bot isn't running
+    }
+    
+    // Wait a bit before restarting to avoid conflict
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    
+    await bot.launch();
     console.log('------------------------------------------------');
     console.log('🤖 IELTS AI Essay Grader Telegram Bot is online!');
     console.log('------------------------------------------------');
   } catch (error) {
     console.error('Startup failed:', error);
-    process.exit(1);
+    // Don't exit immediately, try to recover
+    setTimeout(() => {
+      console.log('Attempting to restart bot...');
+      startBot();
+    }, 5000);
   }
 }
 
 startBot();
 
 // Graceful shutdowns
-process.once('SIGINT', () => bot.stop('SIGINT'));
-process.once('SIGTERM', () => bot.stop('SIGTERM'));
+process.once('SIGINT', () => {
+  console.log('Shutting down...');
+  bot.stop('SIGINT');
+  process.exit(0);
+});
+process.once('SIGTERM', () => {
+  console.log('Shutting down...');
+  bot.stop('SIGTERM');
+  process.exit(0);
+});
