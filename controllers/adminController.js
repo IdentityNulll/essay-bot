@@ -49,8 +49,9 @@ export const getStats = async (req, res) => {
       { $group: { _id: null, avg: { $avg: '$creditCount' } } }
     ]);
 
+    // Count users with bonus discount (must have 5+ referral codes used)
     const usersWithDiscount = await User.countDocuments({
-      receivedBonusDiscount: true
+      promoCodeCount: { $gte: 5 }
     });
 
     res.json({

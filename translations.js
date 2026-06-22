@@ -36,6 +36,7 @@ Follow these simple steps to grade your writing:
 • /commands - Show this command list
 • /contact - Support & manual payment confirmation
 • /check - Initiate IELTS essay grading
+• /credits - Buy Credits 
 • /profile - Check your account credits`,
 
     contact: `📞 <b>Contact & Support</b>
@@ -145,8 +146,7 @@ Share this code with your friends! When 5 friends use your code, you'll unlock a
 
     promoCodeSuccess: `✅ <b>Promo code applied!</b>
 
-You now have access to the special bonus: 10 credits for 15,000 UZS instead of 25,000!
-Enjoy your discount when purchasing credits.`,
+Your referrer's discount will become active once they reach 5 referrals! You'll automatically get the bonus discount when they complete the requirement.`,
 
     promoCodeUsed: `🎉 <b>Your code was used!</b>
 
@@ -346,8 +346,7 @@ Ushbu kodni do'stlaringiz bilan baham ko'ring! 5 odam kodingizdan foydalanganida
 
     promoCodeSuccess: `✅ <b>Promo kod qo'shildi!</b>
 
-Endi sizda maxsus bonus mavjud: 25,000 o'rniga 10 kreditni 15,000 so'mga!
-Kredit sotib olganizda chegirmadan foydalaning.`,
+Referreringizning chegirmasini foydalanishga tayyorlang! Ular 5 ta referralga yetganda siz avtomatik ravishda bonus chegirmani olasiz.`,
 
     promoCodeUsed: `🎉 <b>Sizning kodi ishlatildi!</b>
 
@@ -535,8 +534,7 @@ To'lovning skrinshoti yuboring va bu joyda xabar yuboring.`,
 
     promoCodeSuccess: `✅ <b>Промо-код применен!</b>
 
-Теперь у вас есть доступ к специальному бонусу: 10 проверок за 15,000 сум вместо 25,000!
-Используйте скидку при покупке кредитов.`,
+Скидка вашего рефератора станет активной, когда он достигнет 5 рефералов! Вы автоматически получите бонусную скидку, когда он завершит требование.`,
 
     promoCodeUsed: `🎉 <b>Ваш код был использован!</b>
 

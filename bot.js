@@ -1,5 +1,6 @@
 import { Telegraf, Markup } from 'telegraf';
 import dotenv from 'dotenv';
+import fs from 'fs';
 import { connectDB } from './config/db.js';
 import User from './models/User.js';
 import Essay from './models/Essay.js';
@@ -302,13 +303,36 @@ async function handleBonusCommand(ctx) {
 
   await ctx.reply(ctx.translate('menuUpdated'), getMainMenu(ctx));
 
-  return ctx.reply(ctx.translate('bonusInstructions'), {
-    parse_mode: 'HTML',
-    ...Markup.inlineKeyboard([
-      [Markup.button.callback(ctx.translate('btnGetPromoCode'), 'get_promo_code')],
-      [Markup.button.callback(ctx.translate('btnEnterPromoCode'), 'enter_promo_code')]
-    ])
-  });
+  try {
+    // Prepare caption with progress info
+    const sharedCount = user.promoCodeCount || 0;
+    const progressText = `\n\n📊 <b>Your Progress:</b> You have shared: <b>${sharedCount}/5</b>`;
+    
+    const caption = ctx.translate('bonusInstructions') + progressText;
+
+    // Send image with caption and buttons
+    return ctx.replyWithPhoto(
+      { source: fs.createReadStream('./assets/bonus-program.png') },
+      {
+        caption: caption,
+        parse_mode: 'HTML',
+        ...Markup.inlineKeyboard([
+          [Markup.button.callback(ctx.translate('btnGetPromoCode'), 'get_promo_code')],
+          [Markup.button.callback(ctx.translate('btnEnterPromoCode'), 'enter_promo_code')]
+        ])
+      }
+    );
+  } catch (error) {
+    console.error('Error sending bonus image:', error);
+    // Fallback to text message if image fails
+    return ctx.reply(ctx.translate('bonusInstructions'), {
+      parse_mode: 'HTML',
+      ...Markup.inlineKeyboard([
+        [Markup.button.callback(ctx.translate('btnGetPromoCode'), 'get_promo_code')],
+        [Markup.button.callback(ctx.translate('btnEnterPromoCode'), 'enter_promo_code')]
+      ])
+    });
+  }
 }
 
 async function handleCreditsCommand(ctx) {
@@ -582,7 +606,10 @@ bot.on('text', async (ctx) => {
 
       // Mark promo code as used
       user.usedPromoCode = promoCode;
-      user.receivedBonusDiscount = true;
+      // Only set discount if the promo user already has 5 referrals
+      if (promoUser.promoCodeCount >= 5) {
+        user.receivedBonusDiscount = true;
+      }
       user.currentState = 'START';
       await user.save();
 
@@ -595,8 +622,15 @@ bot.on('text', async (ctx) => {
         let notificationMessage;
         
         if (promoUser.promoCodeCount === 5) {
-          // Show bonus unlocked message only when reaching exactly 5
+          // Show bonus unlocked message with celebration when reaching exactly 5
           notificationMessage = ctx.translate('promoCodeFull');
+          
+          // Send celebration animation
+          try {
+            await ctx.telegram.sendDice(promoUser.userId, '🎉');
+          } catch (e) {
+            // Ignore if dice fails
+          }
         } else {
           // Show progress message
           const remaining = 5 - promoUser.promoCodeCount;

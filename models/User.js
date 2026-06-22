@@ -17,7 +17,7 @@ const UserSchema = new mongoose.Schema({
   },
   creditCount: {
     type: Number,
-    default: 1
+    default: 2
   },
   essaysCount: {
     type: Number,

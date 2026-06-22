@@ -113,8 +113,8 @@ function UsersPage() {
                   <td><span className="badge badge-success">{user.creditCount}</span></td>
                   <td>{user.essaysCount || 0}</td>
                   <td>
-                    {user.receivedBonusDiscount ? (
-                      <span className="badge badge-warning">Yes</span>
+                    {user.promoCodeCount >= 5 ? (
+                      <span className="badge badge-warning">Yes (5/5)</span>
                     ) : (
                       <span>-</span>
                     )}
@@ -172,6 +172,16 @@ function UsersPage() {
             </div>
             <div style={{ marginBottom: '15px' }}>
               <strong>Member Since:</strong> {new Date(userDetails.user.createdAt).toLocaleDateString()}
+            </div>
+            <div style={{ marginBottom: '15px' }}>
+              <strong>Referral Progress:</strong> {userDetails.user.promoCodeCount || 0}/5
+            </div>
+            <div style={{ marginBottom: '15px' }}>
+              <strong>Bonus Status:</strong> {(userDetails.user.promoCodeCount || 0) >= 5 ? (
+                <span className="badge badge-success">✅ Unlocked</span>
+              ) : (
+                <span className="badge badge-warning">⏳ In Progress</span>
+              )}
             </div>
 
             <hr style={{ margin: '20px 0' }} />
