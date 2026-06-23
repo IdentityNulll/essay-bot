@@ -151,12 +151,24 @@ export const getEssays = async (req, res) => {
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit)
-      .select('-geminiReport');
+      .lean();
+
+    // Fetch user data for all essays
+    const essaysWithUserInfo = await Promise.all(
+      essays.map(async (essay) => {
+        const user = await User.findOne({ userId: essay.userId }).lean();
+        return {
+          ...essay,
+          username: user?.username || 'Unknown',
+          userChatId: user?.userId
+        };
+      })
+    );
 
     const total = await Essay.countDocuments(query);
 
     res.json({
-      essays,
+      essays: essaysWithUserInfo,
       pagination: {
         page,
         limit,

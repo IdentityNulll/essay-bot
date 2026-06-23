@@ -108,7 +108,7 @@ function EssaysPage() {
           <table>
             <thead>
               <tr>
-                <th>User</th>
+                <th>Username</th>
                 <th>Band Score</th>
                 <th>Word Count</th>
                 <th>Language</th>
@@ -119,10 +119,10 @@ function EssaysPage() {
             <tbody>
               {essays.map((essay) => (
                 <tr key={essay._id}>
-                  <td>{essay.userId}</td>
+                  <td>@{essay.username || 'Unknown'}</td>
                   <td>
                     <span className={`badge badge-${getBandColor(essay.finalBand)}`}>
-                      {essay.finalBand || 'N/A'}
+                      {essay.finalBand || 'Pending'}
                     </span>
                   </td>
                   <td>{essay.wordCount}</td>
