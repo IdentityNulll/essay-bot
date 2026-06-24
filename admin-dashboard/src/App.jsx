@@ -5,6 +5,8 @@ import DashboardPage from './pages/DashboardPage';
 import UsersPage from './pages/UsersPage';
 import EssaysPage from './pages/EssaysPage';
 import BroadcastPage from './pages/BroadcastPage';
+import MarketingAnalyticsPage from './pages/MarketingAnalyticsPage';
+import CampaignManagementPage from './pages/CampaignManagementPage';
 
 function App() {
   const [currentPage, setCurrentPage] = useState('dashboard');
@@ -36,6 +38,8 @@ function App() {
           {currentPage === 'users' && <UsersPage />}
           {currentPage === 'essays' && <EssaysPage />}
           {currentPage === 'broadcast' && <BroadcastPage />}
+          {currentPage === 'marketing' && <MarketingAnalyticsPage />}
+          {currentPage === 'campaigns' && <CampaignManagementPage />}
         </div>
       </div>
     </div>
@@ -70,6 +74,18 @@ function Sidebar({ currentPage, onNavigate, onLogout }) {
       >
         📢 Broadcast
       </div>
+      <div
+        className={`nav-item ${currentPage === 'marketing' ? 'active' : ''}`}
+        onClick={() => onNavigate('marketing')}
+      >
+        📊 Marketing Analytics
+      </div>
+      <div
+        className={`nav-item ${currentPage === 'campaigns' ? 'active' : ''}`}
+        onClick={() => onNavigate('campaigns')}
+      >
+        🎯 Campaigns
+      </div>
       <div className="nav-item" onClick={onLogout} style={{ marginTop: '20px', background: '#f56565' }}>
         🚪 Logout
       </div>
@@ -91,7 +107,9 @@ function getPageTitle(page) {
     dashboard: '📊 Dashboard',
     users: '👥 All Users',
     essays: '📝 All Essays',
-    broadcast: '📢 Broadcast Messages'
+    broadcast: '📢 Broadcast Messages',
+    marketing: '📊 Marketing Analytics',
+    campaigns: '🎯 Campaign Management'
   };
   return titles[page] || 'Dashboard';
 }

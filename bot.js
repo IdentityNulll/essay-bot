@@ -7,6 +7,7 @@ import Essay from './models/Essay.js';
 import { translations } from './translations.js';
 import { gradeIeltsEssay } from './openai.js';
 import { parsePdf, parseDocx } from './documentParser.js';
+import * as eventTracker from './services/eventTracker.js';
 
 dotenv.config();
 
@@ -41,6 +42,9 @@ bot.use(async (ctx, next) => {
       });
       await user.save();
       console.log(`New user registered: ${userId} (@${username})`);
+
+      // Track user started bot event
+      await eventTracker.trackUserStartedBot(userId);
     } else {
       // Keep username updated in DB if they changed it
       if (user.username !== username) {
@@ -433,6 +437,9 @@ bot.action('cmd_buy', async (ctx) => {
   user.currentState = 'AWAITING_RECEIPT';
   await user.save();
 
+  // Track payment page viewed event
+  await eventTracker.trackPaymentPageViewed(user.userId);
+
   await ctx.reply(ctx.translate('menuUpdated'), getMainMenu(ctx));
   return ctx.reply(ctx.translate('insufficientCredits', { credits: user.creditCount }), {
     parse_mode: 'HTML',
@@ -617,6 +624,9 @@ bot.on('text', async (ctx) => {
       promoUser.promoCodeCount += 1;
       await promoUser.save();
 
+      // Track referral event
+      await eventTracker.trackReferralEvent(promoUser.userId, user.userId);
+
       // Notify the original user with appropriate message
       try {
         let notificationMessage;
@@ -797,13 +807,16 @@ async function processEssayGrading(ctx, essayText) {
     }
 
     // Invoke Gemini API grading call
-    const feedbackReport = await gradeIeltsEssay(
+    const gradingResult = await gradeIeltsEssay(
       user.tempQuestionText,
       essayText,
       questionImageBase64,
       questionImageMimeType,
       user.selectedLanguage || 'en'
     );
+
+    // Extract parsed data from grading result
+    const { bandScore, question, feedback } = gradingResult;
 
     // Deduct credit and reset state ONLY after a successful grading
     user.creditCount = Math.max(0, user.creditCount - 1);
@@ -818,15 +831,23 @@ async function processEssayGrading(ctx, essayText) {
       const wordCount = essayText.split(/\s+/).filter(Boolean).length;
       const essay = new Essay({
         userId: user.userId,
-        questionText: user.tempQuestionText || null,
+        questionText: question,
         essayText: essayText.substring(0, 50000),
         source: hasPhotoQuestion ? 'image' : 'text',
         wordCount,
-        geminiReport: feedbackReport,
+        geminiReport: feedback,
+        finalBand: bandScore,
         language: user.selectedLanguage || 'en',
         processingTime: Date.now() - loadingMsg.date * 1000
       });
       await essay.save();
+
+      // Track essay submission events
+      if (user.essaysCount === 1) {
+        await eventTracker.trackFirstEssaySubmitted(user.userId, essay._id.toString());
+      } else if (user.essaysCount === 2) {
+        await eventTracker.trackSecondEssaySubmitted(user.userId, essay._id.toString());
+      }
     } catch (essayError) {
       console.error('Error saving essay record:', essayError);
     }
@@ -837,7 +858,7 @@ async function processEssayGrading(ctx, essayText) {
     } catch (e) {}
 
     // Send result feedback safely
-    await sendLongMessage(ctx, feedbackReport, {
+    await sendLongMessage(ctx, feedback, {
       parse_mode: 'HTML',
       ...Markup.inlineKeyboard([
         [
@@ -928,6 +949,10 @@ bot.action(/^approve_pay_(.+)$/, async (ctx) => {
     targetUser.creditCount += 10; // Give 10 credits on approval
     targetUser.currentState = 'START';
     await targetUser.save();
+
+    // Track package purchase event
+    const amountPaid = targetUser.receivedBonusDiscount ? 15000 : 25000;
+    await eventTracker.trackPackagePurchased(targetUserId, 'PACKAGE_10', amountPaid);
 
     // Helper translator for the target user's language settings
     const translateForUser = (key) => {

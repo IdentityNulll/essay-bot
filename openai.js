@@ -18,90 +18,36 @@ function escapeHtml(text) {
 }
 
 /**
+ * Parses the Gemini response to extract band score, question, and feedback
+ * @param {string} responseText - Raw response from Gemini API
+ * @returns {object} { bandScore, question, feedback }
+ */
+function parseGeminiResponse(responseText) {
+  const bandScoreMatch = responseText.match(/\[BAND_SCORE:([\d.]+)\]/);
+  const questionMatch = responseText.match(/\[QUESTION:(.*?)\]/s);
+  const feedbackMatch = responseText.match(/\[FEEDBACK:\]([\s\S]*)/);
+
+  const bandScore = bandScoreMatch ? parseFloat(bandScoreMatch[1]) : 7.0;
+  const question = questionMatch ? questionMatch[1].trim() : 'Question not provided';
+  const feedback = feedbackMatch ? feedbackMatch[1].trim() : responseText;
+
+  return { bandScore, question, feedback };
+}
+
+/**
  * Generates a realistic mock IELTS feedback report when no API key is present or on API failures.
  *
  * @param {string|null} questionText - Essay prompt question
  * @param {string} essayText - Essay response
  * @param {string} language - Target language code ('en', 'uz', 'ru')
- * @returns {string} Structured Mock report in HTML
+ * @returns {string} Structured Mock report with markers
  */
 function getMockReport(questionText, essayText, language = "en") {
   const wordCount = essayText.split(/\s+/).filter(Boolean).length;
+  const cleanQuestion = questionText ? escapeHtml(questionText) : 'Question not provided';
 
-  if (language === "uz") {
-    return `<b>📊 IELTS Yozma Ishi Tahlili Hisoboti</b>
-
-<b>Umumiy Baho (Overall Estimated Band Score): 7.0</b>
-
-───────────────────
-
-<b>1. Task Achievement (TA/TR): 7.0</b>
-• <b>Kuchli tomonlari:</b> Insho berilgan vazifaning barcha qismlarini qamrab oladi. Nomzod o'z fikrini butun javob davomida aniq ifodalaydi.
-• <b>Yaxshilash kerak bo'lgan tomonlari:</b> Ba'zi asosiy fikrlar aniq misollar yordamida batafsilroq yoritilishi mumkin edi.
-
-<b>2. Coherence and Cohesion (CC): 7.5</b>
-• <b>Kuchli tomonlari:</b> Ma'lumot va g'oyalar mantiqiy tarzda tashkil etilgan bo'lib, insho davomida aniq ketma-ketlik mavjud. Turli xil bog'lovchi vositalardan to'g'ri foydalanilgan.
-• <b>Yaxshilash kerak bo'lgan tomonlari:</b> Ayrim o'tish so'zlaridan (masalan, "Furthermore", "In addition") ortiqcha foydalanilgan. Tabiiyroq bog'lanishlarga e'tibor bering.
-
-<b>3. Lexical Resource (LR): 6.5</b>
-• <b>Kuchli tomonlari:</b> Nomzod o'z fikrlarini yetarli darajada aniq ifodalash uchun so'z boyligidan foydalangan.
-• <b>Yaxshilash kerak bo'lgan tomonlari:</b> Ba'zi imlo va iboraviy xatolar mavjud. Masalan, "make a decision" o'rniga "do a decision" yozilgan.
-
-<b>4. Grammatical Range and Accuracy (GRA): 7.0</b>
-• <b>Kuchli tomonlari:</b> Oddiy va murakkab gap turlarining aralashmasidan foydalanilgan. Grammatika asosan to'g'ri boshqarilgan.
-• <b>Yaxshilash kerak bo'lgan tomonlari:</b> Predloglar va artikllar bilan bog'liq tez-tez uchraydigan mayda xatoliklar mavjud.
-
-───────────────────
-
-<b>🔧 Xatolar va Kamchiliklar:</b>
-• <i>Noto'g'ri:</i> "...do a decision..."
-  <b>To'g'ri:</b> "...make a decision..."
-• <i>Noto'g'ri:</i> "...at the same time..."
-  <b>To'g'ri:</b> "...simultaneously..."
-
-<b>📝 Statistika:</b>
-• So'zlar soni: ${wordCount} ta so'z
-• Tekshiruv tizimi: IELTS AI Examiner (v2.5)`;
-  }
-
-  if (language === "ru") {
-    return `<b>📊 Отчет об Оценке Эссе IELTS</b>
-
-<b>Общий Балл (Overall Estimated Band Score): 7.0</b>
-
-───────────────────
-
-<b>1. Task Achievement (TA/TR): 7.0</b>
-• <b>Сильные стороны:</b> Эссе полностью раскрывает тему задания. Кандидат выражает четкую позицию на протяжении всего ответа.
-• <b>Области для улучшения:</b> Некоторые ключевые моменты могли бы быть более детально раскрыты с помощью конкретных примеров.
-
-<b>2. Coherence and Cohesion (CC): 7.5</b>
-• <b>Сильные стороны:</b> Информация и идеи логически организованы с четкой последовательностью на протяжении всего текста. Разнообразные связующие слова использованы уместно.
-• <b>Области для улучшения:</b> Чрезмерное использование определенных вводных слов (например, "Furthermore", "In addition"). Постарайтесь сделать переходы между абзацами более естественными.
-
-<b>3. Lexical Resource (LR): 6.5</b>
-• <b>Сильные стороны:</b> Кандидат использует достаточный словарный запас для выражения мыслей с достаточной гибкостью и точностью.
-• <b>Области для улучшения:</b> Присутствуют некоторые орфографические и лексические ошибки. Например, вместо "make a decision" кандидат написал "do a decision".
-
-<b>4. Grammatical Range and Accuracy (GRA): 7.0</b>
-• <b>Сильные стороны:</b> Используется смесь простых и сложных предложений. Грамматика в целом контролируется хорошо.
-• <b>Области для улучшения:</b> Частые мелкие ошибки с предлогами и артиклями.
-
-───────────────────
-
-<b>🔧 Исправления и Улучшения:</b>
-• <i>Неправильно:</i> "...do a decision..."
-  <b>Правильно:</b> "...make a decision..."
-• <i>Неправильно:</i> "...at the same time..."
-  <b>Правильно:</b> "...simultaneously..."
-
-<b>📝 Статистика:</b>
-• Количество слов: ${wordCount} слов
-• Система оценки: IELTS AI Examiner (v2.5)`;
-  }
-
-  // Default is English (en)
-  return `<b>📊 IELTS Writing Assessment Report</b>
+  const mockFeedback = {
+    en: `<b>📊 IELTS Writing Assessment Report</b>
 
 <b>Overall Estimated Band Score: 7.0</b>
 
@@ -133,7 +79,79 @@ function getMockReport(questionText, essayText, language = "en") {
 
 <b>📝 Statistics:</b>
 • Word Count: ${wordCount} words
-• Evaluation System: IELTS AI Examiner (v2.5)`;
+• Evaluation System: IELTS AI Examiner (v2.5)`,
+
+    uz: `<b>📊 IELTS Yozma Ishi Tahlili Hisoboti</b>
+
+<b>Umumiy Baho (Overall Estimated Band Score): 7.0</b>
+
+───────────────────
+
+<b>1. Task Achievement (TA/TR): 7.0</b>
+• <b>Kuchli tomonlari:</b> Insho berilgan vazifaning barcha qismlarini qamrab oladi. Nomzod o'z fikrini butun javob davomida aniq ifodalaydi.
+• <b>Yaxshilash kerak bo'lgan tomonlari:</b> Ba'zi asosiy fikrlar aniq misollar yordamida batafsilroq yoritilishi mumkin edi.
+
+<b>2. Coherence and Cohesion (CC): 7.5</b>
+• <b>Kuchli tomonlari:</b> Ma'lumot va g'oyalar mantiqiy tarzda tashkil etilgan bo'lib, insho davomida aniq ketma-ketlik mavjud. Turli xil bog'lovchi vositalardan to'g'ri foydalanilgan.
+• <b>Yaxshilash kerak bo'lgan tomonlari:</b> Ayrim o'tish so'zlaridan (masalan, "Furthermore", "In addition") ortiqcha foydalanilgan. Tabiiyroq bog'lanishlarga e'tibor bering.
+
+<b>3. Lexical Resource (LR): 6.5</b>
+• <b>Kuchli tomonlari:</b> Nomzod o'z fikrlarini yetarli darajada aniq ifodalash uchun so'z boyligidan foydalangan.
+• <b>Yaxshilash kerak bo'lgan tomonlari:</b> Ba'zi imlo va iboraviy xatolar mavjud. Masalan, "make a decision" o'rniga "do a decision" yozilgan.
+
+<b>4. Grammatical Range and Accuracy (GRA): 7.0</b>
+• <b>Kuchli tomonlari:</b> Oddiy va murakkab gap turlarining aralashmasidan foydalanilgan. Grammatika asosan to'g'ri boshqarilgan.
+• <b>Yaxshilash kerak bo'lgan tomonlari:</b> Predloglar va artikllar bilan bog'liq tez-tez uchraydigan mayda xatoliklar mavjud.
+
+───────────────────
+
+<b>🔧 Xatolar va Kamchiliklar:</b>
+• <i>Noto'g'ri:</i> "...do a decision..."
+  <b>To'g'ri:</b> "...make a decision..."
+• <i>Noto'g'ri:</i> "...at the same time..."
+  <b>To'g'ri:</b> "...simultaneously..."
+
+<b>📝 Statistika:</b>
+• So'zlar soni: ${wordCount} ta so'z
+• Tekshiruv tizimi: IELTS AI Examiner (v2.5)`,
+
+    ru: `<b>📊 Отчет об Оценке Эссе IELTS</b>
+
+<b>Общий Балл (Overall Estimated Band Score): 7.0</b>
+
+───────────────────
+
+<b>1. Task Achievement (TA/TR): 7.0</b>
+• <b>Сильные стороны:</b> Эссе полностью раскрывает тему задания. Кандидат выражает четкую позицию на протяжении всего ответа.
+• <b>Области для улучшения:</b> Некоторые ключевые моменты могли бы быть более детально раскрыты с помощью конкретных примеров.
+
+<b>2. Coherence and Cohesion (CC): 7.5</b>
+• <b>Сильные стороны:</b> Информация и идеи логически организованы с четкой последовательностью на протяжении всего текста. Разнообразные связующие слова использованы уместно.
+• <b>Области для улучшения:</b> Чрезмерное использование определенных вводных слов (например, "Furthermore", "In addition"). Постарайтесь сделать переходы между абзацами более естественными.
+
+<b>3. Lexical Resource (LR): 6.5</b>
+• <b>Сильные стороны:</b> Кандидат использует достаточный словарный запас для выражения мыслей с достаточной гибкостью и точностью.
+• <b>Области для улучшения:</b> Присутствуют некоторые орфографические и лексические ошибки. Например, вместо "make a decision" кандидат написал "do a decision".
+
+<b>4. Grammatical Range and Accuracy (GRA): 7.0</b>
+• <b>Сильные стороны:</b> Используется смесь простых и сложных предложений. Грамматика в целом контролируется хорошо.
+• <b>Области для улучшения:</b> Частые мелкие ошибки с предлогами и артиклями.
+
+───────────────────
+
+<b>🔧 Исправления и Улучшения:</b>
+• <i>Неправильно:</i> "...do a decision..."
+  <b>Правильно:</b> "...make a decision..."
+• <i>Неправильно:</i> "...at the same time..."
+  <b>Правильно:</b> "...simultaneously..."
+
+<b>📝 Статистика:</b>
+• Количество слов: ${wordCount} слов
+• Система оценки: IELTS AI Examiner (v2.5)`
+  };
+
+  const feedback = mockFeedback[language] || mockFeedback.en;
+  return `[BAND_SCORE:7.0]\n[QUESTION:${cleanQuestion}]\n[FEEDBACK:]\n${feedback}`;
 }
 
 /**
@@ -212,7 +230,7 @@ export async function gradeIeltsEssay(
 
   const systemPrompt = `
   You are grading IELTS essays. Your scores will be audited against official IELTS Band Descriptors. Inflated scores are considered examiner misconduct. Grade only what is on the page.
-  
+
   You are a strict, no-nonsense official IELTS Writing Examiner with 20+ years of experience. You are known for being accurate, blunt, and completely unaffected by a candidate's effort or feelings. Your only job is to reflect what the writing truly deserves — nothing more, nothing less.
 
 CRITICAL GRADING RULES:
@@ -239,6 +257,14 @@ SCORING RULES:
 3. Calculate Overall Band Score: average of the 4 scores, rounded to nearest 0.5 using official IELTS rules.
 4. For each criterion, provide 2–3 factual sentences on strengths (if any exist) and 2–3 direct sentences on weaknesses. Be specific — reference the actual text.
 5. Corrections section: identify real errors in the essay. Quote them exactly. Do not invent corrections for things that are acceptable — only flag genuine mistakes.
+
+RESPONSE FORMAT - CRITICAL:
+You MUST start your response with these markers in this EXACT order:
+[BAND_SCORE:X.X]
+[QUESTION:The exact question text or "Question not provided"]
+[FEEDBACK:]
+
+After [FEEDBACK:] provide the detailed HTML assessment.
 
 Formatting instructions:
 - Do NOT use Markdown (no **, no _, no #, no tables).
@@ -281,7 +307,7 @@ Formatting instructions:
 
 LANGUAGE RULE: Write all feedback in "${targetLanguage}". IELTS criterion titles may stay in English. Everything else must be in "${targetLanguage}".
 ESCAPING RULE: If quoting essay text that contains '<', '>', or '&', escape them as '&lt;', '&gt;', '&amp;'. Never output raw '<' or '>' outside of allowed HTML tags.
-LENGTH RULE: Keep total response under 4096 characters to fit in a single Telegram message.`;
+LENGTH RULE: Keep feedback section under 4096 characters to fit in a single Telegram message.`;
   const parts = [];
 
   // Sanitize input texts to prevent breaking Telegram HTML
@@ -358,15 +384,17 @@ LENGTH RULE: Keep total response under 4096 characters to fit in a single Telegr
       console.warn(
         "Empty response structure from Gemini. Falling back to Mock Report.",
       );
-      return getMockReport(questionText, essayText, language);
+      const mockResponse = getMockReport(questionText, essayText, language);
+      return parseGeminiResponse(mockResponse);
     }
 
-    return resultText;
+    return parseGeminiResponse(resultText);
   } catch (error) {
     console.error(
       "Error invoking Gemini API. Falling back to Mock Report:",
       error,
     );
-    return getMockReport(questionText, essayText, language);
+    const mockResponse = getMockReport(questionText, essayText, language);
+    return parseGeminiResponse(mockResponse);
   }
 }
