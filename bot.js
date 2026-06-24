@@ -818,15 +818,9 @@ async function processEssayGrading(ctx, essayText) {
     // Extract parsed data from grading result
     const { bandScore, question, feedback } = gradingResult;
 
-    // Deduct credit and reset state ONLY after a successful grading
-    user.creditCount = Math.max(0, user.creditCount - 1);
-    user.essaysCount = (user.essaysCount || 0) + 1;
-    user.currentState = 'START';
-    user.tempQuestionText = null;
-    user.tempQuestionPhotoId = null;
-    await user.save();
-
-    // Save essay record for admin panel
+    // Save essay record for admin panel BEFORE deducting credits
+    // This ensures credits are only deducted if essay is successfully saved
+    let essayId = null;
     try {
       const wordCount = essayText.split(/\s+/).filter(Boolean).length;
       const essay = new Essay({
@@ -841,15 +835,37 @@ async function processEssayGrading(ctx, essayText) {
         processingTime: Date.now() - loadingMsg.date * 1000
       });
       await essay.save();
-
-      // Track essay submission events
-      if (user.essaysCount === 1) {
-        await eventTracker.trackFirstEssaySubmitted(user.userId, essay._id.toString());
-      } else if (user.essaysCount === 2) {
-        await eventTracker.trackSecondEssaySubmitted(user.userId, essay._id.toString());
-      }
+      essayId = essay._id.toString();
     } catch (essayError) {
       console.error('Error saving essay record:', essayError);
+      // If essay saving fails, don't deduct credits
+      try {
+        await ctx.telegram.deleteMessage(ctx.chat.id, loadingMsg.message_id);
+      } catch (e) {}
+      return ctx.reply(ctx.translate('errorGeneral'), {
+        parse_mode: 'HTML',
+        ...getMainMenu(ctx)
+      });
+    }
+
+    // ONLY deduct credit and update user state AFTER essay is successfully saved
+    user.creditCount = Math.max(0, user.creditCount - 1);
+    user.essaysCount = (user.essaysCount || 0) + 1;
+    user.currentState = 'START';
+    user.tempQuestionText = null;
+    user.tempQuestionPhotoId = null;
+    await user.save();
+
+    // Track essay submission events
+    try {
+      if (user.essaysCount === 1) {
+        await eventTracker.trackFirstEssaySubmitted(user.userId, essayId);
+      } else if (user.essaysCount === 2) {
+        await eventTracker.trackSecondEssaySubmitted(user.userId, essayId);
+      }
+    } catch (trackingError) {
+      console.error('Error tracking essay submission:', trackingError);
+      // Don't fail if tracking fails, just log it
     }
 
     // Delete temporary loading message

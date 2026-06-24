@@ -172,12 +172,14 @@ export async function gradeIeltsEssay(
   questionImageMimeType = null,
   language = "en",
 ) {
-  const apiKey = process.env.GEMINI_API_KEY;
+  const primaryApiKey = process.env.GEMINI_API_KEY;
+  const backupApiKey = process.env.GEMINI_BACKUP_API_KEY;
 
   // Fallback to mock report if no key or key is literally "mock"
-  if (!apiKey || apiKey.toLowerCase() === "mock") {
+  if (!primaryApiKey || primaryApiKey.toLowerCase() === "mock") {
     console.log("Using mock grading report (No Gemini API Key provided).");
-    return getMockReport(questionText, essayText, language);
+    const mockResponse = getMockReport(questionText, essayText, language);
+    return parseGeminiResponse(mockResponse);
   }
 
   const langNames = {
@@ -228,7 +230,9 @@ export async function gradeIeltsEssay(
 
   const layout = templateInstructions[language] || templateInstructions["en"];
 
-  const systemPrompt = `
+  // Helper function to call Gemini API
+  async function callGeminiAPI(apiKey, isBackup = false) {
+    const systemPrompt = `
   You are grading IELTS essays. Your scores will be audited against official IELTS Band Descriptors. Inflated scores are considered examiner misconduct. Grade only what is on the page.
 
   You are a strict, no-nonsense official IELTS Writing Examiner with 20+ years of experience. You are known for being accurate, blunt, and completely unaffected by a candidate's effort or feelings. Your only job is to reflect what the writing truly deserves — nothing more, nothing less.
@@ -308,93 +312,116 @@ Formatting instructions:
 LANGUAGE RULE: Write all feedback in "${targetLanguage}". IELTS criterion titles may stay in English. Everything else must be in "${targetLanguage}".
 ESCAPING RULE: If quoting essay text that contains '<', '>', or '&', escape them as '&lt;', '&gt;', '&amp;'. Never output raw '<' or '>' outside of allowed HTML tags.
 LENGTH RULE: Keep feedback section under 4096 characters to fit in a single Telegram message.`;
-  const parts = [];
 
-  // Sanitize input texts to prevent breaking Telegram HTML
-  const cleanQuestionText = questionText ? escapeHtml(questionText) : null;
-  const cleanEssayText = escapeHtml(essayText);
+    const parts = [];
 
-  // 1. Add question input
-  if (cleanQuestionText) {
+    // Sanitize input texts to prevent breaking Telegram HTML
+    const cleanQuestionText = questionText ? escapeHtml(questionText) : null;
+    const cleanEssayText = escapeHtml(essayText);
+
+    // 1. Add question input
+    if (cleanQuestionText) {
+      parts.push({
+        text: `### IELTS Essay Question:\n${cleanQuestionText}\n\n`,
+      });
+    } else if (questionImageBase64 && questionImageMimeType) {
+      parts.push({
+        text: `### IELTS Essay Question:\nPlease see the attached image containing the essay prompt/question.\n`,
+      });
+      parts.push({
+        inlineData: {
+          mimeType: questionImageMimeType,
+          data: questionImageBase64,
+        },
+      });
+    } else {
+      parts.push({
+        text: `### IELTS Essay Question:\n[Question not provided / Skipped by user]\n\n`,
+      });
+    }
+
+    // 2. Add Candidate's essay
     parts.push({
-      text: `### IELTS Essay Question:\n${cleanQuestionText}\n\n`,
+      text: `### Candidate's Essay:\n${cleanEssayText}\n\nPlease evaluate this essay according to the IELTS criteria.`,
     });
-  } else if (questionImageBase64 && questionImageMimeType) {
-    parts.push({
-      text: `### IELTS Essay Question:\nPlease see the attached image containing the essay prompt/question.\n`,
-    });
-    parts.push({
-      inlineData: {
-        mimeType: questionImageMimeType,
-        data: questionImageBase64,
-      },
-    });
-  } else {
-    parts.push({
-      text: `### IELTS Essay Question:\n[Question not provided / Skipped by user]\n\n`,
-    });
-  }
 
-  // 2. Add Candidate's essay
-  parts.push({
-    text: `### Candidate's Essay:\n${cleanEssayText}\n\nPlease evaluate this essay according to the IELTS criteria.`,
-  });
+    try {
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
 
-  try {
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
-
-    const response = await fetch(url, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        contents: [
-          {
-            role: "user",
-            parts: parts,
-          },
-        ],
-        systemInstruction: {
-          parts: [
+      const response = await fetch(url, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          contents: [
             {
-              text: systemPrompt,
+              role: "user",
+              parts: parts,
             },
           ],
-        },
-        generationConfig: {
-          temperature: 0.3,
-          maxOutputTokens: 10000,
-        },
-      }),
-    });
+          systemInstruction: {
+            parts: [
+              {
+                text: systemPrompt,
+              },
+            ],
+          },
+          generationConfig: {
+            temperature: 0.3,
+            maxOutputTokens: 10000,
+          },
+        }),
+      });
 
-    if (!response.ok) {
-      const errText = await response.text();
-      console.warn(
-        `Gemini API responded with status ${response.status}: ${errText}. Falling back to Mock Report.`,
+      if (!response.ok) {
+        const errText = await response.text();
+        const keyLabel = isBackup ? "backup" : "primary";
+        console.warn(
+          `Gemini API (${keyLabel}) responded with status ${response.status}: ${errText}`
+        );
+        return null;
+      }
+
+      const data = await response.json();
+      const resultText = data.candidates?.[0]?.content?.parts?.[0]?.text;
+
+      if (!resultText) {
+        const keyLabel = isBackup ? "backup" : "primary";
+        console.warn(
+          `Empty response structure from Gemini (${keyLabel} key).`
+        );
+        return null;
+      }
+
+      return resultText;
+    } catch (error) {
+      const keyLabel = isBackup ? "backup" : "primary";
+      console.error(
+        `Error invoking Gemini API (${keyLabel} key):`,
+        error.message
       );
-      return getMockReport(questionText, essayText, language);
+      return null;
     }
+  }
 
-    const data = await response.json();
-    const resultText = data.candidates?.[0]?.content?.parts?.[0]?.text;
+  // Try primary API key first
+  let resultText = await callGeminiAPI(primaryApiKey, false);
 
-    if (!resultText) {
-      console.warn(
-        "Empty response structure from Gemini. Falling back to Mock Report.",
-      );
-      const mockResponse = getMockReport(questionText, essayText, language);
-      return parseGeminiResponse(mockResponse);
-    }
+  // If primary fails, try backup key
+  if (!resultText && backupApiKey) {
+    console.log("Primary API key failed. Trying backup API key...");
+    resultText = await callGeminiAPI(backupApiKey, true);
+  }
 
-    return parseGeminiResponse(resultText);
-  } catch (error) {
-    console.error(
-      "Error invoking Gemini API. Falling back to Mock Report:",
-      error,
+  // If both fail, use mock report
+  if (!resultText) {
+    console.warn(
+      "Both primary and backup API keys failed. Falling back to Mock Report."
     );
     const mockResponse = getMockReport(questionText, essayText, language);
     return parseGeminiResponse(mockResponse);
   }
+
+  return parseGeminiResponse(resultText);
 }
