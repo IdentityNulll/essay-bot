@@ -1,43 +1,45 @@
 export const translations = {
   en: {
     languageSelected: "🇬🇧 English selected successfully!",
-    welcome: `✨ <b>Welcome to IELTS Essay Examiner!</b> ✨
+    welcome: `✨ <b>Welcome to IELTS Essay Examiner</b> ✨
 
-Hi there! I am your AI-powered IELTS Writing Examiner, powered by <b>Google Gemini</b>. I can grade your essays and give you detailed criteria-based feedback just like a real examiner.
+Your AI-powered Writing Assistant, powered by <b>Google Gemini</b>
 
-<b>Current Balance:</b> <code>{credits} credits</code>
+Get instant, detailed feedback on your IELTS essays with professional criteria-based scoring just like a real examiner.
 
-<b>Quick Start:</b>
-1. Press /check or tap "📝 Check Essay".
-2. Send the Essay Question (or skip it).
-3. Submit your Essay (text or .pdf/.docx file).
-4. Get instant detailed feedback!`,
+📊 <b>Current Credits:</b> <code>{credits} essays</code>
+
+🚀 <b>Get Started:</b>
+1. Tap "📝 Check Essay" or send /check
+2. Share your essay question (or skip if it's in your document)
+3. Upload your essay (text, PDF, or DOCX)
+4. Receive detailed band score feedback in seconds!`,
 
     help: `📖 <b>How to Use IELTS Essay Examiner</b>
 
-Follow these simple steps to grade your writing:
-1️⃣ <b>Start the process</b> by sending the /check command or tapping the "📝 Check Essay" button.
-2️⃣ <b>Submit the Essay Question</b>: Copy and paste the prompt, upload an image of the prompt, or skip this step if the question is already contained in your PDF essay document.
-3️⃣ <b>Submit your Essay</b>: Copy and paste your written essay or upload a document format (<code>.pdf</code> or <code>.docx</code>).
-4️⃣ <b>Wait for Analysis</b>: The AI will evaluate your writing and deliver a detailed score report based on the official IELTS band descriptors.
+Follow these simple steps to get feedback on your essays:
 
-<b>Commands:</b>
-/start - Start or restart the bot
-/help - Show instructions
-/commands - List all available commands
-/contact - Admin contact info
-/check - Start grading an essay
-/profile - View your credits and status`,
+1️⃣ <b>Start</b> — Send /check or tap "📝 Check Essay"
+2️⃣ <b>Question</b> — Copy your essay topic or skip if it's in your document
+3️⃣ <b>Essay</b> — Share your essay (text, PDF, or DOCX file)
+4️⃣ <b>Feedback</b> — Get instant professional band score analysis
+
+<b>Quick Commands:</b>
+/start — Restart bot
+/help — View this guide
+/commands — All commands
+/check — Grade an essay
+/credits — Buy credits
+/profile — View account`,
 
     commandsList: `💻 <b>Available Commands:</b>
 
-• /start - Restart the bot / Change language
-• /help - Guide on using the bot
-• /commands - Show this command list
-• /contact - Support & manual payment confirmation
-• /check - Initiate IELTS essay grading
-• /credits - Buy Credits 
-• /profile - Check your account credits`,
+/start — Restart / Change language
+/check — Check an essay
+/profile — View your account
+/credits — Buy credits
+/help — Full guide
+/contact — Contact us`,
 
     contact: `📞 <b>Contact & Support</b>
 
@@ -55,11 +57,11 @@ Join our community group for help, support, and questions:
     btnCheck: "📝 Check Essay",
     btnProfile: "👤 Profile",
     btnHelp: "📖 Help",
-    btnContact: "📞 Contact Admin",
-    btnChangeLanguage: "🌐 Change Language",
+    btnContact: "💬 Contact",
+    btnChangeLanguage: "🌐 Language",
     btnBuyCredits: "💳 Buy Credits",
-    btnBonus: "🎁 Bonus",
-    btnContactDirectly: "👤 Chat with Admin",
+    btnBonus: "🎁 Referral",
+    btnContactDirectly: "💬 Chat with Us",
     menuUpdated: "⬇️ You can use the menu buttons below:",
 
     promptQuestion: `❓ <b>Phase 1: The Essay Question</b>
@@ -83,33 +85,34 @@ You can:
     invalidFile:
       "⚠️ <b>Invalid File Type!</b> Please upload only <code>.pdf</code> or <code>.docx</code> documents, or send plain text.",
     processing:
-      "⏳ <b>Processing and Analyzing your essay...</b> \nOur IELTS AI Examiner is evaluating your writing. Please wait up to 30 seconds.",
+      "⏳ <b>Analyzing your essay...</b>\nOur AI is evaluating your writing. Please wait up to 30 seconds.",
     processingImage:
-      "📸 <b>Processing question image and analyzing essay...</b>",
+      "📸 <b>Processing question and analyzing essay...</b>",
 
-    insufficientCredits: `🚫 <b>Buy Credits!</b>
+    insufficientCredits: `💡 <b>Get More Credits</b>
 
-You currently have <code>{credits} credits</code> remaining. To grade more essays, purchase a premium package.
+You have <code>{credits} credits</code> left. Choose a plan that works for you:
 
-💳 <b>Premium Packages:</b>
-• <b>IELTS Express (10 credits)</b>: 25,000 UZS
-• <b>IELTS Bonus (10 credits)</b>: 15,000 UZS (with promo code)
+📦 <b>Our Plans:</b>
+• <b>Starter</b>: 5 credits → 9,900 UZS
+• <b>Popular</b>: 13 credits → 19,900 UZS ⭐
+• <b>Premium</b>: 25 credits → 29,900 UZS
 
-🔒 <b>Payment Details (Manual Uzcard/Humo):</b>
-• <b>Card Number:</b> <code>5614 6822 1586 0018</code>
-• <b>Recipient Name:</b> Nurmatov Muydin.
+🔐 <b>Payment Method:</b>
+• <b>Card:</b> <code>5614 6822 1586 0018</code>
+• <b>Name:</b> Nurmatov Muydin
 
-<b>How to Pay:</b>
-1. Transfer the amount to the card above.
-2. <b>Screenshot/Photo the receipt</b>.
-3. <b>Send the receipt photo</b> using the "Already Paid" button!
+<b>Simple Steps:</b>
+1. Transfer the amount using your Uzcard or Humo.
+2. Take a screenshot of the receipt.
+3. Share the receipt using the "✅ Confirm Payment" button.
 
-Once you send the photo, our admin will verify and credit your account immediately.`,
+Our team verifies quickly and credits your account right away!`,
 
     receiptReceived:
-      "✅ <b>Receipt Received!</b> Your receipt has been sent to the administrator for verification. You will be notified once it is approved.",
+      "✅ <b>Payment received!</b> We're verifying your transaction. You'll be notified once approved.",
 
-    alreadyPaidPrompt: "📷 Please send the payment receipt image (screenshot or photo of the confirmation).",
+    alreadyPaidPrompt: "📸 <b>Upload Payment Receipt</b>\nShare your payment confirmation screenshot.",
 
     checkCancelled: "✅ Check cancelled. No credits were used.",
 
@@ -166,15 +169,20 @@ Use the /credits command or tap "💳 Buy Credits" button.`,
 
     buyCreditsInfo: `💳 <b>Buy Credits</b>
 
-Choose your preferred plan:
+Choose your perfect plan:
 
-<b>Regular Price:</b>
-10 credits → 25,000 UZS
+📦 <b>Payment Plans:</b>
+• <b>Starter</b> — 5 credits: 9,900 UZS
+• <b>Popular</b> — 13 credits: 19,900 UZS ⭐ (Best Value)
+• <b>Premium</b> — 25 credits: 29,900 UZS (Save 16%)
 
-<b>Special Bonus:</b>
-10 credits → 15,000 UZS (Only for referral bonus users)
+🎁 <b>Why Choose Us?</b>
+✓ Instant activation
+✓ Professional AI feedback
+✓ Secure payment
+✓ 24/7 support
 
-Send a screenshot of your payment to confirm your purchase.`,
+Send a screenshot of your payment to activate!`,
 
     errorDocx:
       "❌ Failed to read the Word Document (.docx). Please check if it is corrupted or send plain text.",
@@ -195,49 +203,52 @@ Please verify the receipt image and choose an action below.`,
     adminDenied: "❌ Denied user @{username}.",
 
     paymentApproved:
-      "🎉 <b>Your payment has been approved!</b> \n10 essay credits have been added to your balance. You can now grade more essays. Type /check to start!",
+      "🎉 <b>Payment Confirmed!</b>\n✅ {credits} credits added to your account. Ready to grade? Type /check",
     paymentDenied:
-      "❌ <b>Your payment verification was rejected.</b> \nIf you believe this is a mistake, please contact support: @identitynull.",
+      "⚠️ <b>Payment Could Not Be Verified</b>\nPlease check your receipt and try again. Contact us: @identitynull",
   },
 
   uz: {
     languageSelected: "🇺🇿 O'zbek tili muvaffaqiyatli tanlandi!",
-    welcome: `✨ <b>IELTS Essay Examiner Botiga xush kelibsiz!</b> ✨
+    welcome: `✨ <b>IELTS Essay Examiner Botiga Xush Kelibsiz</b> ✨
 
-Assalomu alaykum! Men sizning <b>Google Gemini</b> texnologiyasida ishlaydigan sun'iy intellektli IELTS yozma imtihon tekshiruvchingizman. Men sizning insholaringizni baholab, haqiqiy imtihon oluvchi kabi batafsil fikr-mulohazalar bera olaman.
+Sizning AI-asosiy yozma o'qitgichingiz, <b>Google Gemini</b> orqali ishlaydigan
 
-<b>Joriy balans:</b> <code>{credits} ta urinish</code>
+IELTS insholaringiz bo'yicha darhol batafsil fikr-mulohaza oling, haqiqiy imtihon oluvchi kabi professional baholash bilan.
 
-<b>Tezkor boshlash:</b>
-1. /check buyrug'ini yuboring yoki "📝 Inshoni tekshirish" tugmasini bosing.
-2. Insho savolini yuboring (yoki uni o'tkazib yuboring).
-3. Inshongizni matn yoki <code>.pdf</code> / <code>.docx</code> fayl ko'rinishida yuboring.
-4. Bir necha soniyada batafsil natijani oling!`,
+📊 <b>Joriy Balans:</b> <code>{credits} ta insho</code>
 
-    help: `📖 <b>IELTS Essay Examiner'dan foydalanish yo'riqnomasi</b>
+🚀 <b>Boshlash:</b>
+1. "📝 Inshoni tekshirish" tugmasini bosing yoki /check yuboring
+2. Insho savolini baham ko'ring (yoki o'tkazib yuborish mumkin)
+3. Inshongizni yuklang (matn, PDF yoki DOCX)
+4. Bir neche soniyada batafsil baholar oling!`,
 
-Inshongizni tekshirish uchun quyidagi oddiy qadamlarni bajaring:
-1️⃣ <b>Jarayonni boshlash</b>: /check buyrug'ini yuboring yoki pastdagi "📝 Inshoni tekshirish" tugmasini bosing.
-2️⃣ <b>Insho savolini yuboring</b>: Savol matnini nusxalab yuboring, rasmini yuboring yoki savol PDF fayl ichida bo'lsa, "O'tkazib yuborish" tugmasini bosing.
-3️⃣ <b>Inshoni yuboring</b>: Insho matnini nusxalab yuboring yoki <code>.pdf</code> / <code>.docx</code> fayl ko'rinishida yuklang.
-4️⃣ <b>Tahlilni kuting</b>: Sun'iy intellekt inshongizni IELTS mezonlari bo'yicha baholaydi va batafsil hisobotni yuboradi.
+    help: `📖 <b>IELTS Essay Examiner Qo'llanmasi</b>
 
-<b>Buyruqlar:</b>
-/start - Botni boshlash / qayta ishga tushirish
-/help - Qo'llanmanki ko'rish
-/commands - Barcha buyruqlar ro'yxati
-/contact - Admin aloqa ma'lumotlari
-/check - Inshoni tekshirishni boshlash
-/profile - Balans va profil ma'lumotlari`,
+Insholaringiz bo'yicha fikr-mulohaza olish uchun simple qadamlarni bajaring:
 
-    commandsList: `💻 <b>Mavjud buyruqlar:</b>
+1️⃣ <b>Boshlash</b> — /check yuboring yoki "📝 Inshoni tekshirish" bosing
+2️⃣ <b>Savol</b> — Insho mavzusini yuboring yoki o'tkazib yuborish mumkin
+3️⃣ <b>Insho</b> — Inshongizni baham ko'ring (matn, PDF yoki DOCX)
+4️⃣ <b>Fikr-mulohaza</b> — Darhol professional band baholashi
 
-• /start - Botni qayta ishga tushirish / Tilni o'zgartirish
-• /help - Foydalanish bo'yicha qo'llanma
-• /commands - Buyruqlar ro'yxati
-• /contact - Admin va qo'llab-quvvatlash
-• /check - Inshoni tahlil qilishni boshlash
-• /profile - Balansni tekshirish`,
+<b>Asosiy Buyruqlar:</b>
+/start — Botni qayta boshlash
+/help — Bu qo'llanmani ko'rish
+/commands — Barcha buyruqlar
+/check — Inshoni baholash
+/credits — Kredit sotib olish
+/profile — Akkauntni ko'rish`,
+
+    commandsList: `💻 <b>Mavjud Buyruqlar:</b>
+
+/start — Qayta boshlash / Til o'zgartirish
+/check — Inshoni tekshirish
+/profile — Akkauntni ko'rish
+/credits — Kredit sotib olish
+/help — To'liq qo'llanma
+/contact — Biz bilan aloqa`,
 
     contact: `📞 <b>Aloqa va Qo'llab-quvvatlash</b>
 
@@ -255,11 +266,11 @@ Yordam, qo'llab-quvvatlash va savollar uchun bizning jamoaviy guruhga qo'shiling
     btnCheck: "📝 Inshoni tekshirish",
     btnProfile: "👤 Profil",
     btnHelp: "📖 Yordam",
-    btnContact: "📞 Admin bilan aloqa",
-    btnChangeLanguage: "🌐 Tilni o'zgartirish",
+    btnContact: "💬 Aloqa",
+    btnChangeLanguage: "🌐 Til",
     btnBuyCredits: "💳 Kredit sotib olish",
-    btnBonus: "🎁 Bonus",
-    btnContactDirectly: "👤 Admin bilan bog'lanish",
+    btnBonus: "🎁 Referral",
+    btnContactDirectly: "💬 Biz bilan gaplashing",
     menuUpdated: "⬇️ Quyidagi tugmalardan foydalanishingiz mumkin:",
 
     promptQuestion: `❓ <b>1-bosqich: Insho savoli</b>
@@ -287,29 +298,30 @@ Siz:
     processingImage:
       "📸 <b>Rasm tahlil qilinmoqda va insho tekshirilmoqda...</b>",
 
-    insufficientCredits: `🚫 <b>Kredit xarid qiling!</b>
+    insufficientCredits: `💡 <b>Kredit xarid qiling!</b>
 
-Sizda hozir <code>{credits} ta kredit</code> qoldi. Insho tekshirishda davom etish uchun premium paket xarid qiling.
+Sizda <code>{credits} ta kredit</code> qoldi. O'zingizga mos rejani tanlang:
 
-💳 <b>Premium Paketlar:</b>
-• <b>IELTS Express (10 ta urinish)</b>: 25,000 so'm
-• <b>IELTS Bonus (10 ta urinish)</b>: 15,000 so'm (promo kod bilan)
+📦 <b>Bizning Paketlar:</b>
+• <b>Boshlang'ich</b>: 5 kredit → 9.900 so'm
+• <b>Mashhur</b>: 13 kredit → 19.900 so'm ⭐
+• <b>Premium</b>: 25 kredit → 29.900 so'm
 
-🔒 <b>To'lov ma'lumotlari (Uzcard/Humo):</b>
-• <b>Karta raqami:</b> <code>5614 6822 1586 0018</code>
-• <b>Karta egasi:</b> Nurmatov Muydin.
+🔐 <b>To'lov usuli:</b>
+• <b>Karta:</b> <code>5614 6822 1586 0018</code>
+• <b>Ism:</b> Nurmatov Muydin
 
-<b>To'lov qilish usuli:</b>
-1. Yuqoridagi kartaga to'lovni amalga oshiring.
-2. <b>To'lov chekini rasmga/skrinshotga oling</b>.
-3. <b>Chek rasmini "Already Paid" tugmasi bilan yuboring!</b>
+<b>Oson qadamlar:</b>
+1. Uzcard yoki Humo orqali to'lov qiling.
+2. Chekining skrinshtini oling.
+3. Chek rasmini "✅ To'lovni tasdiqlash" tugmasi bilan yuboring.
 
-Rasm qabul qilingandan so'ng, adminimiz kavolatni tekshiradi va hisobingizga urinishlarni qo'shib beradi.`,
+Bizning jamoa tezda tekshiradi va kreditni darhol qo'shadi!`,
 
     receiptReceived:
-      "✅ <b>Chek qabul qilindi!</b> Sizning to'lov chekingiz tasdiqlash uchun adminga yuborildi. To'lov tasdiqlangach, sizga xabar yuboriladi.",
+      "✅ <b>To'lov qabul qilindi!</b> Biz operatsiyangizni tekshirmoqdamiz. Tasdiqlangach, sizga xabar yuboriladi.",
 
-    alreadyPaidPrompt: "📷 Iltimos, to'lov chekining rasmini yuboring (skrinshot yoki tasdiqlash fotosurati).",
+    alreadyPaidPrompt: "📸 <b>To'lov Chekini Yuklang</b>\nTo'lovning skrinshtini yuboring.",
 
     checkCancelled: "✅ Tekshirish bekor qilindi. Kredit ishlatilmadi.",
 
@@ -366,15 +378,20 @@ Endi siz <b>25,000 o'rniga 15,000 so'mga 10 kredit</b> sotib olishingiz mumkin!
 
     buyCreditsInfo: `💳 <b>Kredit Sotib Olish</b>
 
-Sizga yoqqan rejani tanlang:
+O'zingizga mos rejani tanlang:
 
-<b>Odatiy Narx:</b>
-10 kredit → 25,000 so'm
+📦 <b>To'lov Rejalari:</b>
+• <b>Boshlang'ich</b> — 5 kredit: 9.900 so'm
+• <b>Mashhur</b> — 13 kredit: 19.900 so'm ⭐ (Eng Yaxshi Narx)
+• <b>Premium</b> — 25 kredit: 29.900 so'm (16% tejash)
 
-<b>Maxsus Bonus:</b>
-10 kredit → 15,000 so'm (Faqat referral bonus foydalanuvchilari uchun)
+🎁 <b>Nima uchun biz?</b>
+✓ Darhol aktivlash
+✓ Professional AI fikr-mulohaza
+✓ Xavfsiz to'lov
+✓ 24/7 yordam
 
-To'lovning skrinshoti yuboring va bu joyda xabar yuboring.`,
+To'lovning skrinshtini yuboring va boshlang!`,
 
     errorDocx:
       "❌ Word hujjatini (.docx) o'qib bo'lmadi. Fayl buzilmaganligini tekshiring yoki matn sifatida yuboring.",
@@ -384,49 +401,52 @@ To'lovning skrinshoti yuboring va bu joyda xabar yuboring.`,
       "❌ Xatolik yuz berdi. Iltimos, qaytadan urinib ko'ring yoki /contact orqali bog'laning.",
 
     paymentApproved:
-      "🎉 <b>Sizning to'lovingiz tasdiqlandi!</b> \nHisobingizga 10 ta urinish qo'shildi. Insholaringizni tekshirishingiz mumkin. Boshlash uchun /check yozing!",
+      "🎉 <b>To'lov Tasdiqlandi!</b> \n✅ {credits} kredit hisobingizga qo'shildi. Boshlashga tayyormisiz? /check yozing!",
     paymentDenied:
-      "❌ <b>Sizning to'lovingiz tasdiqlanmadi.</b> \nAgar xatolik yuz bergan deb o'ylasangiz, admin bilan bog'laning: @identitynull.",
+      "⚠️ <b>To'lov Tasdiqlanmadi</b> \nChekingizni qayta tekshiring va urinib ko'ring. Aloqa: @identitynull",
   },
 
   ru: {
     languageSelected: "🇷🇺 Русский язык успешно выбран!",
-    welcome: `✨ <b>Добро пожаловать в IELTS Essay Examiner!</b> ✨
+    welcome: `✨ <b>Добро пожаловать в IELTS Essay Examiner</b> ✨
 
-Привет! Я ваш эксперт по проверке эссе IELTS на базе искусственного интеллекта <b>Google Gemini</b>. Я могу оценить ваше эссе и предоставить подробный разбор по критериям IELTS так же, как реальный экзаменатор.
+Ваш AI-помощник, работающий на <b>Google Gemini</b>
 
-<b>Текущий баланс:</b> <code>{credits} попыток</code>
+Получайте мгновенную, профессиональную обратную связь по вашим IELTS эссе с оценками по критериям, как у реального экзаменатора.
 
-<b>Быстрый старт:</b>
-1. Наберите /check или нажмите кнопку "📝 Проверить эссе".
-2. Отправьте тему эссе (или пропустите этот шаг).
-3. Отправьте эссе в виде текста или документа <code>.pdf</code> / <code>.docx</code>.
-4. Получите детальный отчет о баллах за несколько секунд!`,
+📊 <b>Ваш Баланс:</b> <code>{credits} эссе</code>
 
-    help: `📖 <b>Руководство по использованию бота</b>
+🚀 <b>Начните Сейчас:</b>
+1. Нажмите "📝 Проверить эссе" или отправьте /check
+2. Поделитесь темой эссе (или пропустите, если она в документе)
+3. Загрузите эссе (текст, PDF или DOCX)
+4. Получите детальную оценку за секунды!`,
 
-Чтобы проверить эссе, выполните следующие действия:
-1️⃣ <b>Начните процесс</b>: Отправьте команду /check или нажмите кнопку "📝 Проверить эссе".
-2️⃣ <b>Отправьте тему</b>: Скопируйте и вставьте текст темы, пришлите фото вопроса или нажмите кнопку пропуска, если тема уже находится внутри вашего файла с эссе.
-3️⃣ <b>Отправьте эссе</b>: Скопируйте и вставьте текст эссе или загрузите документ в формате <code>.pdf</code> / <code>.docx</code>.
-4️⃣ <b>Ожидайте анализ</b>: ИИ оценит ваше письмо по критериям IELTS и отправит подробный отчет.
+    help: `📖 <b>Руководство по IELTS Essay Examiner</b>
 
-<b>Команды:</b>
-/start - Начать / перезапустить бота
-/help - Показать инструкции
-/commands - Список всех команд
-/contact - Контакты администрации
-/check - Начать проверку эссе
-/profile - Ваш баланс и статус`,
+Выполните простые шаги для получения обратной связи:
+
+1️⃣ <b>Начало</b> — Отправьте /check или нажмите "📝 Проверить эссе"
+2️⃣ <b>Тема</b> — Поделитесь темой или пропустите, если она в документе
+3️⃣ <b>Эссе</b> — Загрузите эссе (текст, PDF или DOCX)
+4️⃣ <b>Отзыв</b> — Получите мгновенный профессиональный анализ
+
+<b>Основные Команды:</b>
+/start — Перезапуск бота
+/help — Эта инструкция
+/commands — Все команды
+/check — Проверить эссе
+/credits — Купить кредиты
+/profile — Аккаунт`,
 
     commandsList: `💻 <b>Доступные команды:</b>
 
-• /start - Перезапустить бота / Изменить язык
-• /help - Инструкции по использованию
-• /commands - Список всех команд
-• /contact - Поддержка и покупка баланса
-• /check - Начать проверку эссе
-• /profile - Проверить баланс аккаунта`,
+/start — Перезапуск / Язык
+/check — Проверить эссе
+/profile — Ваш аккаунт
+/credits — Купить кредиты
+/help — Полное руководство
+/contact — Контакт`,
 
     contact: `📞 <b>Контакты и Поддержка</b>
 
@@ -444,11 +464,11 @@ To'lovning skrinshoti yuboring va bu joyda xabar yuboring.`,
     btnCheck: "📝 Проверить эссе",
     btnProfile: "👤 Профиль",
     btnHelp: "📖 Помощь",
-    btnContact: "📞 Связь с админом",
-    btnChangeLanguage: "🌐 Изменить язык",
-    btnBuyCredits: "💳 Купить попытки",
-    btnBonus: "🎁 Бонус",
-    btnContactDirectly: "👤 Написать админу",
+    btnContact: "💬 Контакт",
+    btnChangeLanguage: "🌐 Язык",
+    btnBuyCredits: "💳 Купить кредиты",
+    btnBonus: "🎁 Рефералы",
+    btnContactDirectly: "💬 Написать нам",
     menuUpdated: "⬇️ Вы можете использовать кнопки ниже:",
 
     promptQuestion: `❓ <b>Шаг 1: Тема (Вопрос) эссе</b>
@@ -475,29 +495,30 @@ To'lovning skrinshoti yuboring va bu joyda xabar yuboring.`,
       "⏳ <b>Обработка и анализ вашего эссе...</b> \nИИ-экзаменатор оценивает ваше письмо. Пожалуйста, подождите до 30 секунд.",
     processingImage: "📸 <b>Обработка изображения темы и анализ эссе...</b>",
 
-    insufficientCredits: `🚫 <b>Купите кредиты!</b>
+    insufficientCredits: `💡 <b>Получите кредиты!</b>
 
-У вас осталось <code>{credits} кредитов</code>. Для продолжения приобретите премиум-пакет.
+У вас осталось <code>{credits} кредитов</code>. Выберите подходящий пакет:
 
-💳 <b>Премиум-пакеты:</b>
-• <b>IELTS Express (10 проверок)</b>: 25,000 сум
-• <b>IELTS Bonus (10 проверок)</b>: 15,000 сум (с промо-кодом)
+📦 <b>Наши Пакеты:</b>
+• <b>Стартовый</b>: 5 кредитов → 9.900 сум
+• <b>Популярный</b>: 13 кредитов → 19.900 сум ⭐
+• <b>Премиум</b>: 25 кредитов → 29.900 сум
 
-🔒 <b>Реквизиты для оплаты (Uzcard/Humo):</b>
-• <b>Номер карты:</b> <code>5614 6822 1586 0018</code>
-• <b>Получатель:</b> Нурматов Муйдин.
+🔐 <b>Способ оплаты:</b>
+• <b>Карта:</b> <code>5614 6822 1586 0018</code>
+• <b>Получатель:</b> Нурматов Муйдин
 
-<b>Как оплатить:</b>
-1. Переведите сумму на указанную карту.
-2. <b>Сделайте скриншот чека</b> об оплате.
-3. <b>Отправьте фото чека</b> нажав кнопку "Already Paid"!
+<b>Три простых шага:</b>
+1. Переведите сумму через Uzcard или Humo.
+2. Сделайте скриншот чека.
+3. Отправьте чек через кнопку "✅ Подтвердить платеж".
 
-После получения фото наш администратор проверит транзакцию и моментально пополнит ваш баланс.`,
+Наша команда проверит и сразу добавит кредиты!`,
 
     receiptReceived:
-      "✅ <b>Чек получен!</b> Ваш чек отправлен администратору на верификацию. Вы получите уведомление после подтверждения платежа.",
+      "✅ <b>Платеж получен!</b> Мы проверяем вашу транзакцию. Вы получите уведомление после подтверждения.",
 
-    alreadyPaidPrompt: "📷 Пожалуйста, отправьте фото чека об оплате (скриншот или фото подтверждения).",
+    alreadyPaidPrompt: "📸 <b>Загрузите Чек Платежа</b>\nПоделитесь скриншотом подтверждения.",
 
     checkCancelled: "✅ Проверка отменена. Кредиты не были использованы.",
 
@@ -554,15 +575,20 @@ To'lovning skrinshoti yuboring va bu joyda xabar yuboring.`,
 
     buyCreditsInfo: `💳 <b>Купить Кредиты</b>
 
-Выберите подходящий план:
+Выберите подходящий пакет:
 
-<b>Обычная Цена:</b>
-10 проверок → 25,000 сум
+📦 <b>Наши Планы:</b>
+• <b>Стартовый</b> — 5 кредитов: 9.900 сум
+• <b>Популярный</b> — 13 кредитов: 19.900 сум ⭐ (Лучшая Цена)
+• <b>Премиум</b> — 25 кредитов: 29.900 сум (Экономия 16%)
 
-<b>Специальный Бонус:</b>
-10 проверок → 15,000 сум (Только для пользователей с бонусом рефералов)
+🎁 <b>Почему выбирают нас?</b>
+✓ Мгновенная активация
+✓ Профессиональная обратная связь
+✓ Безопасный платеж
+✓ Поддержка 24/7
 
-Отправьте скриншот платежа для подтверждения.`,
+Отправьте скриншот платежа и начните!`,
 
     errorDocx:
       "❌ Не удалось прочитать документ Word (.docx). Проверьте файл или отправьте текст напрямую.",
@@ -572,8 +598,8 @@ To'lovning skrinshoti yuboring va bu joyda xabar yuboring.`,
       "❌ Произошла ошибка. Пожалуйста, попробуйте еще раз или свяжитесь с поддержкой /contact.",
 
     paymentApproved:
-      "🎉 <b>Ваш платеж подтвержден!</b> \nВам начислено 10 проверок эссе. Теперь вы можете оценивать свои эссе. Наберите /check для старта!",
+      "🎉 <b>Платеж Подтвержден!</b> \n✅ {credits} кредитов добавлены. Готовы начать? Отправьте /check",
     paymentDenied:
-      "❌ <b>Ваш платеж отклонен.</b> \nЕсли вы считаете это ошибкой, обратитесь к администратору: @identitynull.",
+      "⚠️ <b>Платеж Не Проверен</b> \nПожалуйста, проверьте чек и попробуйте снова. Контакт: @identitynull",
   },
 };
