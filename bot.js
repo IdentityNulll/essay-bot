@@ -622,6 +622,9 @@ bot.on('text', async (ctx) => {
 
       // Increment promo code usage count for the original user
       promoUser.promoCodeCount += 1;
+      if (promoUser.promoCodeCount >= 5) {
+        promoUser.receivedBonusDiscount = true;
+      }
       await promoUser.save();
 
       // Track referral event
@@ -962,23 +965,35 @@ bot.action(/^approve_pay_(.+)$/, async (ctx) => {
       return ctx.answerCbQuery('User not found in database.');
     }
 
-    targetUser.creditCount += 10; // Give 10 credits on approval
+    // Calculate credits and price
+    const isDiscounted = targetUser.receivedBonusDiscount;
+    const creditsAwarded = 13;
+    const amountPaid = isDiscounted ? 14900 : 19900;
+    const packageType = isDiscounted ? 'PACKAGE_13_DISCOUNT' : 'PACKAGE_13';
+
+    targetUser.creditCount += creditsAwarded;
     targetUser.currentState = 'START';
+    if (isDiscounted) {
+      targetUser.receivedBonusDiscount = false; // Reset discount after purchase
+    }
     await targetUser.save();
 
     // Track package purchase event
-    const amountPaid = targetUser.receivedBonusDiscount ? 15000 : 25000;
-    await eventTracker.trackPackagePurchased(targetUserId, 'PACKAGE_10', amountPaid);
+    await eventTracker.trackPackagePurchased(targetUserId, packageType, amountPaid);
 
     // Helper translator for the target user's language settings
-    const translateForUser = (key) => {
+    const translateForUser = (key, replacements = {}) => {
       const lang = targetUser.selectedLanguage || 'en';
-      return translations[lang]?.[key] || translations['en']?.[key] || key;
+      let text = translations[lang]?.[key] || translations['en']?.[key] || key;
+      for (const [k, v] of Object.entries(replacements)) {
+        text = text.replace(new RegExp(`{${k}}`, 'g'), v);
+      }
+      return text;
     };
 
     // Notify user in their chosen language
     try {
-      await ctx.telegram.sendMessage(targetUserId, translateForUser('paymentApproved'), {
+      await ctx.telegram.sendMessage(targetUserId, translateForUser('paymentApproved', { credits: creditsAwarded }), {
         parse_mode: 'HTML'
       });
     } catch (err) {
@@ -987,16 +1002,16 @@ bot.action(/^approve_pay_(.+)$/, async (ctx) => {
 
     // Update Admin's view
     const originalCaption = ctx.callbackQuery.message.caption || '';
-    const bonusStatus = targetUser.receivedBonusDiscount ? ' (Bonus Discount: 15,000)' : ' (Regular: 25,000)';
+    const bonusStatus = isDiscounted ? ' (Bonus Discount: 14,900)' : ' (Regular: 19,900)';
     await ctx.editMessageCaption(
-      `${originalCaption}\n\n✅ <b>Status: APPROVED (+10 Credits${bonusStatus})</b>`,
+      `${originalCaption}\n\n✅ <b>Status: APPROVED (+${creditsAwarded} Credits${bonusStatus})</b>`,
       {
         parse_mode: 'HTML',
         reply_markup: null // remove inline buttons
       }
     );
 
-    return ctx.answerCbQuery('Payment approved, 10 credits added.');
+    return ctx.answerCbQuery(`Payment approved, ${creditsAwarded} credits added.`);
 
   } catch (error) {
     console.error('Error handling payment approval:', error);

@@ -123,7 +123,7 @@ Share your promo code with friends and earn discounts!
 📋 <b>How it works:</b>
 1. Click "Get Promo Code" to receive your unique code
 2. Share it with your friends
-3. When 5 friends use your code, you unlock <b>10 credits for only 15,000 UZS</b> instead of 25,000!
+3. When 5 friends use your code, you unlock <b>13 credits for only 14,900 UZS</b> instead of 19,900!
 4. Each user can redeem 1 promo code maximum
 
 🎯 <b>Requirements:</b>
@@ -163,7 +163,7 @@ User has redeemed your promo code.
 
 You now have 5/5 referrals completed! 🏆
 
-You can now buy <b>10 credits for 15,000 UZS</b> instead of 25,000!
+You can now buy <b>13 credits for 14,900 UZS</b> instead of 19,900!
 
 Use the /credits command or tap "💳 Buy Credits" button.`,
 
@@ -332,7 +332,7 @@ Promo kodingizni do'stlaringiz bilan baham ko'ring va chegirma oling!
 📋 <b>Qanday ishlaydi:</b>
 1. "Get Promo Code" tugmasini bosing va kodingizni oling
 2. Uni do'stlaringiz bilan baham ko'ring
-3. 5 odam kodingizdan foydalanganida, siz <b>10 kreditni 15,000 so'mga</b> almashtirasiz (25,000 o'rniga)!
+3. 5 odam kodingizdan foydalanganida, siz <b>13 kreditni 14,900 so'mga</b> almashtirasiz (19,900 o'rniga)!
 4. Har bir foydalanuvchi faqat 1 ta promo koddan foydalana oladi
 
 🎯 <b>Shartlar:</b>
@@ -372,7 +372,7 @@ Foydalanuvchi sizning promo kodingizni qabul qildi.
 
 Siz 5/5 referralga erishdingiz! 🏆
 
-Endi siz <b>25,000 o'rniga 15,000 so'mga 10 kredit</b> sotib olishingiz mumkin!
+Endi siz <b>19,900 o'rniga 14,900 so'mga 13 kredit</b> sotib olishingiz mumkin!
 
 /credits buyruqidan yoki "💳 Kredit Sotib Olish" tugmasidan foydalaning.`,
 
@@ -529,7 +529,7 @@ To'lovning skrinshtini yuboring va boshlang!`,
 📋 <b>Как это работает:</b>
 1. Нажмите "Get Promo Code" чтобы получить уникальный код
 2. Поделитесь им с друзьями
-3. Когда 5 друзей используют ваш код, вы разблокируете <b>10 проверок за 15,000 сум</b> вместо 25,000!
+3. Когда 5 друзей используют ваш код, вы разблокируете <b>13 проверок за 14,900 сум</b> вместо 19,900!
 4. Каждый пользователь может использовать только 1 промо-код
 
 🎯 <b>Условия:</b>
@@ -569,7 +569,7 @@ To'lovning skrinshtini yuboring va boshlang!`,
 
 Вы достигли 5/5 рефералов! 🏆
 
-Теперь вы можете купить <b>10 проверок за 15,000 сум</b> вместо 25,000!
+Теперь вы можете купить <b>13 проверок за 14,900 сум</b> вместо 19,900!
 
 Используйте команду /credits или нажмите кнопку "💳 Купить Кредиты".`,
 
