@@ -776,7 +776,7 @@ bot.on('document', async (ctx) => {
 
 // --- CORE LOGIC IMPLEMENTATIONS ---
 
-// Process the grading via Google Gemini
+// Process the grading via Google Gemini 
 async function processEssayGrading(ctx, essayText) {
   const user = ctx.state.user;
 
