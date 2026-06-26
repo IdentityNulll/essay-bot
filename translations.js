@@ -187,7 +187,7 @@ Select a package below to get payment details!`,
 <b>Simple Steps:</b>
 1. Transfer the exact amount using your Uzcard or Humo.
 2. Take a screenshot of the receipt.
-3. Upload the screenshot (image file) directly to this chat.
+3. 📷 Upload the screenshot (image file) directly to this chat.
 
 Our team will verify the payment and credit your account immediately!`,
 
@@ -404,7 +404,7 @@ To'lov ma'lumotlarini olish uchun quyidagi paketlardan birini tanlang!`,
 <b>Oson qadamlar:</b>
 1. Uzcard yoki Humo orqali to'lov qiling.
 2. Chekning skrinshtini oling.
-3. Chek rasmini to'g'ridan-to'g'ri ushbu chatga yuklang.
+3. 📷 Chek rasmini to'g'ridan-to'g'ri ushbu chatga yuklang.
 
 Bizning jamoa tezda tekshiradi va yaqin orada kreditni qo'shadi!`,
 
@@ -608,7 +608,7 @@ Bizning jamoa tezda tekshiradi va yaqin orada kreditni qo'shadi!`,
 <b>Три простых шага:</b>
 1. Переведите точную сумму через Uzcard или Humo.
 2. Сделайте скриншот чека.
-3. Отправьте скриншот (изображение) напрямую в этот чат.
+3. 📷 Отправьте скриншот (изображение) напрямую в этот чат.
 
 Наша команда проверит платеж и сразу начислит кредиты!`,
 
