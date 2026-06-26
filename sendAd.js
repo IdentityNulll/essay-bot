@@ -12,7 +12,7 @@ const BOT_USERNAME = process.env.BOT_USERNAME || "your_bot_username";
 
 const IMAGE_PATH = "./image.png";
 
-const adMessage = `✨ <b>Essayni AI bilan tekshiring!</b>
+const adMessage = `✨ <b>Essayni AI bot bilan tekshiring!</b>
 
 📝 IELTS imtihoniga tayyorlanayapsizmi?
 Endi Essaylaringizni <b>haqiqiy IELTS mezonlari</b> asosida tekshirish mumkin — sekundlar ichida!
