@@ -95,19 +95,10 @@ You have <code>{credits} credits</code> left. Choose a plan that works for you:
 
 📦 <b>Our Plans:</b>
 • <b>Starter</b>: 5 credits → 9,900 UZS
-• <b>Popular</b>: 13 credits → 19,900 UZS ⭐
+• <b>Popular</b>: 13 credits → {popularPrice} UZS ⭐ {popularBadge}
 • <b>Premium</b>: 25 credits → 29,900 UZS
 
-🔐 <b>Payment Method:</b>
-• <b>Card:</b> <code>5614 6822 1586 0018</code>
-• <b>Name:</b> Nurmatov Muydin
-
-<b>Simple Steps:</b>
-1. Transfer the amount using your Uzcard or Humo.
-2. Take a screenshot of the receipt.
-3. Share the receipt using the "✅ Confirm Payment" button.
-
-Our team verifies quickly and credits your account right away!`,
+Select a package below to get payment details!`,
 
     receiptReceived:
       "✅ <b>Payment received!</b> We're verifying your transaction. You'll be notified once approved.",
@@ -173,7 +164,7 @@ Choose your perfect plan:
 
 📦 <b>Payment Plans:</b>
 • <b>Starter</b> — 5 credits: 9,900 UZS
-• <b>Popular</b> — 13 credits: 19,900 UZS ⭐ (Best Value)
+• <b>Popular</b> — 13 credits: {popularPrice} UZS ⭐ {popularBadge}
 • <b>Premium</b> — 25 credits: 29,900 UZS (Save 16%)
 
 🎁 <b>Why Choose Us?</b>
@@ -182,7 +173,23 @@ Choose your perfect plan:
 ✓ Secure payment
 ✓ 24/7 support
 
-Send a screenshot of your payment to activate!`,
+Select a package below to get payment details!`,
+
+    btnStarter: "📦 Starter (5 credits) — 9,900 UZS",
+    btnPopular: "⭐ Popular (13 credits) — {price} UZS",
+    btnPremium: "💎 Premium (25 credits) — 29,900 UZS",
+    paymentInstructions: `💳 <b>Payment Details for {packageName}</b>
+
+🔐 <b>Payment Card:</b> <code>5614 6822 1586 0018</code>
+👤 <b>Name:</b> Nurmatov Muydin
+💵 <b>Amount:</b> <code>{price} UZS</code>
+
+<b>Simple Steps:</b>
+1. Transfer the exact amount using your Uzcard or Humo.
+2. Take a screenshot of the receipt.
+3. Upload the screenshot (image file) directly to this chat.
+
+Our team will verify the payment and credit your account immediately!`,
 
     errorDocx:
       "❌ Failed to read the Word Document (.docx). Please check if it is corrupted or send plain text.",
@@ -196,6 +203,7 @@ Send a screenshot of your payment to activate!`,
 👤 <b>User:</b> @{username}
 🆔 <b>User ID:</b> <code>{userId}</code>
 🌐 <b>Language:</b> {language}
+📦 <b>Selected Package:</b> {packageInfo}
 
 Please verify the receipt image and choose an action below.`,
 
@@ -304,19 +312,10 @@ Sizda <code>{credits} ta kredit</code> qoldi. O'zingizga mos rejani tanlang:
 
 📦 <b>Bizning Paketlar:</b>
 • <b>Boshlang'ich</b>: 5 kredit → 9.900 so'm
-• <b>Mashhur</b>: 13 kredit → 19.900 so'm ⭐
+• <b>Mashhur</b>: 13 kredit → {popularPrice} so'm ⭐ {popularBadge}
 • <b>Premium</b>: 25 kredit → 29.900 so'm
 
-🔐 <b>To'lov usuli:</b>
-• <b>Karta:</b> <code>5614 6822 1586 0018</code>
-• <b>Ism:</b> Nurmatov Muydin
-
-<b>Oson qadamlar:</b>
-1. Uzcard yoki Humo orqali to'lov qiling.
-2. Chekining skrinshtini oling.
-3. Chek rasmini "✅ To'lovni tasdiqlash" tugmasi bilan yuboring.
-
-Bizning jamoa tezda tekshiradi va kreditni darhol qo'shadi!`,
+To'lov ma'lumotlarini olish uchun quyidagi paketlardan birini tanlang!`,
 
     receiptReceived:
       "✅ <b>To'lov qabul qilindi!</b> Biz operatsiyangizni tekshirmoqdamiz. Tasdiqlangach, sizga xabar yuboriladi.",
@@ -382,7 +381,7 @@ O'zingizga mos rejani tanlang:
 
 📦 <b>To'lov Rejalari:</b>
 • <b>Boshlang'ich</b> — 5 kredit: 9.900 so'm
-• <b>Mashhur</b> — 13 kredit: 19.900 so'm ⭐ (Eng Yaxshi Narx)
+• <b>Mashhur</b> — 13 kredit: {popularPrice} so'm ⭐ {popularBadge}
 • <b>Premium</b> — 25 kredit: 29.900 so'm (16% tejash)
 
 🎁 <b>Nima uchun biz?</b>
@@ -391,7 +390,23 @@ O'zingizga mos rejani tanlang:
 ✓ Xavfsiz to'lov
 ✓ 24/7 yordam
 
-To'lovning skrinshtini yuboring va boshlang!`,
+To'lov ma'lumotlarini olish uchun quyidagi paketlardan birini tanlang!`,
+
+    btnStarter: "📦 Boshlang'ich (5 kredit) — 9,900 so'm",
+    btnPopular: "⭐ Mashhur (13 kredit) — {price} so'm",
+    btnPremium: "💎 Premium (25 kredit) — 29,900 so'm",
+    paymentInstructions: `💳 <b>{packageName} uchun to'lov ma'lumotlari</b>
+
+🔐 <b>Karta:</b> <code>5614 6822 1586 0018</code>
+👤 <b>Ism:</b> Nurmatov Muydin
+💵 <b>Suma:</b> <code>{price} so'm</code>
+
+<b>Oson qadamlar:</b>
+1. Uzcard yoki Humo orqali to'lov qiling.
+2. Chekning skrinshtini oling.
+3. Chek rasmini to'g'ridan-to'g'ri ushbu chatga yuklang.
+
+Bizning jamoa tezda tekshiradi va yaqin orada kreditni qo'shadi!`,
 
     errorDocx:
       "❌ Word hujjatini (.docx) o'qib bo'lmadi. Fayl buzilmaganligini tekshiring yoki matn sifatida yuboring.",
@@ -501,19 +516,10 @@ To'lovning skrinshtini yuboring va boshlang!`,
 
 📦 <b>Наши Пакеты:</b>
 • <b>Стартовый</b>: 5 кредитов → 9.900 сум
-• <b>Популярный</b>: 13 кредитов → 19.900 сум ⭐
+• <b>Популярный</b>: 13 кредитов → {popularPrice} сум ⭐ {popularBadge}
 • <b>Премиум</b>: 25 кредитов → 29.900 сум
 
-🔐 <b>Способ оплаты:</b>
-• <b>Карта:</b> <code>5614 6822 1586 0018</code>
-• <b>Получатель:</b> Нурматов Муйдин
-
-<b>Три простых шага:</b>
-1. Переведите сумму через Uzcard или Humo.
-2. Сделайте скриншот чека.
-3. Отправьте чек через кнопку "✅ Подтвердить платеж".
-
-Наша команда проверит и сразу добавит кредиты!`,
+Выберите пакет ниже для получения деталей оплаты!`,
 
     receiptReceived:
       "✅ <b>Платеж получен!</b> Мы проверяем вашу транзакцию. Вы получите уведомление после подтверждения.",
@@ -579,7 +585,7 @@ To'lovning skrinshtini yuboring va boshlang!`,
 
 📦 <b>Наши Планы:</b>
 • <b>Стартовый</b> — 5 кредитов: 9.900 сум
-• <b>Популярный</b> — 13 кредитов: 19.900 сум ⭐ (Лучшая Цена)
+• <b>Популярный</b> — 13 кредитов: {popularPrice} сум ⭐ {popularBadge}
 • <b>Премиум</b> — 25 кредитов: 29.900 сум (Экономия 16%)
 
 🎁 <b>Почему выбирают нас?</b>
@@ -588,7 +594,23 @@ To'lovning skrinshtini yuboring va boshlang!`,
 ✓ Безопасный платеж
 ✓ Поддержка 24/7
 
-Отправьте скриншот платежа и начните!`,
+Выберите пакет ниже для получения деталей оплаты!`,
+
+    btnStarter: "📦 Стартовый (5 кредитов) — 9.900 сум",
+    btnPopular: "⭐ Популярный (13 кредитов) — {price} сум",
+    btnPremium: "💎 Премиум (25 кредитов) — 29.900 сум",
+    paymentInstructions: `💳 <b>Детали оплаты для {packageName}</b>
+
+🔐 <b>Карта:</b> <code>5614 6822 1586 0018</code>
+👤 <b>Получатель:</b> Нурматов Муйдин
+💵 <b>Сумма:</b> <code>{price} сум</code>
+
+<b>Три простых шага:</b>
+1. Переведите точную сумму через Uzcard или Humo.
+2. Сделайте скриншот чека.
+3. Отправьте скриншот (изображение) напрямую в этот чат.
+
+Наша команда проверит платеж и сразу начислит кредиты!`,
 
     errorDocx:
       "❌ Не удалось прочитать документ Word (.docx). Проверьте файл или отправьте текст напрямую.",

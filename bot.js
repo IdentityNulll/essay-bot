@@ -231,14 +231,31 @@ async function handleCheckCommand(ctx) {
   }
 
   if (user.creditCount < 1) {
-    user.currentState = 'AWAITING_RECEIPT';
+    user.currentState = 'START';
     await user.save();
 
     await ctx.reply(ctx.translate('menuUpdated'), getMainMenu(ctx));
-    return ctx.reply(ctx.translate('insufficientCredits', { credits: user.creditCount }), {
+
+    const isDiscounted = user.receivedBonusDiscount;
+    const popularPrice = isDiscounted ? '14,900' : '19,900';
+    const popularBadge = isDiscounted
+      ? (user.selectedLanguage === 'uz' ? "(Chegirmali Narx 🔥)" : user.selectedLanguage === 'ru' ? "(Со скидкой 🔥)" : "(Discounted Price 🔥)")
+      : (user.selectedLanguage === 'uz' ? "(Eng Yaxshi Narx)" : user.selectedLanguage === 'ru' ? "(Лучшая Цена)" : "(Best Value)");
+
+    const messageText = ctx.translate('insufficientCredits', {
+      credits: user.creditCount,
+      popularPrice,
+      popularBadge
+    });
+
+    const popularBtnText = ctx.translate('btnPopular').replace('{price}', popularPrice);
+
+    return ctx.reply(messageText, {
       parse_mode: 'HTML',
       ...Markup.inlineKeyboard([
-        [Markup.button.callback(ctx.translate('btnBuyCredits'), 'cmd_buy')]
+        [Markup.button.callback(ctx.translate('btnStarter'), 'select_pack_starter')],
+        [Markup.button.callback(popularBtnText, 'select_pack_popular')],
+        [Markup.button.callback(ctx.translate('btnPremium'), 'select_pack_premium')]
       ])
     });
   }
@@ -341,7 +358,7 @@ async function handleBonusCommand(ctx) {
 
 async function handleCreditsCommand(ctx) {
   const user = ctx.state.user;
-  user.currentState = 'AWAITING_RECEIPT';
+  user.currentState = 'START';
   await user.save();
 
   if (ctx.callbackQuery) {
@@ -350,10 +367,25 @@ async function handleCreditsCommand(ctx) {
 
   await ctx.reply(ctx.translate('menuUpdated'), getMainMenu(ctx));
 
-  return ctx.reply(ctx.translate('buyCreditsInfo'), {
+  const isDiscounted = user.receivedBonusDiscount;
+  const popularPrice = isDiscounted ? '14,900' : '19,900';
+  const popularBadge = isDiscounted
+    ? (user.selectedLanguage === 'uz' ? "(Chegirmali Narx 🔥)" : user.selectedLanguage === 'ru' ? "(Со скидкой 🔥)" : "(Discounted Price 🔥)")
+    : (user.selectedLanguage === 'uz' ? "(Eng Yaxshi Narx)" : user.selectedLanguage === 'ru' ? "(Лучшая Цена)" : "(Best Value)");
+
+  const messageText = ctx.translate('buyCreditsInfo', {
+    popularPrice,
+    popularBadge
+  });
+
+  const popularBtnText = ctx.translate('btnPopular').replace('{price}', popularPrice);
+
+  return ctx.reply(messageText, {
     parse_mode: 'HTML',
     ...Markup.inlineKeyboard([
-      [Markup.button.callback(ctx.translate('btnBuyCredits'), 'cmd_buy')]
+      [Markup.button.callback(ctx.translate('btnStarter'), 'select_pack_starter')],
+      [Markup.button.callback(popularBtnText, 'select_pack_popular')],
+      [Markup.button.callback(ctx.translate('btnPremium'), 'select_pack_premium')]
     ])
   });
 }
@@ -434,28 +466,71 @@ bot.action('cmd_language', async (ctx) => {
 bot.action('cmd_buy', async (ctx) => {
   try { await ctx.answerCbQuery(); } catch (e) {}
   const user = ctx.state.user;
-  user.currentState = 'AWAITING_RECEIPT';
+  user.currentState = 'START';
   await user.save();
 
   // Track payment page viewed event
   await eventTracker.trackPaymentPageViewed(user.userId);
 
-  await ctx.reply(ctx.translate('menuUpdated'), getMainMenu(ctx));
-  return ctx.reply(ctx.translate('insufficientCredits', { credits: user.creditCount }), {
+  const isDiscounted = user.receivedBonusDiscount;
+  const popularPrice = isDiscounted ? '14,900' : '19,900';
+  const popularBadge = isDiscounted
+    ? (user.selectedLanguage === 'uz' ? "(Chegirmali Narx 🔥)" : user.selectedLanguage === 'ru' ? "(Со скидкой 🔥)" : "(Discounted Price 🔥)")
+    : (user.selectedLanguage === 'uz' ? "(Eng Yaxshi Narx)" : user.selectedLanguage === 'ru' ? "(Лучшая Цена)" : "(Best Value)");
+
+  const messageText = ctx.translate('insufficientCredits', {
+    credits: user.creditCount,
+    popularPrice,
+    popularBadge
+  });
+
+  const popularBtnText = ctx.translate('btnPopular').replace('{price}', popularPrice);
+
+  return ctx.reply(messageText, {
     parse_mode: 'HTML',
     ...Markup.inlineKeyboard([
-      [Markup.button.callback('✅ Already Paid', 'already_paid')]
+      [Markup.button.callback(ctx.translate('btnStarter'), 'select_pack_starter')],
+      [Markup.button.callback(popularBtnText, 'select_pack_popular')],
+      [Markup.button.callback(ctx.translate('btnPremium'), 'select_pack_premium')]
     ])
   });
 });
 
-bot.action('already_paid', async (ctx) => {
+bot.action(/^select_pack_(.+)$/, async (ctx) => {
   try { await ctx.answerCbQuery(); } catch (e) {}
+  const packageType = ctx.match[1];
   const user = ctx.state.user;
+
+  user.tempSelectedPackage = packageType;
   user.currentState = 'AWAITING_RECEIPT';
   await user.save();
 
-  return ctx.reply(ctx.translate('alreadyPaidPrompt'), {
+  let packageName = '';
+  let price = '';
+  if (packageType === 'starter') {
+    packageName = user.selectedLanguage === 'uz' ? 'Boshlang\'ich (5 kredit)' : user.selectedLanguage === 'ru' ? 'Стартовый (5 кредитов)' : 'Starter (5 credits)';
+    price = '9,900';
+  } else if (packageType === 'popular') {
+    const isDiscounted = user.receivedBonusDiscount;
+    if (user.selectedLanguage === 'uz') {
+      packageName = isDiscounted ? 'Mashhur (13 kredit - Chegirma)' : 'Mashhur (13 kredit)';
+    } else if (user.selectedLanguage === 'ru') {
+      packageName = isDiscounted ? 'Популярный (13 кредитов - Со скидкой)' : 'Популярный (13 кредитов)';
+    } else {
+      packageName = isDiscounted ? 'Popular (13 credits - Discounted)' : 'Popular (13 credits)';
+    }
+    price = isDiscounted ? '14,900' : '19,900';
+  } else if (packageType === 'premium') {
+    packageName = user.selectedLanguage === 'uz' ? 'Premium (25 kredit)' : user.selectedLanguage === 'ru' ? 'Премиум (25 кредитов)' : 'Premium (25 credits)';
+    price = '29,900';
+  }
+
+  const instructionsText = ctx.translate('paymentInstructions', {
+    packageName,
+    price
+  });
+
+  return ctx.reply(instructionsText, {
     parse_mode: 'HTML'
   });
 });
@@ -677,10 +752,35 @@ bot.on('text', async (ctx) => {
   }
 
   if (user.currentState === 'AWAITING_RECEIPT') {
-    // Re-prompt payment manual guidelines
-    return ctx.reply(ctx.translate('insufficientCredits'), {
-      parse_mode: 'HTML',
-      ...getMainMenu(ctx)
+    // Re-prompt payment instructions for their selected package
+    const packageType = user.tempSelectedPackage || 'popular';
+    let packageName = '';
+    let price = '';
+    if (packageType === 'starter') {
+      packageName = user.selectedLanguage === 'uz' ? 'Boshlang\'ich (5 kredit)' : user.selectedLanguage === 'ru' ? 'Стартовый (5 кредитов)' : 'Starter (5 credits)';
+      price = '9,900';
+    } else if (packageType === 'popular') {
+      const isDiscounted = user.receivedBonusDiscount;
+      if (user.selectedLanguage === 'uz') {
+        packageName = isDiscounted ? 'Mashhur (13 kredit - Chegirma)' : 'Mashhur (13 kredit)';
+      } else if (user.selectedLanguage === 'ru') {
+        packageName = isDiscounted ? 'Популярный (13 кредитов - Со скидкой)' : 'Популярный (13 кредитов)';
+      } else {
+        packageName = isDiscounted ? 'Popular (13 credits - Discounted)' : 'Popular (13 credits)';
+      }
+      price = isDiscounted ? '14,900' : '19,900';
+    } else if (packageType === 'premium') {
+      packageName = user.selectedLanguage === 'uz' ? 'Premium (25 kredit)' : user.selectedLanguage === 'ru' ? 'Премиум (25 кредитов)' : 'Premium (25 credits)';
+      price = '29,900';
+    }
+
+    const instructionsText = ctx.translate('paymentInstructions', {
+      packageName,
+      price
+    });
+
+    return ctx.reply(instructionsText, {
+      parse_mode: 'HTML'
     });
   }
 
@@ -708,8 +808,13 @@ bot.on('photo', async (ctx) => {
     });
   }
 
-  if (user.currentState === 'AWAITING_RECEIPT' || user.creditCount === 0) {
+  if (user.currentState === 'AWAITING_RECEIPT') {
     return handleReceiptPhoto(ctx, photo.file_id);
+  }
+
+  if (user.creditCount === 0) {
+    // If they have 0 credits but didn't select a package yet, redirect them to select one
+    return handleCreditsCommand(ctx);
   }
 
   return ctx.reply(ctx.translate('help'), {
@@ -776,17 +881,34 @@ bot.on('document', async (ctx) => {
 
 // --- CORE LOGIC IMPLEMENTATIONS ---
 
-// Process the grading via Google Gemini 
+// Process the grading via Anthropic Claude
 async function processEssayGrading(ctx, essayText) {
   const user = ctx.state.user;
 
   if (user.creditCount < 1) {
-    user.currentState = 'AWAITING_RECEIPT';
+    user.currentState = 'START';
     await user.save();
-    return ctx.reply(ctx.translate('insufficientCredits'), {
+
+    const isDiscounted = user.receivedBonusDiscount;
+    const popularPrice = isDiscounted ? '14,900' : '19,900';
+    const popularBadge = isDiscounted
+      ? (user.selectedLanguage === 'uz' ? "(Chegirmali Narx 🔥)" : user.selectedLanguage === 'ru' ? "(Со скидкой 🔥)" : "(Discounted Price 🔥)")
+      : (user.selectedLanguage === 'uz' ? "(Eng Yaxshi Narx)" : user.selectedLanguage === 'ru' ? "(Лучшая Цена)" : "(Best Value)");
+
+    const messageText = ctx.translate('insufficientCredits', {
+      credits: user.creditCount,
+      popularPrice,
+      popularBadge
+    });
+
+    const popularBtnText = ctx.translate('btnPopular').replace('{price}', popularPrice);
+
+    return ctx.reply(messageText, {
       parse_mode: 'HTML',
       ...Markup.inlineKeyboard([
-        [Markup.button.callback(ctx.translate('btnBuyCredits'), 'cmd_buy')]
+        [Markup.button.callback(ctx.translate('btnStarter'), 'select_pack_starter')],
+        [Markup.button.callback(popularBtnText, 'select_pack_popular')],
+        [Markup.button.callback(ctx.translate('btnPremium'), 'select_pack_premium')]
       ])
     });
   }
@@ -913,18 +1035,31 @@ async function handleReceiptPhoto(ctx, fileId) {
     });
   }
 
-  // Create keyboard with inline approval buttons containing target user's ID
+  const packageType = user.tempSelectedPackage || 'popular';
+
+  // Create keyboard with inline approval buttons containing target user's ID and package type
   const adminMarkup = Markup.inlineKeyboard([
     [
-      Markup.button.callback('✅ Approve Payment', `approve_pay_${user.userId}`),
-      Markup.button.callback('❌ Deny Payment', `deny_pay_${user.userId}`)
+      Markup.button.callback('✅ Approve Payment', `approve_pay_${user.userId}_${packageType}`),
+      Markup.button.callback('❌ Deny Payment', `deny_pay_${user.userId}_${packageType}`)
     ]
   ]);
+
+  let packageInfo = '';
+  if (packageType === 'starter') {
+    packageInfo = 'Starter (5 credits) — 9,900 UZS';
+  } else if (packageType === 'popular') {
+    const isDiscounted = user.receivedBonusDiscount;
+    packageInfo = isDiscounted ? 'Popular (13 credits - Discounted) — 14,900 UZS' : 'Popular (13 credits) — 19,900 UZS';
+  } else if (packageType === 'premium') {
+    packageInfo = 'Premium (25 credits) — 29,900 UZS';
+  }
 
   const captionText = ctx.translate('adminReceiptNotify', {
     username: user.username || 'NoUsername',
     userId: user.userId,
-    language: user.selectedLanguage || 'en'
+    language: user.selectedLanguage || 'en',
+    packageInfo: packageInfo
   });
 
   try {
@@ -956,8 +1091,9 @@ async function handleReceiptPhoto(ctx, fileId) {
 // --- ADMIN CALLBACK ACTIONS ---
 
 // Approve Payment Callback
-bot.action(/^approve_pay_(.+)$/, async (ctx) => {
+bot.action(/^approve_pay_(.+)_(.+)$/, async (ctx) => {
   const targetUserId = ctx.match[1];
+  const packageType = ctx.match[2];
 
   try {
     const targetUser = await User.findOne({ userId: targetUserId });
@@ -965,21 +1101,40 @@ bot.action(/^approve_pay_(.+)$/, async (ctx) => {
       return ctx.answerCbQuery('User not found in database.');
     }
 
-    // Calculate credits and price
-    const isDiscounted = targetUser.receivedBonusDiscount;
-    const creditsAwarded = 13;
-    const amountPaid = isDiscounted ? 14900 : 19900;
-    const packageType = isDiscounted ? 'PACKAGE_13_DISCOUNT' : 'PACKAGE_13';
+    // Determine credits and pricing based on package type
+    let creditsAwarded = 13;
+    let amountPaid = 19900;
+    let dbPackageName = 'PACKAGE_13';
+    let packageLabel = '';
+
+    if (packageType === 'starter') {
+      creditsAwarded = 5;
+      amountPaid = 9900;
+      dbPackageName = 'PACKAGE_5';
+      packageLabel = 'Starter (5 Credits)';
+    } else if (packageType === 'popular') {
+      creditsAwarded = 13;
+      const isDiscounted = targetUser.receivedBonusDiscount;
+      amountPaid = isDiscounted ? 14900 : 19900;
+      dbPackageName = isDiscounted ? 'PACKAGE_13_DISCOUNT' : 'PACKAGE_13';
+      packageLabel = isDiscounted ? 'Popular (13 Credits - Discounted)' : 'Popular (13 Credits)';
+      if (isDiscounted) {
+        targetUser.receivedBonusDiscount = false; // Reset discount after purchase
+      }
+    } else if (packageType === 'premium') {
+      creditsAwarded = 25;
+      amountPaid = 29900;
+      dbPackageName = 'PACKAGE_25';
+      packageLabel = 'Premium (25 Credits)';
+    }
 
     targetUser.creditCount += creditsAwarded;
     targetUser.currentState = 'START';
-    if (isDiscounted) {
-      targetUser.receivedBonusDiscount = false; // Reset discount after purchase
-    }
+    targetUser.tempSelectedPackage = null; // Clear selected package
     await targetUser.save();
 
     // Track package purchase event
-    await eventTracker.trackPackagePurchased(targetUserId, packageType, amountPaid);
+    await eventTracker.trackPackagePurchased(targetUserId, dbPackageName, amountPaid);
 
     // Helper translator for the target user's language settings
     const translateForUser = (key, replacements = {}) => {
@@ -1002,9 +1157,9 @@ bot.action(/^approve_pay_(.+)$/, async (ctx) => {
 
     // Update Admin's view
     const originalCaption = ctx.callbackQuery.message.caption || '';
-    const bonusStatus = isDiscounted ? ' (Bonus Discount: 14,900)' : ' (Regular: 19,900)';
+    const formattedPrice = amountPaid.toLocaleString('en-US').replace(/,/g, '.');
     await ctx.editMessageCaption(
-      `${originalCaption}\n\n✅ <b>Status: APPROVED (+${creditsAwarded} Credits${bonusStatus})</b>`,
+      `${originalCaption}\n\n✅ <b>Status: APPROVED (+${creditsAwarded} Credits for ${packageLabel} - ${formattedPrice} UZS)</b>`,
       {
         parse_mode: 'HTML',
         reply_markup: null // remove inline buttons
@@ -1020,14 +1175,18 @@ bot.action(/^approve_pay_(.+)$/, async (ctx) => {
 });
 
 // Deny Payment Callback
-bot.action(/^deny_pay_(.+)$/, async (ctx) => {
+bot.action(/^deny_pay_(.+)_(.+)$/, async (ctx) => {
   const targetUserId = ctx.match[1];
+  const packageType = ctx.match[2];
 
   try {
     const targetUser = await User.findOne({ userId: targetUserId });
     if (!targetUser) {
       return ctx.answerCbQuery('User not found.');
     }
+
+    targetUser.tempSelectedPackage = null; // Clear selected package
+    await targetUser.save();
 
     const translateForUser = (key) => {
       const lang = targetUser.selectedLanguage || 'en';
@@ -1046,7 +1205,7 @@ bot.action(/^deny_pay_(.+)$/, async (ctx) => {
     // Update Admin's view
     const originalCaption = ctx.callbackQuery.message.caption || '';
     await ctx.editMessageCaption(
-      `${originalCaption}\n\n❌ <b>Status: DENIED</b>`,
+      `${originalCaption}\n\n❌ <b>Status: DENIED (${packageType.toUpperCase()} Package)</b>`,
       {
         parse_mode: 'HTML',
         reply_markup: null // remove inline buttons

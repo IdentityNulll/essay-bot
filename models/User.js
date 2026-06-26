@@ -36,6 +36,10 @@ const UserSchema = new mongoose.Schema({
     type: String,
     default: null
   },
+  tempSelectedPackage: {
+    type: String,
+    default: null
+  },
   // Bonus/Referral program fields
   promoCode: {
     type: String,
