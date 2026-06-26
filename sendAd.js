@@ -12,13 +12,13 @@ const BOT_USERNAME = process.env.BOT_USERNAME || "your_bot_username";
 
 const IMAGE_PATH = "./image.png";
 
-const adMessage = `✨ <b>Inshoyingizni AI bilan tekshiring!</b>
+const adMessage = `✨ <b>Essayni AI bilan tekshiring!</b>
 
 📝 IELTS imtihoniga tayyorlanayapsizmi?
-Endi insholaringizni <b>haqiqiy IELTS mezonlari</b> asosida tekshirish mumkin — sekundlar ichida!
+Endi Essaylaringizni <b>haqiqiy IELTS mezonlari</b> asosida tekshirish mumkin — sekundlar ichida!
 
 🎯 <b>Bot nima qiladi?</b>
-• Band skoringizni aniq hisoblaydi (0–9)
+• Band skoringizni aniq hisoblaydi
 • 4 ta rasmiy mezon bo'yicha batafsil fikr beradi
 • Grammatika va leksik xatolaringizni ko'rsatadi
 • PDF yoki .docx fayl ham qabul qiladi
