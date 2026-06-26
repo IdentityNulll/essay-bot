@@ -2,6 +2,7 @@ import dotenv from "dotenv";
 import fs from "fs";
 import path from "path";
 import FormData from "form-data";
+import fetch from "node-fetch";
 
 dotenv.config();
 
@@ -57,7 +58,10 @@ async function sendAdMessage() {
 
   const form = new FormData();
   form.append("chat_id", ADMIN_CHAT_ID);
-  form.append("photo", fs.createReadStream(path.resolve(IMAGE_PATH)));
+  form.append("photo", fs.createReadStream(path.resolve(IMAGE_PATH)), {
+    filename: "ad_image.jpg",
+    contentType: "image/jpeg",
+  });
   form.append("caption", adMessage);
   form.append("parse_mode", "HTML");
   form.append("reply_markup", replyMarkup);
@@ -69,13 +73,23 @@ async function sendAdMessage() {
       headers: form.getHeaders(),
     });
 
-    const data = await response.json();
+    const text = await response.text();
+
+    let data;
+    try {
+      data = JSON.parse(text);
+    } catch {
+      console.error("❌ Could not parse Telegram response:");
+      console.error(text);
+      process.exit(1);
+    }
 
     if (data.ok) {
       console.log("✅ Ad message with image sent successfully!");
       console.log(`📨 Message ID: ${data.result.message_id}`);
     } else {
       console.error("❌ Telegram API error:", data.description);
+      console.error("Full response:", JSON.stringify(data, null, 2));
     }
   } catch (error) {
     console.error("❌ Request failed:", error.message);
