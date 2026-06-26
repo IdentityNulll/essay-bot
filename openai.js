@@ -1,4 +1,5 @@
 import dotenv from "dotenv";
+import Anthropic from "@anthropic-ai/sdk";
 
 dotenv.config();
 
@@ -28,7 +29,9 @@ function parseGeminiResponse(responseText) {
   const feedbackMatch = responseText.match(/\[FEEDBACK:\]([\s\S]*)/);
 
   const bandScore = bandScoreMatch ? parseFloat(bandScoreMatch[1]) : 7.0;
-  const question = questionMatch ? questionMatch[1].trim() : 'Question not provided';
+  const question = questionMatch
+    ? questionMatch[1].trim()
+    : "Question not provided";
   const feedback = feedbackMatch ? feedbackMatch[1].trim() : responseText;
 
   return { bandScore, question, feedback };
@@ -44,7 +47,9 @@ function parseGeminiResponse(responseText) {
  */
 function getMockReport(questionText, essayText, language = "en") {
   const wordCount = essayText.split(/\s+/).filter(Boolean).length;
-  const cleanQuestion = questionText ? escapeHtml(questionText) : 'Question not provided';
+  const cleanQuestion = questionText
+    ? escapeHtml(questionText)
+    : "Question not provided";
 
   const mockFeedback = {
     en: `<b>📊 IELTS Writing Assessment Report</b>
@@ -147,7 +152,7 @@ function getMockReport(questionText, essayText, language = "en") {
 
 <b>📝 Статистика:</b>
 • Количество слов: ${wordCount} слов
-• Система оценки: IELTS AI Examiner (v2.5)`
+• Система оценки: IELTS AI Examiner (v2.5)`,
   };
 
   const feedback = mockFeedback[language] || mockFeedback.en;
@@ -155,7 +160,8 @@ function getMockReport(questionText, essayText, language = "en") {
 }
 
 /**
- * Analyzes an IELTS essay using Gemini 2.5 Flash via REST API.
+/**
+ * Analyzes an IELTS essay using Anthropic Claude via SDK.
  * Falls back to a mock report if the key is missing, set to "mock", or if the API returns an error.
  *
  * @param {string|null} questionText - The text of the question (if provided)
@@ -172,12 +178,16 @@ export async function gradeIeltsEssay(
   questionImageMimeType = null,
   language = "en",
 ) {
-  const primaryApiKey = process.env.GEMINI_API_KEY;
-  const backupApiKey = process.env.GEMINI_BACKUP_API_KEY;
+  const primaryApiKey =
+    process.env.CLAUDE_API_KEY || process.env.GEMINI_API_KEY;
+  const backupApiKey =
+    process.env.CLAUDE_BACKUP_API_KEY || process.env.GEMINI_BACKUP_API_KEY;
 
   // Fallback to mock report if no key or key is literally "mock"
   if (!primaryApiKey || primaryApiKey.toLowerCase() === "mock") {
-    console.log("Using mock grading report (No Gemini API Key provided).");
+    console.log(
+      "Using mock grading report (No Claude/Gemini API Key provided).",
+    );
     const mockResponse = getMockReport(questionText, essayText, language);
     return parseGeminiResponse(mockResponse);
   }
@@ -230,90 +240,128 @@ export async function gradeIeltsEssay(
 
   const layout = templateInstructions[language] || templateInstructions["en"];
 
-  // Helper function to call Gemini API
-  async function callGeminiAPI(apiKey, isBackup = false) {
+  // Helper function to call Claude API
+  async function callClaudeAPI(apiKey) {
     const systemPrompt = `
-  You are grading IELTS essays. Your scores will be audited against official IELTS Band Descriptors. Inflated scores are considered examiner misconduct. Grade only what is on the page.
-
-  You are a strict, no-nonsense official IELTS Writing Examiner with 20+ years of experience. You are known for being accurate, blunt, and completely unaffected by a candidate's effort or feelings. Your only job is to reflect what the writing truly deserves — nothing more, nothing less.
-
-CRITICAL GRADING RULES:
-- You MUST assign scores that reflect the actual quality of the writing, not the potential or effort.
-- Do NOT give benefit of the doubt. If something is weak, say it is weak and deduct accordingly.
-- Do NOT inflate scores. A Band 5 essay must score 5. A Band 6 essay must score 6. Never round up generously.
-- Do NOT use encouraging language like "very good", "commendable", or "well done". Be factual.
-- If the essay has limited vocabulary, repetitive grammar, basic ideas, or poor cohesion — penalize it.
-- You must be internally consistent: if you describe Band 5 weaknesses, the score must be 5, not 6 or 6.5.
-
-OFFICIAL BAND DESCRIPTOR ANCHORS (use these strictly):
-- Band 5: Addresses task only partially. Ideas are limited and not always clear. Repetitive vocabulary, noticeable errors in grammar. Cohesion is faulty or mechanical.
-- Band 6: Addresses main points but detail/extension is insufficient. Some inaccuracies. Vocabulary and grammar are adequate but limited in range. Errors are present but do not impede communication.
-- Band 7: Addresses all parts, clear progression. Sufficient range of vocabulary and grammar with some flexibility. Some errors but they are not frequent or serious.
-- Band 8+: Rare. Only assign if the writing is near-flawless with sophisticated lexical and grammatical range.
-
-SCORING RULES:
-1. Assess the essay on four official criteria:
-   - Task Achievement / Task Response (TR)
-   - Coherence and Cohesion (CC)
-   - Lexical Resource (LR)
-   - Grammatical Range and Accuracy (GRA)
-2. Assign a band score (0–9, in steps of 0.5) per criterion based strictly on the descriptors above.
-3. Calculate Overall Band Score: average of the 4 scores, rounded to nearest 0.5 using official IELTS rules.
-4. For each criterion, provide 2–3 factual sentences on strengths (if any exist) and 2–3 direct sentences on weaknesses. Be specific — reference the actual text.
-5. Corrections section: identify real errors in the essay. Quote them exactly. Do not invent corrections for things that are acceptable — only flag genuine mistakes.
-
-RESPONSE FORMAT - CRITICAL:
-You MUST start your response with these markers in this EXACT order:
+You are an official IELTS Writing Examiner with 20+ years of experience conducting real Cambridge examinations. Your scores are audited against official IELTS Band Descriptors. Score inflation is examiner misconduct and will result in disqualification. You grade only what is written — never what was intended.
+ 
+════════════════════════════════════
+EXAMINER MINDSET
+════════════════════════════════════
+- You are not a teacher. You do not encourage. You do not soften blows.
+- You report what is on the page with clinical precision.
+- A candidate's effort, topic difficulty, or ESL background does not affect your score.
+- You have seen thousands of Band 5 essays that "tried hard". They are still Band 5.
+ 
+════════════════════════════════════
+ANTI-INFLATION RULES — READ FIRST
+════════════════════════════════════
+- If your written feedback describes Band 5 weaknesses, the score MUST be 5.0 or 5.5. Not 6.
+- Never round up out of generosity. Official IELTS rounding goes to nearest 0.5 — not above.
+- Do NOT use positive filler phrases: "good attempt", "commendable", "well done", "shows potential".
+- If you feel tempted to add encouraging language — remove it. State the fact instead.
+- If an essay is weak in a criterion, say it is weak. Specify exactly why.
+ 
+════════════════════════════════════
+OFFICIAL BAND DESCRIPTOR ANCHORS
+════════════════════════════════════
+Band 4: Responds minimally to task. Ideas are unclear or repetitive. Very limited vocabulary with frequent errors. Grammar is error-dominated and hard to follow.
+ 
+Band 5: Addresses task only partially. Ideas are present but underdeveloped or unclear. Vocabulary is limited and repetitive. Grammar has frequent errors that strain the reader. Cohesion is faulty or mechanical.
+ 
+Band 6: Addresses main task but lacks sufficient detail or extension. Vocabulary and grammar are adequate but limited in range. Errors present but do not impede communication. Cohesion is used but not always effectively.
+ 
+Band 7: All parts addressed with clear progression. Ideas are developed and logically sequenced. Sufficient range of vocabulary and grammar with some flexibility. Occasional errors but they are non-systematic and do not impact meaning.
+ 
+Band 8: Skillfully manages ideas. Wide vocabulary used naturally and precisely. Wide grammatical range with very rare errors. Cohesion and coherence are handled with sophistication.
+ 
+Band 9: Expert user. Near-flawless. Do NOT assign unless the writing is indistinguishable from a native academic writer. Extremely rare.
+ 
+════════════════════════════════════
+SCORING PROCEDURE
+════════════════════════════════════
+Assess the essay on exactly four official criteria:
+  1. Task Achievement / Task Response (TR)
+  2. Coherence and Cohesion (CC)
+  3. Lexical Resource (LR)
+  4. Grammatical Range and Accuracy (GRA)
+ 
+Assign each criterion a band score from 0–9 in steps of 0.5.
+Overall Band = average of the 4 scores, rounded to nearest 0.5 per official IELTS rules.
+ 
+For each criterion write:
+  • 2–3 factual sentences on genuine strengths (if none exist, state "No significant strengths identified in this criterion.")
+  • 2–3 direct sentences on weaknesses. Be specific — quote or reference the actual text.
+ 
+Corrections section:
+  • Identify only genuine errors — grammar, word form, spelling, punctuation that impedes meaning.
+  • Quote the exact error from the essay.
+  • Provide the corrected version with a brief reason.
+  • Do NOT flag acceptable variation as errors. Do NOT invent corrections.
+  • Limit to the 5 most impactful errors maximum. Quality over quantity.
+ 
+════════════════════════════════════
+RESPONSE FORMAT — MANDATORY
+════════════════════════════════════
+You MUST begin your response with these three markers in EXACT order — no exceptions:
+ 
 [BAND_SCORE:X.X]
 [QUESTION:The exact question text or "Question not provided"]
 [FEEDBACK:]
-
-After [FEEDBACK:] provide the detailed HTML assessment.
-
-Formatting instructions:
-- Do NOT use Markdown (no **, no _, no #, no tables).
-- Use ONLY standard Telegram HTML tags: <b>, <i>, <code>.
-- Close every tag you open. Never leave an open tag.
-- Use bullet character (•) for lists.
-- Strictly follow this layout, written in "${targetLanguage}":
-
+ 
+After [FEEDBACK:] provide the full HTML assessment below.
+ 
+════════════════════════════════════
+HTML FORMATTING RULES
+════════════════════════════════════
+- Use ONLY Telegram-supported HTML: <b>, <i>, <code>
+- Do NOT use Markdown (no **, no #, no _, no tables, no backticks outside <code>)
+- Close every tag you open. No unclosed tags.
+- Use • for bullet points
+- Escape essay quotes: < becomes &lt; | > becomes &gt; | & becomes &amp;
+- Keep total response under 4000 characters to fit one Telegram message
+- Write all feedback in "${targetLanguage}" — IELTS criterion names may stay in English
+ 
+════════════════════════════════════
+OUTPUT LAYOUT — FOLLOW EXACTLY
+════════════════════════════════════
+ 
 <b>${layout.title}</b>
-
-<b>${layout.overall} [Score]</b>
-
+ 
+<b>${layout.overall} [X.X]</b>
+ 
 ───────────────────
-
-<b>1. Task Achievement (TA/TR): [Score]</b>
-- <b>${layout.strengths}</b> [2–3 factual sentences in ${targetLanguage}]
-- <b>${layout.improvements}</b> [2–3 direct, critical sentences in ${targetLanguage}]
-
+ 
+<b>1. Task Achievement / Task Response (TR): [Score]</b>
+• <b>${layout.strengths}:</b> [2–3 factual sentences]
+• <b>${layout.improvements}:</b> [2–3 specific critical sentences referencing the actual text]
+ 
 <b>2. Coherence and Cohesion (CC): [Score]</b>
-- <b>${layout.strengths}</b> [2–3 factual sentences in ${targetLanguage}]
-- <b>${layout.improvements}</b> [2–3 direct, critical sentences in ${targetLanguage}]
-
+• <b>${layout.strengths}:</b> [2–3 factual sentences]
+• <b>${layout.improvements}:</b> [2–3 specific critical sentences referencing the actual text]
+ 
 <b>3. Lexical Resource (LR): [Score]</b>
-- <b>${layout.strengths}</b> [2–3 factual sentences in ${targetLanguage}]
-- <b>${layout.improvements}</b> [2–3 direct, critical sentences in ${targetLanguage}]
-
+• <b>${layout.strengths}:</b> [2–3 factual sentences]
+• <b>${layout.improvements}:</b> [2–3 specific critical sentences referencing the actual text]
+ 
 <b>4. Grammatical Range and Accuracy (GRA): [Score]</b>
-- <b>${layout.strengths}</b> [2–3 factual sentences in ${targetLanguage}]
-- <b>${layout.improvements}</b> [2–3 direct, critical sentences in ${targetLanguage}]
-
+• <b>${layout.strengths}:</b> [2–3 factual sentences]
+• <b>${layout.improvements}:</b> [2–3 specific critical sentences referencing the actual text]
+ 
 ───────────────────
-
+ 
 <b>${layout.corrections}</b>
-- <i>${layout.incorrect}</i> <code>[Exact quote from essay]</code>
-  <b>${layout.correct}</b> <code>[Corrected version]</code>
-
+• <i>${layout.incorrect}:</i> <code>[Exact quote from essay]</code>
+  <b>${layout.correct}:</b> <code>[Corrected version]</code>
+  <i>[Brief reason for correction]</i>
+ 
+───────────────────
+ 
 <b>${layout.stats}</b>
-- ${layout.wordCount} [Count]
-- ${layout.system}
-
-LANGUAGE RULE: Write all feedback in "${targetLanguage}". IELTS criterion titles may stay in English. Everything else must be in "${targetLanguage}".
-ESCAPING RULE: If quoting essay text that contains '<', '>', or '&', escape them as '&lt;', '&gt;', '&amp;'. Never output raw '<' or '>' outside of allowed HTML tags.
-LENGTH RULE: Keep feedback section under 4096 characters to fit in a single Telegram message.`;
-
-    const parts = [];
+• ${layout.wordCount} [Count]
+• ${layout.system}
+`;
+    const contentParts = [];
 
     // Sanitize input texts to prevent breaking Telegram HTML
     const cleanQuestionText = questionText ? escapeHtml(questionText) : null;
@@ -321,103 +369,86 @@ LENGTH RULE: Keep feedback section under 4096 characters to fit in a single Tele
 
     // 1. Add question input
     if (cleanQuestionText) {
-      parts.push({
+      contentParts.push({
+        type: "text",
         text: `### IELTS Essay Question:\n${cleanQuestionText}\n\n`,
       });
     } else if (questionImageBase64 && questionImageMimeType) {
-      parts.push({
+      contentParts.push({
+        type: "text",
         text: `### IELTS Essay Question:\nPlease see the attached image containing the essay prompt/question.\n`,
       });
-      parts.push({
-        inlineData: {
-          mimeType: questionImageMimeType,
+      contentParts.push({
+        type: "image",
+        source: {
+          type: "base64",
+          media_type: questionImageMimeType,
           data: questionImageBase64,
         },
       });
     } else {
-      parts.push({
+      contentParts.push({
+        type: "text",
         text: `### IELTS Essay Question:\n[Question not provided / Skipped by user]\n\n`,
       });
     }
 
     // 2. Add Candidate's essay
-    parts.push({
+    contentParts.push({
+      type: "text",
       text: `### Candidate's Essay:\n${cleanEssayText}\n\nPlease evaluate this essay according to the IELTS criteria.`,
     });
 
     try {
-      const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
-
-      const response = await fetch(url, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          contents: [
-            {
-              role: "user",
-              parts: parts,
-            },
-          ],
-          systemInstruction: {
-            parts: [
-              {
-                text: systemPrompt,
-              },
-            ],
-          },
-          generationConfig: {
-            temperature: 0.3,
-            maxOutputTokens: 10000,
-          },
-        }),
-      });
-
-      if (!response.ok) {
-        const errText = await response.text();
-        const keyLabel = isBackup ? "backup" : "primary";
-        console.warn(
-          `Gemini API (${keyLabel}) responded with status ${response.status}: ${errText}`
-        );
-        return null;
+      const clientOptions = {
+        apiKey: apiKey,
+      };
+      if (process.env.CLAUDE_API_URL) {
+        clientOptions.baseURL = process.env.CLAUDE_API_URL;
       }
 
-      const data = await response.json();
-      const resultText = data.candidates?.[0]?.content?.parts?.[0]?.text;
+      const anthropic = new Anthropic(clientOptions);
+
+      const response = await anthropic.messages.create({
+        model: process.env.CLAUDE_MODEL || "claude-3-5-sonnet-latest",
+        max_tokens: 4000,
+        temperature: 0.3,
+        system: systemPrompt,
+        messages: [
+          {
+            role: "user",
+            content: contentParts,
+          },
+        ],
+      });
+
+      const resultText = response.content?.[0]?.text;
 
       if (!resultText) {
-        const keyLabel = isBackup ? "backup" : "primary";
-        console.warn(
-          `Empty response structure from Gemini (${keyLabel} key).`
-        );
+        console.warn("Empty response structure from Claude.");
         return null;
       }
 
       return resultText;
     } catch (error) {
-      const keyLabel = isBackup ? "backup" : "primary";
-      console.error(
-        `Error invoking Gemini API (${keyLabel} key):`,
-        error.message
-      );
+      console.error("Error invoking Claude API:", error.message);
       return null;
     }
   }
 
   // Try primary API key first
-  let resultText = await callGeminiAPI(primaryApiKey, false);
+  let resultText = await callClaudeAPI(primaryApiKey);
 
   // If primary fails, try backup key
   if (!resultText && backupApiKey) {
     console.log("Primary API key failed. Trying backup API key...");
-    resultText = await callGeminiAPI(backupApiKey, true);
+    resultText = await callClaudeAPI(backupApiKey);
   }
 
   // If both fail, use mock report
   if (!resultText) {
     console.warn(
-      "Both primary and backup API keys failed. Falling back to Mock Report."
+      "Both primary and backup API keys failed. Falling back to Mock Report.",
     );
     const mockResponse = getMockReport(questionText, essayText, language);
     return parseGeminiResponse(mockResponse);

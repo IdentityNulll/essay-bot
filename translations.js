@@ -3,7 +3,7 @@ export const translations = {
     languageSelected: "🇬🇧 English selected successfully!",
     welcome: `✨ <b>Welcome to IELTS Essay Examiner</b> ✨
 
-Your AI-powered Writing Assistant, powered by <b>Google Gemini</b>
+Your AI-powered Writing Assistant, powered by <b>Anthropic Claude</b>
 
 Get instant, detailed feedback on your IELTS essays with professional criteria-based scoring just like a real examiner.
 
@@ -212,7 +212,7 @@ Please verify the receipt image and choose an action below.`,
     languageSelected: "🇺🇿 O'zbek tili muvaffaqiyatli tanlandi!",
     welcome: `✨ <b>IELTS Essay Examiner Botiga Xush Kelibsiz</b> ✨
 
-Sizning AI-asosiy yozma o'qitgichingiz, <b>Google Gemini</b> orqali ishlaydigan
+Sizning AI-asosiy yozma o'qitgichingiz, <b>Anthropic Claude</b> orqali ishlaydigan
 
 IELTS insholaringiz bo'yicha darhol batafsil fikr-mulohaza oling, haqiqiy imtihon oluvchi kabi professional baholash bilan.
 
@@ -410,7 +410,7 @@ To'lovning skrinshtini yuboring va boshlang!`,
     languageSelected: "🇷🇺 Русский язык успешно выбран!",
     welcome: `✨ <b>Добро пожаловать в IELTS Essay Examiner</b> ✨
 
-Ваш AI-помощник, работающий на <b>Google Gemini</b>
+Ваш AI-помощник, работающий на <b>Anthropic Claude</b>
 
 Получайте мгновенную, профессиональную обратную связь по вашим IELTS эссе с оценками по критериям, как у реального экзаменатора.
 
