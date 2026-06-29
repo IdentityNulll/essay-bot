@@ -56,6 +56,15 @@ const UserSchema = new mongoose.Schema({
   receivedBonusDiscount: {
     type: Boolean,
     default: false
+  },
+  // Progress report caching
+  cachedProgressReport: {
+    type: String,
+    default: null
+  },
+  progressReportGeneratedAt: {
+    type: Date,
+    default: null
   }
 }, {
   timestamps: true

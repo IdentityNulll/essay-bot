@@ -403,22 +403,56 @@ async function handleProgressCommand(ctx) {
   }
 
   try {
-    // Fetch all essays for this user from DB to evaluate progress
-    const essays = await Essay.find({ userId: user.userId }).sort({ createdAt: -1 });
+    // Fetch all essays for this user from DB, oldest first
+    const essays = await Essay.find({ userId: user.userId }).sort({ createdAt: 1 });
 
     if (essays.length < 2) {
       await ctx.reply(ctx.translate('menuUpdated'), getMainMenu(ctx));
       return ctx.reply(ctx.translate('progressNotEnoughEssays'), { parse_mode: 'HTML' });
     }
 
+    // ── CACHE CHECK ──────────────────────────────────────────────────────────
+    // Determine if any essay was submitted AFTER the last progress report was generated.
+    // If not — the cached report is still fresh, serve it directly without calling AI.
+    const hasCachedReport = user.cachedProgressReport && user.progressReportGeneratedAt;
+
+    if (hasCachedReport) {
+      const newestEssayDate = new Date(essays[essays.length - 1].createdAt);
+      const reportDate = new Date(user.progressReportGeneratedAt);
+      const hasNewEssaySinceReport = newestEssayDate > reportDate;
+
+      if (!hasNewEssaySinceReport) {
+        // ✅ Cache is still valid — return the stored report
+        console.log(`[Progress] Serving cached report for user ${user.userId} (no new essays since ${reportDate.toISOString()})`);
+        await ctx.reply(ctx.translate('menuUpdated'), getMainMenu(ctx));
+        return sendLongMessage(ctx, user.cachedProgressReport, {
+          parse_mode: 'HTML',
+          ...Markup.inlineKeyboard([
+            [
+              Markup.button.callback(ctx.translate('btnCheck'), 'cmd_check'),
+              Markup.button.callback(ctx.translate('btnProgress'), 'cmd_progress')
+            ]
+          ])
+        });
+      }
+
+      console.log(`[Progress] New essay detected for user ${user.userId} — regenerating report.`);
+    }
+
+    // ── GENERATE FRESH REPORT ─────────────────────────────────────────────────
     const loadingMsg = await ctx.reply(ctx.translate('progressAnalyzing'), { parse_mode: 'HTML' });
 
     try {
       const report = await generateProgressReport(essays, user.selectedLanguage || 'en');
-      
+
       try {
         await ctx.telegram.deleteMessage(ctx.chat.id, loadingMsg.message_id);
       } catch (e) {}
+
+      // Cache the report and timestamp on the user document
+      user.cachedProgressReport = report;
+      user.progressReportGeneratedAt = new Date();
+      await user.save();
 
       // Keep reply menu updated
       await ctx.reply(ctx.translate('menuUpdated'), getMainMenu(ctx));
