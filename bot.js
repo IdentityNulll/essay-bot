@@ -5,7 +5,7 @@ import { connectDB } from './config/db.js';
 import User from './models/User.js';
 import Essay from './models/Essay.js';
 import { translations } from './translations.js';
-import { gradeIeltsEssay } from './openai.js';
+import { gradeIeltsEssay, generateProgressReport } from './openai.js';
 import { parsePdf, parseDocx } from './documentParser.js';
 import * as eventTracker from './services/eventTracker.js';
 
@@ -104,9 +104,9 @@ function generatePromoCode() {
 const getMainMenu = (ctx) => {
   const user = ctx.state.user;
   const buttons = [
-    [ctx.translate('btnCheck'), ctx.translate('btnContact')],
-    [ctx.translate('btnHelp'), ctx.translate('btnChangeLanguage')],
-    [ctx.translate('btnBonus')]
+    [ctx.translate('btnCheck'), ctx.translate('btnProgress')],
+    [ctx.translate('btnHelp'), ctx.translate('btnContact')],
+    [ctx.translate('btnBonus'), ctx.translate('btnChangeLanguage')]
   ];
   
   // Add buy credits button if user has zero credits
@@ -120,7 +120,10 @@ const getMainMenu = (ctx) => {
 // Helpers: Dynamic Inline Keyboards for Main Sections
 const getWelcomeInline = (ctx) => {
   return Markup.inlineKeyboard([
-    [Markup.button.callback(ctx.translate('btnCheck'), 'cmd_check')],
+    [
+      Markup.button.callback(ctx.translate('btnCheck'), 'cmd_check'),
+      Markup.button.callback(ctx.translate('btnProgress'), 'cmd_progress')
+    ],
     [
       Markup.button.callback(ctx.translate('btnBuyCredits'), 'cmd_buy')
     ],
@@ -390,6 +393,61 @@ async function handleCreditsCommand(ctx) {
   });
 }
 
+async function handleProgressCommand(ctx) {
+  const user = ctx.state.user;
+  user.currentState = 'START';
+  await user.save();
+
+  if (ctx.callbackQuery) {
+    try { await ctx.answerCbQuery(); } catch (e) {}
+  }
+
+  try {
+    // Fetch all essays for this user from DB to evaluate progress
+    const essays = await Essay.find({ userId: user.userId }).sort({ createdAt: -1 });
+
+    if (essays.length < 2) {
+      await ctx.reply(ctx.translate('menuUpdated'), getMainMenu(ctx));
+      return ctx.reply(ctx.translate('progressNotEnoughEssays'), { parse_mode: 'HTML' });
+    }
+
+    const loadingMsg = await ctx.reply(ctx.translate('progressAnalyzing'), { parse_mode: 'HTML' });
+
+    try {
+      const report = await generateProgressReport(essays, user.selectedLanguage || 'en');
+      
+      try {
+        await ctx.telegram.deleteMessage(ctx.chat.id, loadingMsg.message_id);
+      } catch (e) {}
+
+      // Keep reply menu updated
+      await ctx.reply(ctx.translate('menuUpdated'), getMainMenu(ctx));
+
+      // Send the report safely
+      await sendLongMessage(ctx, report, {
+        parse_mode: 'HTML',
+        ...Markup.inlineKeyboard([
+          [
+            Markup.button.callback(ctx.translate('btnCheck'), 'cmd_check'),
+            Markup.button.callback(ctx.translate('btnProgress'), 'cmd_progress')
+          ]
+        ])
+      });
+    } catch (apiErr) {
+      console.error('Error generating progress report via AI:', apiErr);
+      try {
+        await ctx.telegram.deleteMessage(ctx.chat.id, loadingMsg.message_id);
+      } catch (e) {}
+      await ctx.reply(ctx.translate('menuUpdated'), getMainMenu(ctx));
+      return ctx.reply(ctx.translate('errorGeneral'), { parse_mode: 'HTML' });
+    }
+  } catch (dbErr) {
+    console.error('Error querying essays for progress report:', dbErr);
+    await ctx.reply(ctx.translate('menuUpdated'), getMainMenu(ctx));
+    return ctx.reply(ctx.translate('errorGeneral'), { parse_mode: 'HTML' });
+  }
+}
+
 // Bind Command Routes
 bot.command('start', handleStartCommand);
 bot.command('check', handleCheckCommand);
@@ -397,6 +455,7 @@ bot.command('help', handleHelpCommand);
 bot.command('contact', handleContactCommand);
 bot.command('bonus', handleBonusCommand);
 bot.command('credits', handleCreditsCommand);
+bot.command('progress', handleProgressCommand);
 bot.command('language', async (ctx) => {
   const user = ctx.state.user;
   user.currentState = 'START';
@@ -450,6 +509,7 @@ bot.action('lang_en', (ctx) => handleLangSelection(ctx, 'en'));
 
 // Section Callback Actions
 bot.action('cmd_check', handleCheckCommand);
+bot.action('cmd_progress', handleProgressCommand);
 bot.action('cmd_help', handleHelpCommand);
 bot.action('cmd_contact', handleContactCommand);
 bot.action('cmd_language', async (ctx) => {
@@ -627,6 +687,9 @@ bot.on('text', async (ctx) => {
   // 1. Check for localized menu button clicks
   if (text === translations.en.btnCheck || text === translations.uz.btnCheck || text === translations.ru.btnCheck) {
     return handleCheckCommand(ctx);
+  }
+  if (text === translations.en.btnProgress || text === translations.uz.btnProgress || text === translations.ru.btnProgress) {
+    return handleProgressCommand(ctx);
   }
   if (text === translations.en.btnHelp || text === translations.uz.btnHelp || text === translations.ru.btnHelp) {
     return handleHelpCommand(ctx);

@@ -61,8 +61,16 @@ Join our community group for help, support, and questions:
     btnChangeLanguage: "🌐 Language",
     btnBuyCredits: "💳 Buy Credits",
     btnBonus: "🎁 Referral",
+    btnProgress: "📊 Progress",
     btnContactDirectly: "💬 Chat with Us",
     menuUpdated: "⬇️ You can use the menu buttons below:",
+    progressNotEnoughEssays: `📊 <b>Progress Tracking</b>
+
+To analyze your writing progress and give you detailed feedback, we need to compare at least <b>2 essays</b>.
+
+Please submit more essays using the /check command or the menu below, then check your progress again! ✍️`,
+    progressAnalyzing: `⏳ <b>Analyzing your writing history...</b>
+Our AI is reviewing your past essays to generate a detailed progress report. Please wait.`,
 
     promptQuestion: `❓ <b>Phase 1: The Essay Question</b>
 
@@ -278,8 +286,16 @@ Yordam, qo'llab-quvvatlash va savollar uchun bizning jamoaviy guruhga qo'shiling
     btnChangeLanguage: "🌐 Til",
     btnBuyCredits: "💳 Kredit sotib olish",
     btnBonus: "🎁 Referral",
+    btnProgress: "📊 Progress",
     btnContactDirectly: "💬 Biz bilan gaplashing",
     menuUpdated: "⬇️ Quyidagi tugmalardan foydalanishingiz mumkin:",
+    progressNotEnoughEssays: `📊 <b>Jarayon tahlili</b>
+
+Yozish bo'yicha jarayoningizni tahlil qilish va batafsil fikr-mulohaza berish uchun bizga kamida <b>2 ta insho</b> kerak bo'ladi.
+
+Iltimos, /check buyrug'i yoki menyu orqali ko'proq insho yuboring, so'ngra jarayoningizni qayta tekshiring! ✍️`,
+    progressAnalyzing: `⏳ <b>Insholar tarixi tahlil qilinmoqda...</b>
+AI sizning oldingi insholaringizni solishtirib, jarayon tahlilini tayyorlamoqda. Iltimos, kuting.`,
 
     promptQuestion: `❓ <b>1-bosqich: Insho savoli</b>
 
@@ -483,8 +499,16 @@ Bizning jamoa tezda tekshiradi va yaqin orada kreditni qo'shadi!`,
     btnChangeLanguage: "🌐 Язык",
     btnBuyCredits: "💳 Купить кредиты",
     btnBonus: "🎁 Рефералы",
+    btnProgress: "📊 Прогресс",
     btnContactDirectly: "💬 Написать нам",
     menuUpdated: "⬇️ Вы можете использовать кнопки ниже:",
+    progressNotEnoughEssays: `📊 <b>Анализ Прогресса</b>
+
+Чтобы проанализировать ваш прогресс в письме и предоставить подробный отзыв, нам нужно сравнить как минимум <b>2 эссе</b>.
+
+Пожалуйста, отправьте больше эссе с помощью команды /check или меню ниже, а затем проверьте свой прогресс снова! ✍️`,
+    progressAnalyzing: `⏳ <b>Анализ истории ваших эссе...</b>
+Наш ИИ изучает ваши предыдущие работы для составления подробного отчета о прогрессе. Пожалуйста, подождите.`,
 
     promptQuestion: `❓ <b>Шаг 1: Тема (Вопрос) эссе</b>
 

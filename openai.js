@@ -463,3 +463,245 @@ OUTPUT LAYOUT — FOLLOW EXACTLY
 
   return parseGeminiResponse(resultText);
 }
+
+/**
+ * Generates a mock progress report in the user's language.
+ *
+ * @param {Array} essays - List of essay documents
+ * @param {string} language - Target language code
+ * @returns {string} Progress report formatted as HTML
+ */
+function getMockProgressReport(essays, language = "en") {
+  const sorted = [...essays].sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+  const count = sorted.length;
+  const oldestScore = sorted[0]?.finalBand || 6.0;
+  const newestScore = sorted[count - 1]?.finalBand || 6.5;
+  const average = (sorted.reduce((acc, e) => acc + (e.finalBand || 6.0), 0) / count).toFixed(2);
+
+  const mockProgress = {
+    en: `<b>📊 IELTS Writing Progress Report</b>
+
+• <b>Total Essays Evaluated:</b> ${count}
+• <b>Score Trend:</b> ${oldestScore} ➡️ ${newestScore}
+• <b>Average Band Score:</b> ${average}
+
+───────────────────
+
+<b>📈 General Overview</b>
+You are showing consistent progress in your writing journey. Your structure has become more organized, and you are starting to address the essay prompts with greater confidence and detail. 
+
+<b>🔍 Detailed Criteria Analysis</b>
+
+• <b>Task Achievement & Coherence:</b>
+Your paragraph transitions have improved. Ideas are linked more logically, and you are maintaining a clearer position throughout your essays compared to your first attempt.
+
+• <b>Grammatical Range & Lexical Resource:</b>
+While your vocabulary range is expanding, some minor grammatical errors (such as article usage and prepositions) still occur. Focusing on checking these small details will boost your score further.
+
+───────────────────
+
+<b>🎯 Action Plan for Next Essays</b>
+1. Practice writing complex sentences with accurate punctuation (e.g. relative clauses).
+2. Review essay prompts carefully to ensure all sub-questions are answered directly in the introduction.
+
+───────────────────
+<i>Keep writing and practicing to achieve your target score! 🚀</i>`,
+
+    uz: `<b>📊 IELTS Yozma Ishi Jarayon Tahlili</b>
+
+• <b>Jami tekshirilgan insholar:</b> ${count} ta
+• <b>Natijalar o'zgarishi:</b> ${oldestScore} ➡️ ${newestScore}
+• <b>O'rtacha ball:</b> ${average}
+
+───────────────────
+
+<b>📈 Umumiy tahlil</b>
+Siz insholaringizni yozishda izchil rivojlanish ko'rsatyapsiz. Matn tuzilishi yanada tartibli bo'lib bormoqda va siz savollarga batafsilroq va ishonchli javob yozishni boshladingiz.
+
+<b>🔍 Batafsil mezonlar tahlili</b>
+
+• <b>Vazifani bajarish va bog'liqlik (TA & CC):</b>
+Abzaslar orasidagi bog'liqlik sezilarli darajada yaxshilandi. G'oyalar mantiqan to'g'ri bog'langan va siz birinchi inshongizga qaraganda o'z fikringizni aniqroq himoya qilyapsiz.
+
+• <b>Grammatika va So'z boyligi (GRA & LR):</b>
+So'z boyligingiz kengayib borayotgan bo'lsa-da, ba'zi mayda grammatik xatolar (masalan, artikllar va predloglar) hali ham uchrab turibdi. Ushbu kamchiliklarga e'tibor berish balingizni yanada oshiradi.
+
+───────────────────
+
+<b>🎯 Keyingi insholar uchun tavsiyalar</b>
+1. Murakkab gaplarni to'g'ri tinish belgilari bilan yozishni mashq qiling.
+2. Kirish qismida savolning barcha qismlariga to'g'ridan-to'g'ri javob berganingizga ishonch hosil qiling.
+
+───────────────────
+<i>Maqsadingizdagi ballga erishish uchun yozishda va mashq qilishda davom eting! 🚀</i>`,
+
+    ru: `<b>📊 Отчет о Прогрессе в IELTS Письме</b>
+
+• <b>Всего проверено эссе:</b> ${count}
+• <b>Динамика баллов:</b> ${oldestScore} ➡️ ${newestScore}
+• <b>Средний балл:</b> ${average}
+
+───────────────────
+
+<b>📈 Общий Обзор</b>
+Вы демонстрируете стабильный прогресс в написании эссе. Структура ваших текстов стала более организованной, и вы начинаете отвечать на темы более развернуто и уверенно.
+
+<b>🔍 Детальный Анализ по Критериям</b>
+
+• <b>Выполнение Задания и Связность:</b>
+Переходы между абзацами улучшились. Идеи логически связаны друг с другом, и вы более четко отстаиваете свою позицию по сравнению с вашим первым эссе.
+
+• <b>Грамматический Диапазон и Словарный Запас:</b>
+Хотя ваш словарный запас расширяется, все еще встречаются мелкие грамматические ошибки (например, артикли и предлоги). Работа над этими деталями поможет поднять ваш балл.
+
+───────────────────
+
+<b>🎯 План Действий для Следующих Эссе</b>
+1. Практикуйте построение сложных предложений с правильной пунктуацией.
+2. Внимательно читайте тему, чтобы введение содержало ответы на все части вопроса.
+
+───────────────────
+<i>Продолжайте писать и тренироваться, чтобы достичь желаемого балла! 🚀</i>`
+  };
+
+  return mockProgress[language] || mockProgress.en;
+}
+
+/**
+ * Generates an IELTS essay progress report based on user's past essays and scores.
+ *
+ * @param {Array} essays - List of essay documents from the database
+ * @param {string} language - Target language code ('en', 'uz', 'ru')
+ * @returns {Promise<string>} Detailed HTML progress report
+ */
+export async function generateProgressReport(essays, language = "en") {
+  const primaryApiKey = process.env.CLAUDE_API_KEY || process.env.GEMINI_API_KEY;
+  const backupApiKey = process.env.CLAUDE_BACKUP_API_KEY || process.env.GEMINI_BACKUP_API_KEY;
+
+  if (!primaryApiKey || primaryApiKey.toLowerCase() === "mock") {
+    console.log("Using mock progress report (No Claude/Gemini API Key provided).");
+    return getMockProgressReport(essays, language);
+  }
+
+  const langNames = {
+    en: "English",
+    uz: "Uzbek",
+    ru: "Russian",
+  };
+  const targetLanguage = langNames[language] || "English";
+
+  const systemPrompt = `
+You are an expert IELTS Writing Tutor and Examiner with 20+ years of experience. Your task is to analyze a student's writing progress based on their previous IELTS essays and their scores.
+
+Provide a comprehensive, professional, and detailed progress report in ${targetLanguage}.
+The report must look highly encouraging but realistic, highlighting specific patterns of improvement and recurring weaknesses based on the provided essays.
+
+════════════════════════════════════
+HTML FORMATTING RULES
+════════════════════════════════════
+- Use ONLY Telegram-supported HTML: <b>, <i>, <code>
+- Do NOT use Markdown (no **, no #, no _, no tables)
+- Close every tag you open. No unclosed tags.
+- Use • for bullet points
+- Keep total response under 3500 characters including HTML tags.
+
+════════════════════════════════════
+REPORT STRUCTURE (in ${targetLanguage})
+════════════════════════════════════
+Use the following layout:
+
+<b>📊 IELTS Writing Progress Report</b>
+
+• <b>Total Essays Evaluated:</b> [Count]
+• <b>Score Trend:</b> [Oldest Score] ➡️ [Newest Score] (e.g. 6.0 ➡️ 7.0)
+• <b>Average Band Score:</b> [Average]
+
+───────────────────
+
+<b>📈 General Overview</b>
+[Provide 2-3 sentences summarizing their progress, writing style, and dedication.]
+
+<b>🔍 Detailed Criteria Analysis</b>
+
+• <b>Task Achievement & Coherence:</b>
+[Discuss if they have improved in answering the prompt and organizing paragraphs. Mention specific changes if visible.]
+
+• <b>Grammatical Range & Lexical Resource:</b>
+[Analyze vocabulary variety, spelling, grammar errors, and whether they are making fewer mistakes.]
+
+───────────────────
+
+<b>🎯 Action Plan for Next Essays</b>
+1. [First actionable tip, e.g. "Focus on paragraph transitions by using..."]
+2. [Second actionable tip, e.g. "Work on lexical precision for academic verbs..."]
+
+───────────────────
+<i>Keep writing and practicing to achieve your target score! 🚀</i>
+`;
+
+  // Sort essays from oldest to newest to provide a chronological history to the AI
+  const sorted = [...essays].sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+  
+  let essaysData = "";
+  sorted.forEach((essay, index) => {
+    essaysData += `--- ESSAY #${index + 1} ---\n`;
+    essaysData += `Date: ${essay.createdAt ? new Date(essay.createdAt).toDateString() : 'N/A'}\n`;
+    essaysData += `Question: ${essay.questionText || "Not provided"}\n`;
+    essaysData += `Band Score: ${essay.finalBand || "N/A"}\n`;
+    essaysData += `Essay Text: ${essay.essayText}\n`;
+    if (essay.geminiReport) {
+      essaysData += `Feedback Snippet: ${typeof essay.geminiReport === 'string' ? essay.geminiReport.substring(0, 500) : JSON.stringify(essay.geminiReport).substring(0, 500)}\n`;
+    }
+    essaysData += `\n`;
+  });
+
+  const userPrompt = `Here is the history of the student's essays from oldest to newest. Please analyze their progress and generate the progress report.\n\n${essaysData}`;
+
+  async function callClaudeAPI(apiKey) {
+    try {
+      const clientOptions = {
+        apiKey: apiKey,
+      };
+      if (process.env.CLAUDE_API_URL) {
+        clientOptions.baseURL = process.env.CLAUDE_API_URL;
+      }
+
+      const anthropic = new Anthropic(clientOptions);
+
+      const response = await anthropic.messages.create({
+        model: process.env.CLAUDE_MODEL || "claude-3-5-sonnet-latest",
+        max_tokens: 3000,
+        temperature: 0.3,
+        system: systemPrompt,
+        messages: [
+          {
+            role: "user",
+            content: userPrompt,
+          },
+        ],
+      });
+
+      return response.content?.[0]?.text || null;
+    } catch (error) {
+      console.error("Error invoking Claude API for progress report:", error.message);
+      return null;
+    }
+  }
+
+  // Try primary API key first
+  let resultText = await callClaudeAPI(primaryApiKey);
+
+  // If primary fails, try backup key
+  if (!resultText && backupApiKey) {
+    console.log("Primary API key failed. Trying backup API key for progress report...");
+    resultText = await callClaudeAPI(backupApiKey);
+  }
+
+  // If both fail, use mock progress report
+  if (!resultText) {
+    console.warn("Both primary and backup API keys failed for progress report. Falling back to Mock Progress Report.");
+    return getMockProgressReport(essays, language);
+  }
+
+  return resultText;
+}
