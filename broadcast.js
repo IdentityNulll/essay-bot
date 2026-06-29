@@ -13,49 +13,119 @@ const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 // Path to the broadcast image
 const IMAGE_PATH = './assets/progress-feature.png';
 
-const MESSAGES = {
-  en: `📢 <b>Exciting Update: AI Progress Tracking is here!</b> 📊
+// Contact group URL
+const CONTACT_URL = 'https://t.me/+BMjBYcW4_oNjNjNi';
 
-We are thrilled to announce a brand new feature in the <b>IELTS Essay Examiner</b> bot: <b>AI Progress Tracking</b>!
-
-After you submit at least <b>2 essays</b>, our AI can analyze your writing history to provide a detailed progress report, comparing your band scores and giving you tailored recommendations to improve.
-
-To celebrate this release, we have set your essay credits to <b>2 credits</b>! 🎁 
-
-Tap the "📊 Progress" button in the menu or type /progress to check it out! Go ahead and check your next essays to unlock your detailed progress tracking analysis.
-
-Type /check or use the menu below to examine your next essay!`,
-
-  uz: `📢 <b>Ajoyib yangilik: AI Jarayon Tahlili ishga tushdi!</b> 📊
-
-Biz <b>IELTS Essay Examiner</b> botida yangi funksiya — <b>AI Jarayon Tahlilini (Progress Tracking)</b> e'lon qilishdan mamnunmiz!
-
-Kamida <b>2 ta insho</b> yuborganingizdan so'ng, AI sizning yozish tarixingizni tahlil qila oladi, natijalaringizni taqqoslaydi va ballingizni oshirish uchun maxsus tavsiyalar beradi.
-
-Ushbu yangilik munosabati bilan biz sizning insho kreditlaringizni <b>2 ta kreditga</b> o'rnatdik! 🎁
-
-Menyudagi "📊 Progress" tugmasini bosing yoki /progress buyrug'ini yuboring. Keyingi insholaringizni tekshiring va shaxsiy tahlilingizni oching!
-
-Keyingi inshongizni tekshirish uchun /check yozing yoki quyidagi menyudan foydalaning!`,
-
-  ru: `📢 <b>Отличное обновление: Анализ прогресса от ИИ уже здесь!</b> 📊
-
-Мы рады представить вам новую функцию в боте <b>IELTS Essay Examiner</b>: <b>Анализ прогресса</b>!
-
-После того, как вы отправите как минимум <b>2 эссе</b>, наш ИИ сможет проанализировать всю историю ваших работ, сравнить ваши оценки и дать индивидуальные рекомендации для улучшения результатов.
-
-В честь этого обновления мы установили баланс ваших кредитов на <b>2 кредита</b>! 🎁
-
-Нажмите кнопку "📊 Прогресс" в меню или отправьте команду /progress, чтобы попробовать! Пишите новые эссе и получайте подробный отчет о своем прогрессе.
-
-Отправьте команду /check или используйте меню ниже, чтобы проверить ваше следующее эссе!`
+// Inline contact button per language
+const CONTACT_BUTTONS = {
+  en: { text: '💬 Contact Support', url: CONTACT_URL },
+  uz: { text: '💬 Yordam olish', url: CONTACT_URL },
+  ru: { text: '💬 Написать нам', url: CONTACT_URL },
 };
 
-async function sendPhoto(telegram, chatId, caption) {
-  return telegram.sendPhoto(chatId, { source: fs.createReadStream(IMAGE_PATH) }, {
-    caption,
-    parse_mode: 'HTML'
-  });
+/**
+ * Returns the broadcast message text based on language and credit count.
+ * @param {'en'|'uz'|'ru'} lang
+ * @param {number} credits
+ */
+function getMessage(lang, credits) {
+  const messages = {
+    // ─── ENGLISH ─────────────────────────────────────────────────────────────
+    en: {
+      two: `📢 <b>Exciting Update: AI Progress Tracking is here!</b> 📊
+
+We just launched a brand new feature in the <b>IELTS Essay Examiner</b> bot: <b>AI Progress Tracking</b>!
+
+After submitting at least <b>2 essays</b>, our AI will compare your writing history and deliver a detailed personalized report — band score trends, strengths, weaknesses, and an action plan.
+
+🎉 <b>Good news:</b> You currently have <b>2 essay credits</b> ready to go! Use them to check your essays and then unlock your personalized Progress Report.
+
+Tap "📊 Progress" in the menu or type /progress after your 2nd essay to see your analysis!
+
+Need help? Tap the button below 👇`,
+
+      one: `📢 <b>Exciting Update: AI Progress Tracking is here!</b> 📊
+
+We just launched a brand new feature: <b>AI Progress Tracking</b> — our AI analyzes your past essays and gives you a full personalized report on your improvement!
+
+✍️ <b>You have 1 essay credit left.</b> Go ahead and use it — every essay you check gets you closer to unlocking your Progress Report (available after 2 essays).
+
+Tap "📝 Check Essay" or type /check to use your credit now!
+
+Need help? Tap the button below 👇`,
+    },
+
+    // ─── UZBEK ───────────────────────────────────────────────────────────────
+    uz: {
+      two: `📢 <b>Ajoyib yangilik: AI Jarayon Tahlili ishga tushdi!</b> 📊
+
+Biz <b>IELTS Essay Examiner</b> botida yangi funksiyani ishga tushirdik: <b>AI Jarayon Tahlili (Progress Tracking)</b>!
+
+Kamida <b>2 ta insho</b> yuborganingizdan so'ng, AI sizning yozish tarixingizni tahlil qiladi va shaxsiy hisobot tayyorlaydi — ball tendensiyalari, kuchli va zaif tomonlar, va harakat rejasi.
+
+🎉 <b>Xushxabar:</b> Hozir sizda <b>2 ta insho krediti</b> bor! Ulardan foydalanib insholaringizni tekshiring va shaxsiy Progress Hisobotingizni oching.
+
+2-inshoni tekshirganingizdan so'ng menyudagi "📊 Progress" tugmasini bosing yoki /progress yuboring!
+
+Yordam kerakmi? Quyidagi tugmani bosing 👇`,
+
+      one: `📢 <b>Ajoyib yangilik: AI Jarayon Tahlili ishga tushdi!</b> 📊
+
+Yangi funksiya taqdim etildi: <b>AI Jarayon Tahlili</b> — AI sizning oldingi insholaringizni tahlil qilib, rivojlanishingiz haqida batafsil shaxsiy hisobot beradi!
+
+✍️ <b>Sizda 1 ta insho krediti qoldi.</b> Kreditingizdan foydalaning — har bir tekshirilgan insho sizni Progress Hisobotiga (2 ta inshоdan so'ng) yaqinlashtiradi.
+
+Hozir kreditingizdan foydalanish uchun "📝 Inshoni tekshirish" tugmasini bosing yoki /check yuboring!
+
+Yordam kerakmi? Quyidagi tugmani bosing 👇`,
+    },
+
+    // ─── RUSSIAN ─────────────────────────────────────────────────────────────
+    ru: {
+      two: `📢 <b>Отличное обновление: Анализ прогресса от ИИ уже здесь!</b> 📊
+
+Мы только что запустили новую функцию в боте <b>IELTS Essay Examiner</b>: <b>Анализ прогресса</b>!
+
+После отправки минимум <b>2 эссе</b>, наш ИИ сравнит вашу историю написания и подготовит персональный отчёт — динамика баллов, сильные и слабые стороны, план действий.
+
+🎉 <b>Хорошая новость:</b> Сейчас у вас есть <b>2 кредита</b> — готовы к использованию! Проверьте свои эссе и разблокируйте персональный Отчёт о прогрессе.
+
+После 2-го эссе нажмите "📊 Прогресс" в меню или отправьте /progress!
+
+Нужна помощь? Нажмите кнопку ниже 👇`,
+
+      one: `📢 <b>Отличное обновление: Анализ прогресса от ИИ уже здесь!</b> 📊
+
+Представляем новую функцию: <b>Анализ прогресса</b> — ИИ анализирует ваши прошлые эссе и предоставляет полный персональный отчёт о вашем улучшении!
+
+✍️ <b>У вас остался 1 кредит.</b> Используйте его — каждое проверенное эссе приближает вас к Отчёту о прогрессе (доступен после 2 эссе).
+
+Нажмите "📝 Проверить эссе" или отправьте /check, чтобы использовать кредит сейчас!
+
+Нужна помощь? Нажмите кнопку ниже 👇`,
+    },
+  };
+
+  const langMessages = messages[lang] || messages['en'];
+  // Users with 2+ credits get the "two" message, users with 1 credit get "one"
+  return credits >= 2 ? langMessages.two : langMessages.one;
+}
+
+async function sendPhoto(telegram, chatId, caption, lang) {
+  const contactBtn = CONTACT_BUTTONS[lang] || CONTACT_BUTTONS['en'];
+  return telegram.sendPhoto(
+    chatId,
+    { source: fs.createReadStream(IMAGE_PATH) },
+    {
+      caption,
+      parse_mode: 'HTML',
+      reply_markup: {
+        inline_keyboard: [
+          [{ text: contactBtn.text, url: contactBtn.url }]
+        ]
+      }
+    }
+  );
 }
 
 async function run() {
@@ -78,12 +148,17 @@ async function run() {
 
   try {
     // ─── STEP 1: Send preview to admin first ─────────────────────────────────
-    console.log('\n📨 Sending preview to admin first...');
-    const adminPreviewCaption = `🔔 <b>[ADMIN PREVIEW]</b> This is how the broadcast will look to users:\n\n` + MESSAGES['en'];
+    console.log('\n📨 Sending previews to admin first...');
+
+    // Show admin both message variants so they can review
+    const previewTwo = `🔔 <b>[ADMIN PREVIEW — 2 credits variant]</b>\n\n` + getMessage('en', 2);
+    const previewOne = `🔔 <b>[ADMIN PREVIEW — 1 credit variant]</b>\n\n` + getMessage('en', 1);
 
     try {
-      await sendPhoto(telegram, adminChatId, adminPreviewCaption);
-      console.log(`✅ Admin preview sent to: ${adminChatId}`);
+      await sendPhoto(telegram, adminChatId, previewTwo, 'en');
+      await delay(500);
+      await sendPhoto(telegram, adminChatId, previewOne, 'en');
+      console.log(`✅ Admin previews sent to: ${adminChatId}`);
     } catch (err) {
       console.error(`❌ Failed to send admin preview: ${err.message}`);
       console.log('Aborting broadcast. Fix the issue and try again.');
@@ -91,8 +166,7 @@ async function run() {
       return;
     }
 
-    // ─── STEP 2: Ask for confirmation ────────────────────────────────────────
-    // Give admin 10 seconds to see the preview before proceeding
+    // ─── STEP 2: Wait before proceeding ──────────────────────────────────────
     console.log('\n⏳ Waiting 10 seconds before starting the full broadcast...');
     console.log('   (Kill this process now with Ctrl+C if the preview looks wrong)\n');
     await delay(10000);
@@ -107,41 +181,47 @@ async function run() {
       return;
     }
 
-    console.log(`📢 Found ${users.length} users. Starting credit update to 2 and broadcast campaign...\n`);
+    console.log(`📢 Found ${users.length} users. Starting broadcast campaign...\n`);
 
     let successCount = 0;
     let failureCount = 0;
+    let twoCreditsCount = 0;
+    let oneCreditsCount = 0;
 
     for (let i = 0; i < users.length; i++) {
       const user = users[i];
       const lang = user.selectedLanguage || 'en';
-      const messageText = MESSAGES[lang] || MESSAGES['en'];
+      const credits = user.creditCount;
+      const messageText = getMessage(lang, credits);
 
-      console.log(`[${i + 1}/${users.length}] Processing user ID: ${user.userId} (@${user.username || 'No Username'}) [Language: ${lang}]`);
-
-      // Set credits to exactly 2
-      user.creditCount = 2;
+      const variant = credits >= 2 ? '2-credits' : '1-credit';
+      console.log(`[${i + 1}/${users.length}] User: ${user.userId} (@${user.username || 'N/A'}) | Lang: ${lang} | Credits: ${credits} | Variant: ${variant}`);
 
       try {
-        // Send the announcement photo with caption
-        await sendPhoto(telegram, user.userId, messageText);
+        await sendPhoto(telegram, user.userId, messageText, lang);
 
-        // Save DB changes only if message was sent successfully
-        await user.save();
-
-        console.log(`   ✅ Credits set to 2 and photo sent to user: ${user.userId}`);
+        console.log(`   ✅ Message sent to user: ${user.userId}`);
         successCount++;
+        if (credits >= 2) twoCreditsCount++; else oneCreditsCount++;
       } catch (err) {
-        console.error(`   ❌ Failed to process user ${user.userId}: ${err.message}`);
+        console.error(`   ❌ Failed for user ${user.userId}: ${err.message}`);
         failureCount++;
       }
 
-      // 100ms delay to respect Telegram API rate limits (max 30 messages/sec)
+      // 100ms delay to respect Telegram API rate limits
       await delay(100);
     }
 
     // ─── STEP 4: Send summary to admin ───────────────────────────────────────
-    const summaryMessage = `📊 <b>[BROADCAST COMPLETE]</b>\n\n✅ <b>Success (credits updated & photo sent):</b> ${successCount}\n❌ <b>Failures (could not notify/update):</b> ${failureCount}\n📬 <b>Total users processed:</b> ${users.length}`;
+    const summaryMessage = `📊 <b>[BROADCAST COMPLETE]</b>
+
+✅ <b>Successfully notified:</b> ${successCount}
+❌ <b>Failures:</b> ${failureCount}
+📬 <b>Total users processed:</b> ${users.length}
+
+📋 <b>Variants sent:</b>
+• "2 credits" variant: ${twoCreditsCount}
+• "1 credit" variant: ${oneCreditsCount}`;
 
     try {
       await telegram.sendMessage(adminChatId, summaryMessage, { parse_mode: 'HTML' });
@@ -152,14 +232,13 @@ async function run() {
 
     console.log('\n=======================================');
     console.log('🎉 Broadcast Finished!');
-    console.log(`✅ Success (Credits updated & photo sent): ${successCount}`);
-    console.log(`❌ Failures (Could not notify/update): ${failureCount}`);
+    console.log(`✅ Sent: ${successCount} | ❌ Failed: ${failureCount}`);
+    console.log(`📋 2-credit variant: ${twoCreditsCount} | 1-credit variant: ${oneCreditsCount}`);
     console.log('=======================================');
 
   } catch (error) {
     console.error('Fatal error occurred during broadcast execution:', error);
   } finally {
-    // Gracefully disconnect from database
     console.log('Disconnecting from database...');
     await mongoose.disconnect();
     console.log('Disconnected.');
