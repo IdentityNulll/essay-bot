@@ -19,6 +19,12 @@ const CONTACT_BUTTONS = {
   ru: { text: '💬 Оставить отзыв', url: CONTACT_URL },
 };
 
+const BUY_CREDITS_BUTTONS = {
+  en: '💳 Buy Credits',
+  uz: '💳 Kredit sotib olish',
+  ru: '💳 Купить кредиты',
+};
+
 /**
  * Returns the broadcast message text based on language and credit count.
  * @param {'en'|'uz'|'ru'} lang
@@ -93,14 +99,25 @@ AI examiner оценит письмо по критериям:
   return messages[lang] || messages['en'];
 }
 
-async function sendBroadcastMessage(telegram, chatId, text, lang) {
+async function sendBroadcastMessage(telegram, chatId, text, lang, credits) {
   const contactBtn = CONTACT_BUTTONS[lang] || CONTACT_BUTTONS['en'];
+  const inlineKeyboard = [
+    [{ text: contactBtn.text, url: contactBtn.url }]
+  ];
+
+  if ((credits || 0) < 1) {
+    inlineKeyboard.unshift([
+      {
+        text: BUY_CREDITS_BUTTONS[lang] || BUY_CREDITS_BUTTONS.en,
+        callback_data: 'cmd_buy'
+      }
+    ]);
+  }
+
   return telegram.sendMessage(chatId, text, {
     parse_mode: 'HTML',
     reply_markup: {
-      inline_keyboard: [
-        [{ text: contactBtn.text, url: contactBtn.url }]
-      ]
+      inline_keyboard: inlineKeyboard
     }
   });
 }
@@ -130,7 +147,7 @@ async function run() {
     const preview = `🔔 <b>[ADMIN PREVIEW — LETTER UPDATE]</b>\n\n` + getMessage('en', 2);
 
     try {
-      await sendBroadcastMessage(telegram, adminChatId, preview, 'en');
+      await sendBroadcastMessage(telegram, adminChatId, preview, 'en', 2);
       console.log(`✅ Admin preview sent to: ${adminChatId}`);
     } catch (err) {
       console.error(`❌ Failed to send admin preview: ${err.message}`);
@@ -168,7 +185,7 @@ async function run() {
       console.log(`[${i + 1}/${users.length}] User: ${user.userId} (@${user.username || 'N/A'}) | Lang: ${lang} | Credits: ${credits}`);
 
       try {
-        await sendBroadcastMessage(telegram, user.userId, messageText, lang);
+        await sendBroadcastMessage(telegram, user.userId, messageText, lang, credits);
 
         console.log(`   ✅ Message sent to user: ${user.userId}`);
         successCount++;
