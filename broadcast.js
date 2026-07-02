@@ -1,6 +1,5 @@
 import dotenv from 'dotenv';
 import mongoose from 'mongoose';
-import fs from 'fs';
 import { Telegram } from 'telegraf';
 import { connectDB } from './config/db.js';
 import User from './models/User.js';
@@ -9,9 +8,6 @@ dotenv.config();
 
 // Helper to add a delay between messages to respect Telegram rate limits
 const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
-
-// Path to the broadcast image
-const IMAGE_PATH = './assets/progress-feature.png';
 
 // Contact group URL
 const CONTACT_URL = 'https://t.me/+BMjBYcW4_oNjNjNi';
@@ -31,101 +27,76 @@ const CONTACT_BUTTONS = {
 function getMessage(lang, credits) {
   const messages = {
     // ─── ENGLISH ─────────────────────────────────────────────────────────────
-    en: {
-      two: `📢 <b>Exciting Update: AI Progress Tracking is here!</b> 📊
+    en: `📩 <b>New Update: CEFR Letter Check is live!</b>
 
-We just launched a brand new feature in the <b>IELTS Essay Examiner</b> bot: <b>AI Progress Tracking</b>!
+You can now check your <b>formal and informal CEFR letters</b> directly in the bot.
 
-After submitting at least <b>2 essays</b>, our AI will compare your writing history and deliver a detailed personalized report — band score trends, strengths, weaknesses, and an action plan.
+Send /letter or tap <b>📩 Letter Check</b> in the menu.
 
-🎉 <b>Good news:</b> You currently have <b>2 essay credits</b> ready to go! Use them to check your essays and then unlock your personalized Progress Report.
+Our AI examiner will evaluate your letter by:
+• Task Completion
+• Coherence and Cohesion
+• Lexical Resource
+• Grammar Range and Accuracy
 
-Tap "📊 Progress" in the menu or type /progress after your 2nd essay to see your analysis!
+You will receive a full report with your estimated <b>CEFR level</b> from A1 to C2.
 
-Need help? Tap the button below 👇`,
+Your current balance: <code>${credits} checks</code>
 
-      one: `📢 <b>Exciting Update: AI Progress Tracking is here!</b> 📊
-
-We just launched a brand new feature: <b>AI Progress Tracking</b> — our AI analyzes your past essays and gives you a full personalized report on your improvement!
-
-✍️ <b>You have 1 essay credit left.</b> Go ahead and use it — every essay you check gets you closer to unlocking your Progress Report (available after 2 essays).
-
-Tap "📝 Check Essay" or type /check to use your credit now!
-
-Need help? Tap the button below 👇`,
-    },
+Your credits work for both <b>Essay Check</b> and <b>Letter Check</b>. Try it today 🚀`,
 
     // ─── UZBEK ───────────────────────────────────────────────────────────────
-    uz: {
-      two: `📢 <b>Ajoyib yangilik: AI Jarayon Tahlili ishga tushdi!</b> 📊
+    uz: `📩 <b>Yangi funksiya: CEFR Maktub tekshiruvi ishga tushdi!</b>
 
-Biz <b>IELTS Essay Examiner</b> botida yangi funksiyani ishga tushirdik: <b>AI Jarayon Tahlili (Progress Tracking)</b>!
+Endi bot orqali <b>rasmiy va norasmiy CEFR maktublaringizni</b> tekshirishingiz mumkin.
 
-Kamida <b>2 ta insho</b> yuborganingizdan so'ng, AI sizning yozish tarixingizni tahlil qiladi va shaxsiy hisobot tayyorlaydi — ball tendensiyalari, kuchli va zaif tomonlar, va harakat rejasi.
+/letter yuboring yoki menyudan <b>📩 Maktubni tekshirish</b> tugmasini bosing.
 
-🎉 <b>Xushxabar:</b> Hozir sizda <b>2 ta insho krediti</b> bor! Ulardan foydalanib insholaringizni tekshiring va shaxsiy Progress Hisobotingizni oching.
+AI examiner maktubingizni quyidagilar bo'yicha baholaydi:
+• Vazifani bajarish
+• Mantiqiy bog'lanish
+• So'z boyligi
+• Grammatika diapazoni va aniqligi
 
-2-inshoni tekshirganingizdan so'ng menyudagi "📊 Progress" tugmasini bosing yoki /progress yuboring!
+Siz A1 dan C2 gacha bo'lgan <b>CEFR darajangiz</b> bilan to'liq hisobot olasiz.
 
-Yordam kerakmi? Quyidagi tugmani bosing 👇`,
+Joriy balansingiz: <code>${credits} ta tekshiruv</code>
 
-      one: `📢 <b>Ajoyib yangilik: AI Jarayon Tahlili ishga tushdi!</b> 📊
-
-Yangi funksiya taqdim etildi: <b>AI Jarayon Tahlili</b> — AI sizning oldingi insholaringizni tahlil qilib, rivojlanishingiz haqida batafsil shaxsiy hisobot beradi!
-
-✍️ <b>Sizda 1 ta insho krediti qoldi.</b> Kreditingizdan foydalaning — har bir tekshirilgan insho sizni Progress Hisobotiga (2 ta inshоdan so'ng) yaqinlashtiradi.
-
-Hozir kreditingizdan foydalanish uchun "📝 Inshoni tekshirish" tugmasini bosing yoki /check yuboring!
-
-Yordam kerakmi? Quyidagi tugmani bosing 👇`,
-    },
+Kreditlaringiz <b>insho</b> va <b>maktub</b> tekshiruvi uchun ishlaydi. Bugun sinab ko'ring 🚀`,
 
     // ─── RUSSIAN ─────────────────────────────────────────────────────────────
-    ru: {
-      two: `📢 <b>Отличное обновление: Анализ прогресса от ИИ уже здесь!</b> 📊
+    ru: `📩 <b>Новое обновление: проверка CEFR писем уже доступна!</b>
 
-Мы только что запустили новую функцию в боте <b>IELTS Essay Examiner</b>: <b>Анализ прогресса</b>!
+Теперь вы можете проверять <b>формальные и неформальные письма CEFR</b> прямо в боте.
 
-После отправки минимум <b>2 эссе</b>, наш ИИ сравнит вашу историю написания и подготовит персональный отчёт — динамика баллов, сильные и слабые стороны, план действий.
+Отправьте /letter или нажмите <b>📩 Проверить письмо</b> в меню.
 
-🎉 <b>Хорошая новость:</b> Сейчас у вас есть <b>2 кредита</b> — готовы к использованию! Проверьте свои эссе и разблокируйте персональный Отчёт о прогрессе.
+AI examiner оценит письмо по критериям:
+• Выполнение задания
+• Связность и логика
+• Лексический ресурс
+• Грамматический диапазон и точность
 
-После 2-го эссе нажмите "📊 Прогресс" в меню или отправьте /progress!
+Вы получите полный отчет с примерным <b>уровнем CEFR</b> от A1 до C2.
 
-Нужна помощь? Нажмите кнопку ниже 👇`,
+Ваш баланс: <code>${credits} проверок</code>
 
-      one: `📢 <b>Отличное обновление: Анализ прогресса от ИИ уже здесь!</b> 📊
-
-Представляем новую функцию: <b>Анализ прогресса</b> — ИИ анализирует ваши прошлые эссе и предоставляет полный персональный отчёт о вашем улучшении!
-
-✍️ <b>У вас остался 1 кредит.</b> Используйте его — каждое проверенное эссе приближает вас к Отчёту о прогрессе (доступен после 2 эссе).
-
-Нажмите "📝 Проверить эссе" или отправьте /check, чтобы использовать кредит сейчас!
-
-Нужна помощь? Нажмите кнопку ниже 👇`,
-    },
+Ваши кредиты подходят и для <b>эссе</b>, и для <b>писем</b>. Попробуйте сегодня 🚀`,
   };
 
-  const langMessages = messages[lang] || messages['en'];
-  // Users with 2+ credits get the "two" message, users with 1 credit get "one"
-  return credits >= 2 ? langMessages.two : langMessages.one;
+  return messages[lang] || messages['en'];
 }
 
-async function sendPhoto(telegram, chatId, caption, lang) {
+async function sendBroadcastMessage(telegram, chatId, text, lang) {
   const contactBtn = CONTACT_BUTTONS[lang] || CONTACT_BUTTONS['en'];
-  return telegram.sendPhoto(
-    chatId,
-    { source: fs.createReadStream(IMAGE_PATH) },
-    {
-      caption,
-      parse_mode: 'HTML',
-      reply_markup: {
-        inline_keyboard: [
-          [{ text: contactBtn.text, url: contactBtn.url }]
-        ]
-      }
+  return telegram.sendMessage(chatId, text, {
+    parse_mode: 'HTML',
+    reply_markup: {
+      inline_keyboard: [
+        [{ text: contactBtn.text, url: contactBtn.url }]
+      ]
     }
-  );
+  });
 }
 
 async function run() {
@@ -148,17 +119,13 @@ async function run() {
 
   try {
     // ─── STEP 1: Send preview to admin first ─────────────────────────────────
-    console.log('\n📨 Sending previews to admin first...');
+    console.log('\n📨 Sending preview to admin first...');
 
-    // Show admin both message variants so they can review
-    const previewTwo = `🔔 <b>[ADMIN PREVIEW — 2 credits variant]</b>\n\n` + getMessage('en', 2);
-    const previewOne = `🔔 <b>[ADMIN PREVIEW — 1 credit variant]</b>\n\n` + getMessage('en', 1);
+    const preview = `🔔 <b>[ADMIN PREVIEW — LETTER UPDATE]</b>\n\n` + getMessage('en', 2);
 
     try {
-      await sendPhoto(telegram, adminChatId, previewTwo, 'en');
-      await delay(500);
-      await sendPhoto(telegram, adminChatId, previewOne, 'en');
-      console.log(`✅ Admin previews sent to: ${adminChatId}`);
+      await sendBroadcastMessage(telegram, adminChatId, preview, 'en');
+      console.log(`✅ Admin preview sent to: ${adminChatId}`);
     } catch (err) {
       console.error(`❌ Failed to send admin preview: ${err.message}`);
       console.log('Aborting broadcast. Fix the issue and try again.');
@@ -181,12 +148,10 @@ async function run() {
       return;
     }
 
-    console.log(`📢 Found ${users.length} users. Starting broadcast campaign...\n`);
+    console.log(`📢 Found ${users.length} users. Starting letter update broadcast...\n`);
 
     let successCount = 0;
     let failureCount = 0;
-    let twoCreditsCount = 0;
-    let oneCreditsCount = 0;
 
     for (let i = 0; i < users.length; i++) {
       const user = users[i];
@@ -194,15 +159,13 @@ async function run() {
       const credits = user.creditCount;
       const messageText = getMessage(lang, credits);
 
-      const variant = credits >= 2 ? '2-credits' : '1-credit';
-      console.log(`[${i + 1}/${users.length}] User: ${user.userId} (@${user.username || 'N/A'}) | Lang: ${lang} | Credits: ${credits} | Variant: ${variant}`);
+      console.log(`[${i + 1}/${users.length}] User: ${user.userId} (@${user.username || 'N/A'}) | Lang: ${lang} | Credits: ${credits}`);
 
       try {
-        await sendPhoto(telegram, user.userId, messageText, lang);
+        await sendBroadcastMessage(telegram, user.userId, messageText, lang);
 
         console.log(`   ✅ Message sent to user: ${user.userId}`);
         successCount++;
-        if (credits >= 2) twoCreditsCount++; else oneCreditsCount++;
       } catch (err) {
         console.error(`   ❌ Failed for user ${user.userId}: ${err.message}`);
         failureCount++;
@@ -213,15 +176,11 @@ async function run() {
     }
 
     // ─── STEP 4: Send summary to admin ───────────────────────────────────────
-    const summaryMessage = `📊 <b>[BROADCAST COMPLETE]</b>
+    const summaryMessage = `📊 <b>[LETTER UPDATE BROADCAST COMPLETE]</b>
 
 ✅ <b>Successfully notified:</b> ${successCount}
 ❌ <b>Failures:</b> ${failureCount}
-📬 <b>Total users processed:</b> ${users.length}
-
-📋 <b>Variants sent:</b>
-• "2 credits" variant: ${twoCreditsCount}
-• "1 credit" variant: ${oneCreditsCount}`;
+📬 <b>Total users processed:</b> ${users.length}`;
 
     try {
       await telegram.sendMessage(adminChatId, summaryMessage, { parse_mode: 'HTML' });
@@ -231,9 +190,8 @@ async function run() {
     }
 
     console.log('\n=======================================');
-    console.log('🎉 Broadcast Finished!');
+    console.log('🎉 Letter Update Broadcast Finished!');
     console.log(`✅ Sent: ${successCount} | ❌ Failed: ${failureCount}`);
-    console.log(`📋 2-credit variant: ${twoCreditsCount} | 1-credit variant: ${oneCreditsCount}`);
     console.log('=======================================');
 
   } catch (error) {

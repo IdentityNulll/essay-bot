@@ -1,34 +1,35 @@
 export const translations = {
   en: {
     languageSelected: "🇬🇧 English selected successfully!",
-    welcome: `✨ <b>Welcome to IELTS Essay Examiner</b> ✨
+    welcome: `✨ <b>Welcome to IELTS & CEFR examiner</b> ✨
 
 Your AI-powered Writing Assistant, powered by <b>Anthropic Claude</b>
 
-Get instant, detailed feedback on your IELTS essays with professional criteria-based scoring just like a real examiner.
+Get instant, detailed feedback on your IELTS essays & CEFR letters with professional criteria-based scoring just like a real examiner.
 
-📊 <b>Current Credits:</b> <code>{credits} essays</code>
+📊 <b>Current Credits:</b> <code>{credits} checks</code>
 
 🚀 <b>Get Started:</b>
-1. Tap "📝 Check Essay" or send /check
-2. Share your essay question (or skip if it's in your document)
-3. Upload your essay (text, PDF, or DOCX)
-4. Receive detailed band score feedback in seconds!`,
+1. Tap "📝 Essay Check", "📩 Letter Check" or send /check, /letter
+2. Share your question (or skip if it's in your document)
+3. Upload your essay or letter (text, PDF, or DOCX)
+4. Receive detailed feedback in seconds!`,
 
-    help: `📖 <b>How to Use IELTS Essay Examiner</b>
+    help: `📖 <b>How to Use AI Essay & Letter Examiner</b>
 
-Follow these simple steps to get feedback on your essays:
+Follow these simple steps to get feedback on your writing:
 
-1️⃣ <b>Start</b> — Send /check or tap "📝 Check Essay"
-2️⃣ <b>Question</b> — Copy your essay topic or skip if it's in your document
-3️⃣ <b>Essay</b> — Share your essay (text, PDF, or DOCX file)
-4️⃣ <b>Feedback</b> — Get instant professional band score analysis
+1️⃣ <b>Start</b> — Send /check, /letter or tap the check buttons
+2️⃣ <b>Question</b> — Copy your question topic or skip if it's in your document
+3️⃣ <b>Writing</b> — Share your essay or letter (text, PDF, or DOCX file)
+4️⃣ <b>Feedback</b> — Get instant professional analysis
 
 <b>Quick Commands:</b>
 /start — Restart bot
 /help — View this guide
 /commands — All commands
 /check — Grade an essay
+/letter — Grade a CEFR letter
 /credits — Buy credits
 /profile — View account`,
 
@@ -36,6 +37,7 @@ Follow these simple steps to get feedback on your essays:
 
 /start — Restart / Change language
 /check — Check an essay
+/letter — Check a CEFR letter
 /profile — View your account
 /credits — Buy credits
 /help — Full guide
@@ -52,15 +54,16 @@ Join our community group for help, support, and questions:
 • <b>Username:</b> @{username}
 • <b>User ID:</b> <code>{userId}</code>
 • <b>Language:</b> 🇬🇧 English
-• <b>Credits:</b> <code>{credits} essays remaining</code>`,
+• <b>Credits:</b> <code>{credits} checks remaining</code>`,
 
-    btnCheck: "📝 Check Essay",
+    btnCheck: "📝 Essay Check",
+    btnLetterCheck: "📩 Letter Check",
     btnProfile: "👤 Profile",
     btnHelp: "📖 Help",
     btnContact: "💬 Contact",
     btnChangeLanguage: "🌐 Language",
     btnBuyCredits: "💳 Buy Credits",
-    btnBonus: "🎁 Referral",
+    btnBonus: "🎁 Bonus",
     btnProgress: "📊 Progress",
     btnContactDirectly: "💬 Chat with Us",
     menuUpdated: "⬇️ You can use the menu buttons below:",
@@ -90,16 +93,33 @@ You can:
 • Copy-paste your essay text directly.
 • Upload a document file (<code>.pdf</code> or <code>.docx</code>).`,
 
+    promptLetterQuestion: `❓ <b>Phase 1: The Letter Question</b>
+
+Please send the <b>Letter Question/Prompt</b>.
+You can:
+• Copy-paste the question text.
+• Send a photo of the question.
+• Tap the button below if the question is already inside your letter file.`,
+
+    promptLetter: `✍️ <b>Phase 2: The Letter</b>
+
+Please send your <b>Letter</b> now.
+You can:
+• Copy-paste your letter text directly.
+• Upload a document file (<code>.pdf</code> or <code>.docx</code>).`,
+
     invalidFile:
       "⚠️ <b>Invalid File Type!</b> Please upload only <code>.pdf</code> or <code>.docx</code> documents, or send plain text.",
     processing:
       "⏳ <b>Analyzing your essay...</b>\nOur AI is evaluating your writing. Please wait up to 30 seconds.",
+    processingLetter:
+      "⏳ <b>Analyzing your letter...</b>\nOur AI is evaluating your writing. Please wait up to 30 seconds.",
     processingImage:
       "📸 <b>Processing question and analyzing essay...</b>",
 
     insufficientCredits: `💡 <b>Get More Credits</b>
 
-You have <code>{credits} credits</code> left. Choose a plan that works for you:
+You have <code>{credits} credits</code> left. Credits can be used for both Essay and Letter checking! Choose a plan that works for you:
 
 📦 <b>Our Plans:</b>
 • <b>Starter</b>: 5 credits → 9,900 UZS
@@ -115,7 +135,7 @@ Select a package below to get payment details!`,
 
     checkCancelled: "✅ Check cancelled. No credits were used.",
 
-    bonusInstructions: `🎁 <b>Bonus Referral Program</b>
+    bonusInstructions: `🎁 <b>Bonus Program</b>
 
 Share your promo code with friends and earn discounts!
 
@@ -148,7 +168,7 @@ Share this code with your friends! When 5 friends use your code, you'll unlock a
 
     promoCodeSuccess: `✅ <b>Promo code applied!</b>
 
-Your referrer's discount will become active once they reach 5 referrals! You'll automatically get the bonus discount when they complete the requirement.`,
+Your referrer's discount will become active once they reach 5 users! You'll automatically get the bonus discount when they complete the requirement.`,
 
     promoCodeUsed: `🎉 <b>Your code was used!</b>
 
@@ -160,7 +180,7 @@ User has redeemed your promo code.
 
     promoCodeFull: `🎉 <b>Congratulations! Your bonus is unlocked!</b>
 
-You now have 5/5 referrals completed! 🏆
+You now have 5/5 users completed! 🏆
 
 You can now buy <b>13 credits for 14,900 UZS</b> instead of 19,900!
 
@@ -168,7 +188,7 @@ Use the /credits command or tap "💳 Buy Credits" button.`,
 
     buyCreditsInfo: `💳 <b>Buy Credits</b>
 
-Choose your perfect plan:
+Choose your perfect plan to grade your Essays and Letters:
 
 📦 <b>Payment Plans:</b>
 • <b>Starter</b> — 5 credits: 9,900 UZS
@@ -219,41 +239,42 @@ Please verify the receipt image and choose an action below.`,
     adminDenied: "❌ Denied user @{username}.",
 
     paymentApproved:
-      "🎉 <b>Payment Confirmed!</b>\n✅ {credits} credits added to your account. Ready to grade? Type /check",
+      "🎉 <b>Payment Confirmed!</b>\n✅ {credits} credits added to your account. Ready to grade? Type /check or /letter",
     paymentDenied:
       "⚠️ <b>Payment Could Not Be Verified</b>\nPlease check your receipt and try again. Contact us: @identitynull",
   },
 
   uz: {
     languageSelected: "🇺🇿 O'zbek tili muvaffaqiyatli tanlandi!",
-    welcome: `✨ <b>IELTS Essay Examiner Botiga Xush Kelibsiz</b> ✨
+    welcome: `✨ <b>IELTS & CEFR Examiner Botiga Xush Kelibsiz</b> ✨
 
 Sizning AI-asosiy yozma o'qitgichingiz, <b>Anthropic Claude</b> orqali ishlaydigan
 
-IELTS insholaringiz bo'yicha darhol batafsil fikr-mulohaza oling, haqiqiy imtihon oluvchi kabi professional baholash bilan.
+IELTS insholaringiz va CEFR Letter laringiz bo'yicha darhol batafsil fikr-mulohaza oling, haqiqiy imtihon oluvchi kabi professional baholash bilan.
 
-📊 <b>Joriy Balans:</b> <code>{credits} ta insho</code>
+📊 <b>Joriy Balans:</b> <code>{credits} ta tekshiruv</code>
 
 🚀 <b>Boshlash:</b>
-1. "📝 Inshoni tekshirish" tugmasini bosing yoki /check yuboring
-2. Insho savolini baham ko'ring (yoki o'tkazib yuborish mumkin)
-3. Inshongizni yuklang (matn, PDF yoki DOCX)
-4. Bir neche soniyada batafsil baholar oling!`,
+1. "📝 Inshoni tekshirish", "📩 Letter tekshirish" tugmasini bosing yoki /check, /letter yuboring
+2. Savolni baham ko'ring (yoki o'tkazib yuborish mumkin)
+3. Insho yoki Letteringizni yuklang (matn, PDF yoki DOCX)
+4. Bir necha soniyada batafsil baholar oling!`,
 
-    help: `📖 <b>IELTS Essay Examiner Qo'llanmasi</b>
+    help: `📖 <b>Insho va Letter Examiner Qo'llanmasi</b>
 
-Insholaringiz bo'yicha fikr-mulohaza olish uchun simple qadamlarni bajaring:
+Yozma ishlar bo'yicha fikr-mulohaza olish uchun qadamlarni bajaring:
 
-1️⃣ <b>Boshlash</b> — /check yuboring yoki "📝 Inshoni tekshirish" bosing
-2️⃣ <b>Savol</b> — Insho mavzusini yuboring yoki o'tkazib yuborish mumkin
-3️⃣ <b>Insho</b> — Inshongizni baham ko'ring (matn, PDF yoki DOCX)
-4️⃣ <b>Fikr-mulohaza</b> — Darhol professional band baholashi
+1️⃣ <b>Boshlash</b> — /check, /letter yuboring yoki tekshirish tugmalarini bosing
+2️⃣ <b>Savol</b> — Mavzuni yuboring yoki o'tkazib yuborish mumkin
+3️⃣ <b>Yozma ish</b> — Insho yoki maktubingizni baham ko'ring (matn, PDF yoki DOCX)
+4️⃣ <b>Fikr-mulohaza</b> — Darhol professional baholash hisoboti
 
 <b>Asosiy Buyruqlar:</b>
 /start — Botni qayta boshlash
 /help — Bu qo'llanmani ko'rish
 /commands — Barcha buyruqlar
 /check — Inshoni baholash
+/letter — Letter baholash
 /credits — Kredit sotib olish
 /profile — Akkauntni ko'rish`,
 
@@ -261,6 +282,7 @@ Insholaringiz bo'yicha fikr-mulohaza olish uchun simple qadamlarni bajaring:
 
 /start — Qayta boshlash / Til o'zgartirish
 /check — Inshoni tekshirish
+/letter — Letter tekshirish
 /profile — Akkauntni ko'rish
 /credits — Kredit sotib olish
 /help — To'liq qo'llanma
@@ -277,15 +299,16 @@ Yordam, qo'llab-quvvatlash va savollar uchun bizning jamoaviy guruhga qo'shiling
 • <b>Telegram:</b> @{username}
 • <b>ID:</b> <code>{userId}</code>
 • <b>Til:</b> 🇺🇿 O'zbekcha
-• <b>Balans:</b> <code>{credits} ta insho</code>`,
+• <b>Balans:</b> <code>{credits} ta tekshiruv remaining</code>`,
 
     btnCheck: "📝 Inshoni tekshirish",
+    btnLetterCheck: "📩 Letter tekshirish",
     btnProfile: "👤 Profil",
     btnHelp: "📖 Yordam",
     btnContact: "💬 Aloqa",
     btnChangeLanguage: "🌐 Til",
     btnBuyCredits: "💳 Kredit sotib olish",
-    btnBonus: "🎁 Referral",
+    btnBonus: "🎁 Bonus",
     btnProgress: "📊 Progress",
     btnContactDirectly: "💬 Biz bilan gaplashing",
     menuUpdated: "⬇️ Quyidagi tugmalardan foydalanishingiz mumkin:",
@@ -315,12 +338,29 @@ Siz:
 • Insho matnini to'g'ridan-to'g'ri yozib yuborishingiz,
 • Yoki <code>.pdf</code> / <code>.docx</code> formatdagi fayl yuklashingiz mumkin.`,
 
+    promptLetterQuestion: `❓ <b>1-bosqich: Letter savoli</b>
+
+Iltimos, <b>Letter savolini</b> yuboring.
+Siz:
+• Savol matnini nusxalab yuborishingiz,
+• Savol rasmini yuborishingiz,
+• Yoki savol Letter faylining ichida bo'lsa, quyidagi tugmani bosishingiz mumkin.`,
+
+    promptLetter: `✍️ <b>2-bosqich: Letter</b>
+
+Iltimos, <b>Letterni</b> yuboring.
+Siz:
+• Letter matnini to'g'ridan-to'g'ri yozib yuborishingiz,
+• Yoki <code>.pdf</code> / <code>.docx</code> formatdagi fayl yuklashingiz mumkin.`,
+
     invalidFile:
       "⚠️ <b>Noto'g'ri fayl turi!</b> Iltimos, faqat <code>.pdf</code> yoki <code>.docx</code> hujjat yuklang yoki oddiy matn ko'rinishida yuboring.",
     processing:
       "⏳ <b>Insho tahlil qilinmoqda...</b> \nIELTS AI Examiner inshongizni tekshirmoqda. Iltimos, 30 soniyagacha kuting.",
+    processingLetter:
+      "⏳ <b>Letter tahlil qilinmoqda...</b> \nAI Examiner maktubingizni tekshirmoqda. Iltimos, 30 soniyagacha kuting.",
     processingImage:
-      "📸 <b>Rasm tahlil qilinmoqda va insho tekshirilmoqda...</b>",
+      "📸 <b>Rasm tahlil qilinmoqda va yozma ish tekshirilmoqda...</b>",
 
     insufficientCredits: `💡 <b>Kredit xarid qiling!</b>
 
@@ -340,7 +380,7 @@ To'lov ma'lumotlarini olish uchun quyidagi paketlardan birini tanlang!`,
 
     checkCancelled: "✅ Tekshirish bekor qilindi. Kredit ishlatilmadi.",
 
-    bonusInstructions: `🎁 <b>Bonus Referral Dasturi</b>
+    bonusInstructions: `🎁 <b>Bonus Dasturi</b>
 
 Promo kodingizni do'stlaringiz bilan baham ko'ring va chegirma oling!
 
@@ -373,7 +413,7 @@ Ushbu kodni do'stlaringiz bilan baham ko'ring! 5 odam kodingizdan foydalanganida
 
     promoCodeSuccess: `✅ <b>Promo kod qo'shildi!</b>
 
-Referreringizning chegirmasini foydalanishga tayyorlang! Ular 5 ta referralga yetganda siz avtomatik ravishda bonus chegirmani olasiz.`,
+Sizning chegirmangiz tayyor bo'ladi! Ular 5 kishiga yetganda siz avtomatik ravishda bonus chegirmani olasiz.`,
 
     promoCodeUsed: `🎉 <b>Sizning kodi ishlatildi!</b>
 
@@ -385,7 +425,7 @@ Foydalanuvchi sizning promo kodingizni qabul qildi.
 
     promoCodeFull: `🎉 <b>Tabriklaymiz! Sizning bonus ochildi!</b>
 
-Siz 5/5 referralga erishdingiz! 🏆
+Siz 5/5 foydalanuvchiga erishdingiz! 🏆
 
 Endi siz <b>19,900 o'rniga 14,900 so'mga 13 kredit</b> sotib olishingiz mumkin!
 
@@ -393,7 +433,7 @@ Endi siz <b>19,900 o'rniga 14,900 so'mga 13 kredit</b> sotib olishingiz mumkin!
 
     buyCreditsInfo: `💳 <b>Kredit Sotib Olish</b>
 
-O'zingizga mos rejani tanlang:
+Insholar va Letter larni tekshirish uchun o'zingizga mos rejani tanlang:
 
 📦 <b>To'lov Rejalari:</b>
 • <b>Boshlang'ich</b> — 5 kredit: 9.900 so'm
@@ -432,34 +472,34 @@ Bizning jamoa tezda tekshiradi va yaqin orada kreditni qo'shadi!`,
       "❌ Xatolik yuz berdi. Iltimos, qaytadan urinib ko'ring yoki /contact orqali bog'laning.",
 
     paymentApproved:
-      "🎉 <b>To'lov Tasdiqlandi!</b> \n✅ {credits} kredit hisobingizga qo'shildi. Boshlashga tayyormisiz? /check yozing!",
+      "🎉 <b>To'lov Tasdiqlandi!</b> \n✅ {credits} kredit hisobingizga qo'shildi. Boshlashga tayyormisiz? /check yoki /letter yozing!",
     paymentDenied:
       "⚠️ <b>To'lov Tasdiqlanmadi</b> \nChekingizni qayta tekshiring va urinib ko'ring. Aloqa: @identitynull",
   },
 
   ru: {
     languageSelected: "🇷🇺 Русский язык успешно выбран!",
-    welcome: `✨ <b>Добро пожаловать в IELTS Essay Examiner</b> ✨
+    welcome: `✨ <b>Добро пожаловать в IELTS & CEFR Examiner</b> ✨
 
 Ваш AI-помощник, работающий на <b>Anthropic Claude</b>
 
-Получайте мгновенную, профессиональную обратную связь по вашим IELTS эссе с оценками по критериям, как у реального экзаменатора.
+Получайте мгновенную, профессиональную обратную связь по вашим IELTS эссе и CEFR письмам с оценками по критериям, как у реального экзаменатора.
 
-📊 <b>Ваш Баланс:</b> <code>{credits} эссе</code>
+📊 <b>Ваш Баланс:</b> <code>{credits} проверок</code>
 
 🚀 <b>Начните Сейчас:</b>
-1. Нажмите "📝 Проверить эссе" или отправьте /check
-2. Поделитесь темой эссе (или пропустите, если она в документе)
-3. Загрузите эссе (текст, PDF или DOCX)
+1. Нажмите "📝 Проверить эссе", "📩 Проверить письмо" или отправьте /check, /letter
+2. Поделитесь темой (или пропустите, если она в документе)
+3. Загрузите эссе или письмо (текст, PDF или DOCX)
 4. Получите детальную оценку за секунды!`,
 
-    help: `📖 <b>Руководство по IELTS Essay Examiner</b>
+    help: `📖 <b>Руководство по AI Essay & Letter Examiner</b>
 
 Выполните простые шаги для получения обратной связи:
 
-1️⃣ <b>Начало</b> — Отправьте /check или нажмите "📝 Проверить эссе"
+1️⃣ <b>Начало</b> — Отправьте /check, /letter или нажмите кнопки проверки
 2️⃣ <b>Тема</b> — Поделитесь темой или пропустите, если она в документе
-3️⃣ <b>Эссе</b> — Загрузите эссе (текст, PDF или DOCX)
+3️⃣ <b>Работа</b> — Загрузите эссе или письмо (текст, PDF или DOCX)
 4️⃣ <b>Отзыв</b> — Получите мгновенный профессиональный анализ
 
 <b>Основные Команды:</b>
@@ -467,6 +507,7 @@ Bizning jamoa tezda tekshiradi va yaqin orada kreditni qo'shadi!`,
 /help — Эта инструкция
 /commands — Все команды
 /check — Проверить эссе
+/letter — Проверить CEFR письмо
 /credits — Купить кредиты
 /profile — Аккаунт`,
 
@@ -474,6 +515,7 @@ Bizning jamoa tezda tekshiradi va yaqin orada kreditni qo'shadi!`,
 
 /start — Перезапуск / Язык
 /check — Проверить эссе
+/letter — Проверить CEFR письмо
 /profile — Ваш аккаунт
 /credits — Купить кредиты
 /help — Полное руководство
@@ -490,15 +532,16 @@ Bizning jamoa tezda tekshiradi va yaqin orada kreditni qo'shadi!`,
 • <b>Телеграм:</b> @{username}
 • <b>ID:</b> <code>{userId}</code>
 • <b>Язык:</b> 🇷🇺 Русский
-• <b>Баланс:</b> <code>{credits} эссе remaining</code>`,
+• <b>Баланс:</b> <code>{credits} проверок remaining</code>`,
 
     btnCheck: "📝 Проверить эссе",
+    btnLetterCheck: "📩 Проверить письмо",
     btnProfile: "👤 Профиль",
     btnHelp: "📖 Помощь",
     btnContact: "💬 Контакт",
     btnChangeLanguage: "🌐 Язык",
     btnBuyCredits: "💳 Купить кредиты",
-    btnBonus: "🎁 Рефералы",
+    btnBonus: "🎁 Bonus",
     btnProgress: "📊 Прогресс",
     btnContactDirectly: "💬 Написать нам",
     menuUpdated: "⬇️ Вы можете использовать кнопки ниже:",
@@ -528,11 +571,28 @@ Bizning jamoa tezda tekshiradi va yaqin orada kreditni qo'shadi!`,
 • Скопировать и вставить текст вашего эссе.
 • Загрузить файл документа (<code>.pdf</code> или <code>.docx</code>).`,
 
+    promptLetterQuestion: `❓ <b>Шаг 1: Тема (Вопрос) письма</b>
+
+Пожалуйста, отправьте <b>тему письма</b>.
+Вы можете:
+• Скопировать и вставить текст темы.
+• Отправить фото темы.
+• Нажать кнопку ниже, если тема уже содержится в файле вашего письма.`,
+
+    promptLetter: `✍️ <b>Шаг 2: Ваше письмо</b>
+
+Пожалуйста, отправьте ваше <b>письмо</b>.
+Вы можете:
+• Скопировать и вставить текст вашего письма напрямую.
+• Загрузить файл документа (<code>.pdf</code> или <code>.docx</code>).`,
+
     invalidFile:
       "⚠️ <b>Неверный формат файла!</b> Пожалуйста, загружайте только документы <code>.pdf</code> или <code>.docx</code> или отправьте текст напрямую.",
     processing:
       "⏳ <b>Обработка и анализ вашего эссе...</b> \nИИ-экзаменатор оценивает ваше письмо. Пожалуйста, подождите до 30 секунд.",
-    processingImage: "📸 <b>Обработка изображения темы и анализ эссе...</b>",
+    processingLetter:
+      "⏳ <b>Обработка и анализ вашего письма...</b> \nИИ-экзаменатор оценивает ваше письмо. Пожалуйста, подождите до 30 секунд.",
+    processingImage: "📸 <b>Обработка изображения темы и анализ работы...</b>",
 
     insufficientCredits: `💡 <b>Получите кредиты!</b>
 
@@ -552,7 +612,7 @@ Bizning jamoa tezda tekshiradi va yaqin orada kreditni qo'shadi!`,
 
     checkCancelled: "✅ Проверка отменена. Кредиты не были использованы.",
 
-    bonusInstructions: `🎁 <b>Бонусная программа рефералов</b>
+    bonusInstructions: `🎁 <b>Бонусная программа</b>
 
 Поделитесь своим промо-кодом с друзьями и получите скидку!
 
@@ -585,7 +645,7 @@ Bizning jamoa tezda tekshiradi va yaqin orada kreditni qo'shadi!`,
 
     promoCodeSuccess: `✅ <b>Промо-код применен!</b>
 
-Скидка вашего рефератора станет активной, когда он достигнет 5 рефералов! Вы автоматически получите бонусную скидку, когда он завершит требование.`,
+Бонусная скидка владельца кода станет активной, когда 5 пользователей применят его код! Вы автоматически получите бонусную скидку, когда условие будет выполнено.`,
 
     promoCodeUsed: `🎉 <b>Ваш код был использован!</b>
 
@@ -597,7 +657,7 @@ Bizning jamoa tezda tekshiradi va yaqin orada kreditni qo'shadi!`,
 
     promoCodeFull: `🎉 <b>Поздравляем! Ваш бонус разблокирован!</b>
 
-Вы достигли 5/5 рефералов! 🏆
+Вы достигли 5/5 пользователей! 🏆
 
 Теперь вы можете купить <b>13 проверок за 14,900 сум</b> вместо 19,900!
 
@@ -605,7 +665,7 @@ Bizning jamoa tezda tekshiradi va yaqin orada kreditni qo'shadi!`,
 
     buyCreditsInfo: `💳 <b>Купить Кредиты</b>
 
-Выберите подходящий пакет:
+Выберите подходящий пакет для проверки ваших эссе и писем:
 
 📦 <b>Наши Планы:</b>
 • <b>Стартовый</b> — 5 кредитов: 9.900 сум
@@ -644,7 +704,7 @@ Bizning jamoa tezda tekshiradi va yaqin orada kreditni qo'shadi!`,
       "❌ Произошла ошибка. Пожалуйста, попробуйте еще раз или свяжитесь с поддержкой /contact.",
 
     paymentApproved:
-      "🎉 <b>Платеж Подтвержден!</b> \n✅ {credits} кредитов добавлены. Готовы начать? Отправьте /check",
+      "🎉 <b>Платеж Подтвержден!</b> \n✅ {credits} кредитов добавлены. Готовы начать? Отправьте /check или /letter",
     paymentDenied:
       "⚠️ <b>Платеж Не Проверен</b> \nПожалуйста, проверьте чек и попробуйте снова. Контакт: @identitynull",
   },

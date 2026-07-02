@@ -5,7 +5,7 @@ import { connectDB } from './config/db.js';
 import User from './models/User.js';
 import Essay from './models/Essay.js';
 import { translations } from './translations.js';
-import { gradeIeltsEssay, generateProgressReport } from './openai.js';
+import { gradeIeltsEssay, gradeCefrLetter, generateProgressReport } from './openai.js';
 import { parsePdf, parseDocx } from './documentParser.js';
 import * as eventTracker from './services/eventTracker.js';
 
@@ -102,18 +102,14 @@ function generatePromoCode() {
 
 // Helper: Dynamic Main Menu Keyboard (Reply Keyboard)
 const getMainMenu = (ctx) => {
-  const user = ctx.state.user;
   const buttons = [
-    [ctx.translate('btnCheck'), ctx.translate('btnProgress')],
-    [ctx.translate('btnHelp'), ctx.translate('btnContact')],
-    [ctx.translate('btnBonus'), ctx.translate('btnChangeLanguage')]
+    [ctx.translate('btnCheck'), ctx.translate('btnLetterCheck')],
+    [ctx.translate('btnProgress'), ctx.translate('btnContact')],
+    [ctx.translate('btnChangeLanguage'), ctx.translate('btnBonus')]
   ];
-  
-  // Add buy credits button if user has zero credits
-  if (user && user.creditCount === 0) {
+  if ((ctx.state.user?.creditCount || 0) < 1) {
     buttons.push([ctx.translate('btnBuyCredits')]);
   }
-  
   return Markup.keyboard(buttons).resize();
 };
 
@@ -122,24 +118,21 @@ const getWelcomeInline = (ctx) => {
   return Markup.inlineKeyboard([
     [
       Markup.button.callback(ctx.translate('btnCheck'), 'cmd_check'),
-      Markup.button.callback(ctx.translate('btnProgress'), 'cmd_progress')
+      Markup.button.callback(ctx.translate('btnLetterCheck'), 'cmd_letter')
     ],
     [
-      Markup.button.callback(ctx.translate('btnBuyCredits'), 'cmd_buy')
-    ],
-    [
-      Markup.button.callback(ctx.translate('btnHelp'), 'cmd_help'),
+      Markup.button.callback(ctx.translate('btnProgress'), 'cmd_progress'),
       Markup.button.callback(ctx.translate('btnContact'), 'cmd_contact')
     ],
-    [Markup.button.callback(ctx.translate('btnChangeLanguage'), 'cmd_language')]
+    [
+      Markup.button.callback(ctx.translate('btnChangeLanguage'), 'cmd_language'),
+      Markup.button.callback(ctx.translate('btnBonus'), 'cmd_bonus')
+    ]
   ]);
 };
 
 const getHelpInline = (ctx) => {
-  return Markup.inlineKeyboard([
-    [Markup.button.callback(ctx.translate('btnCheck'), 'cmd_check')],
-    [Markup.button.callback(ctx.translate('btnContact'), 'cmd_contact')]
-  ]);
+  return getWelcomeInline(ctx);
 };
 
 
@@ -280,6 +273,61 @@ async function handleCheckCommand(ctx) {
 }
 
 
+
+async function handleLetterCommand(ctx) {
+  const user = ctx.state.user;
+
+  if (ctx.callbackQuery) {
+    try { await ctx.answerCbQuery(); } catch (e) {}
+  }
+
+  if (user.creditCount < 1) {
+    user.currentState = 'START';
+    await user.save();
+
+    await ctx.reply(ctx.translate('menuUpdated'), getMainMenu(ctx));
+
+    const isDiscounted = user.receivedBonusDiscount;
+    const popularPrice = isDiscounted ? '14,900' : '19,900';
+    const popularBadge = isDiscounted
+      ? (user.selectedLanguage === 'uz' ? "(Chegirmali Narx 🔥)" : user.selectedLanguage === 'ru' ? "(Со скидкой 🔥)" : "(Discounted Price 🔥)")
+      : (user.selectedLanguage === 'uz' ? "(Eng Yaxshi Narx)" : user.selectedLanguage === 'ru' ? "(Лучшая Цена)" : "(Best Value)");
+
+    const messageText = ctx.translate('insufficientCredits', {
+      credits: user.creditCount,
+      popularPrice,
+      popularBadge
+    });
+
+    const popularBtnText = ctx.translate('btnPopular').replace('{price}', popularPrice);
+
+    return ctx.reply(messageText, {
+      parse_mode: 'HTML',
+      ...Markup.inlineKeyboard([
+        [Markup.button.callback(ctx.translate('btnStarter'), 'select_pack_starter')],
+        [Markup.button.callback(popularBtnText, 'select_pack_popular')],
+        [Markup.button.callback(ctx.translate('btnPremium'), 'select_pack_premium')]
+      ])
+    });
+  }
+
+  user.currentState = 'AWAITING_LETTER_QUESTION';
+  user.tempQuestionText = null;
+  user.tempQuestionPhotoId = null;
+  await user.save();
+
+  await ctx.reply(ctx.translate('menuUpdated'), getMainMenu(ctx));
+
+  return ctx.reply(ctx.translate('promptLetterQuestion'), {
+    parse_mode: 'HTML',
+    ...Markup.inlineKeyboard([
+      [Markup.button.callback(ctx.translate('btnSkipQuestion'), 'skip_letter_question')],
+      [Markup.button.callback('❌ Cancel', 'cancel_check')]
+    ])
+  });
+}
+
+
 async function handleHelpCommand(ctx) {
   const user = ctx.state.user;
   user.currentState = 'START';
@@ -404,7 +452,11 @@ async function handleProgressCommand(ctx) {
 
   try {
     // Fetch all essays for this user from DB, oldest first
-    const essays = await Essay.find({ userId: user.userId }).sort({ createdAt: 1 });
+    const essays = await Essay.find({
+      userId: user.userId,
+      type: { $ne: 'letter' },
+      finalBand: { $type: 'number' }
+    }).sort({ createdAt: 1 });
 
     if (essays.length < 2) {
       await ctx.reply(ctx.translate('menuUpdated'), getMainMenu(ctx));
@@ -485,6 +537,7 @@ async function handleProgressCommand(ctx) {
 // Bind Command Routes
 bot.command('start', handleStartCommand);
 bot.command('check', handleCheckCommand);
+bot.command('letter', handleLetterCommand);
 bot.command('help', handleHelpCommand);
 bot.command('contact', handleContactCommand);
 bot.command('bonus', handleBonusCommand);
@@ -543,9 +596,10 @@ bot.action('lang_en', (ctx) => handleLangSelection(ctx, 'en'));
 
 // Section Callback Actions
 bot.action('cmd_check', handleCheckCommand);
+bot.action('cmd_letter', handleLetterCommand);
 bot.action('cmd_progress', handleProgressCommand);
-bot.action('cmd_help', handleHelpCommand);
 bot.action('cmd_contact', handleContactCommand);
+bot.action('cmd_bonus', handleBonusCommand);
 bot.action('cmd_language', async (ctx) => {
   try { await ctx.answerCbQuery(); } catch (e) {}
   return ctx.reply(
@@ -665,7 +719,7 @@ bot.action('enter_promo_code', async (ctx) => {
   });
 });
 
-// Question Skipping Callback Action
+// Skip Question for Essay
 bot.action('skip_question', async (ctx) => {
   const user = ctx.state.user;
 
@@ -680,7 +734,6 @@ bot.action('skip_question', async (ctx) => {
 
   try { await ctx.answerCbQuery(); } catch (e) {}
 
-  // Try to edit the message to reflect that question phase is completed/skipped
   try {
     await ctx.editMessageText(ctx.translate('questionSkipped'), { parse_mode: 'HTML' });
   } catch (err) {
@@ -688,6 +741,35 @@ bot.action('skip_question', async (ctx) => {
   }
 
   return ctx.reply(ctx.translate('promptEssay'), {
+    parse_mode: 'HTML',
+    ...Markup.inlineKeyboard([
+      [Markup.button.callback('❌ Cancel', 'cancel_check')]
+    ])
+  });
+});
+
+// Skip Question for Letter
+bot.action('skip_letter_question', async (ctx) => {
+  const user = ctx.state.user;
+
+  if (user.currentState !== 'AWAITING_LETTER_QUESTION') {
+    return ctx.answerCbQuery('Not in letter question selection state.');
+  }
+
+  user.tempQuestionText = null;
+  user.tempQuestionPhotoId = null;
+  user.currentState = 'AWAITING_LETTER';
+  await user.save();
+
+  try { await ctx.answerCbQuery(); } catch (e) {}
+
+  try {
+    await ctx.editMessageText(ctx.translate('questionSkipped'), { parse_mode: 'HTML' });
+  } catch (err) {
+    console.error('Failed to edit skip letter question message:', err.message);
+  }
+
+  return ctx.reply(ctx.translate('promptLetter'), {
     parse_mode: 'HTML',
     ...Markup.inlineKeyboard([
       [Markup.button.callback('❌ Cancel', 'cancel_check')]
@@ -721,6 +803,9 @@ bot.on('text', async (ctx) => {
   // 1. Check for localized menu button clicks
   if (text === translations.en.btnCheck || text === translations.uz.btnCheck || text === translations.ru.btnCheck) {
     return handleCheckCommand(ctx);
+  }
+  if (text === translations.en.btnLetterCheck || text === translations.uz.btnLetterCheck || text === translations.ru.btnLetterCheck) {
+    return handleLetterCommand(ctx);
   }
   if (text === translations.en.btnProgress || text === translations.uz.btnProgress || text === translations.ru.btnProgress) {
     return handleProgressCommand(ctx);
@@ -763,11 +848,30 @@ bot.on('text', async (ctx) => {
     });
   }
 
+  if (user.currentState === 'AWAITING_LETTER_QUESTION') {
+    user.tempQuestionText = text;
+    user.tempQuestionPhotoId = null;
+    user.currentState = 'AWAITING_LETTER';
+    await user.save();
+
+    return ctx.reply(ctx.translate('promptLetter'), {
+      parse_mode: 'HTML',
+      ...getMainMenu(ctx)
+    });
+  }
+
   if (user.currentState === 'AWAITING_ESSAY') {
     if (text.trim().split(/\s+/).length < 20) {
       return ctx.reply("⚠️ Your essay is too short. Please submit a complete IELTS writing essay (e.g. > 100 words).");
     }
     return processEssayGrading(ctx, text);
+  }
+
+  if (user.currentState === 'AWAITING_LETTER') {
+    if (text.trim().split(/\s+/).length < 10) {
+      return ctx.reply("⚠️ Your letter is too short. Please submit a complete letter.");
+    }
+    return processLetterGrading(ctx, text);
   }
 
   if (user.currentState === 'AWAITING_PROMO_CODE') {
@@ -785,7 +889,7 @@ bot.on('text', async (ctx) => {
 
       // Mark promo code as used
       user.usedPromoCode = promoCode;
-      // Only set discount if the promo user already has 5 referrals
+      // Only set discount if enough people have used the promo code.
       if (promoUser.promoCodeCount >= 5) {
         user.receivedBonusDiscount = true;
       }
@@ -799,7 +903,7 @@ bot.on('text', async (ctx) => {
       }
       await promoUser.save();
 
-      // Track referral event
+      // Track promo-code usage event.
       await eventTracker.trackReferralEvent(promoUser.userId, user.userId);
 
       // Notify the original user with appropriate message
@@ -819,7 +923,7 @@ bot.on('text', async (ctx) => {
         } else {
           // Show progress message
           const remaining = 5 - promoUser.promoCodeCount;
-          const progressMessage = `${remaining === 0 ? '✅ All 5 referrals completed!' : `You have ${promoUser.promoCodeCount}/5 people. You need ${remaining} more to unlock the bonus!`}`;
+          const progressMessage = `${remaining === 0 ? '✅ All 5 people completed!' : `You have ${promoUser.promoCodeCount}/5 people. You need ${remaining} more to unlock the bonus!`}`;
           notificationMessage = ctx.translate('promoCodeUsed', {
             count: promoUser.promoCodeCount,
             progressMessage: progressMessage
@@ -905,12 +1009,23 @@ bot.on('photo', async (ctx) => {
     });
   }
 
+  if (user.currentState === 'AWAITING_LETTER_QUESTION') {
+    user.tempQuestionPhotoId = photo.file_id;
+    user.tempQuestionText = null;
+    user.currentState = 'AWAITING_LETTER';
+    await user.save();
+
+    return ctx.reply(ctx.translate('promptLetter'), {
+      parse_mode: 'HTML',
+      ...getMainMenu(ctx)
+    });
+  }
+
   if (user.currentState === 'AWAITING_RECEIPT') {
     return handleReceiptPhoto(ctx, photo.file_id);
   }
 
   if (user.creditCount === 0) {
-    // If they have 0 credits but didn't select a package yet, redirect them to select one
     return handleCreditsCommand(ctx);
   }
 
@@ -924,7 +1039,7 @@ bot.on('photo', async (ctx) => {
 bot.on('document', async (ctx) => {
   const user = ctx.state.user;
 
-  if (user.currentState !== 'AWAITING_ESSAY') {
+  if (user.currentState !== 'AWAITING_ESSAY' && user.currentState !== 'AWAITING_LETTER') {
     return ctx.reply(ctx.translate('help'), {
       parse_mode: 'HTML',
       ...getHelpInline(ctx)
@@ -959,10 +1074,14 @@ bot.on('document', async (ctx) => {
       await ctx.telegram.deleteMessage(ctx.chat.id, loadingMsg.message_id);
     } catch (e) {}
 
-    if (!extractedText || extractedText.trim().split(/\s+/).length < 20) {
+    const minWordCount = user.currentState === 'AWAITING_LETTER' ? 10 : 20;
+    if (!extractedText || extractedText.trim().split(/\s+/).length < minWordCount) {
       return ctx.reply("⚠️ Extracted text from document is too short or blank. Please check the document or copy-paste the text directly.");
     }
 
+    if (user.currentState === 'AWAITING_LETTER') {
+      return processLetterGrading(ctx, extractedText);
+    }
     return processEssayGrading(ctx, extractedText);
 
   } catch (error) {
@@ -1108,6 +1227,129 @@ async function processEssayGrading(ctx, essayText) {
 
   } catch (error) {
     console.error('Error during essay grading flow:', error);
+    try {
+      await ctx.telegram.deleteMessage(ctx.chat.id, loadingMsg.message_id);
+    } catch (e) {}
+
+    return ctx.reply(ctx.translate('errorGeneral'), {
+      parse_mode: 'HTML',
+      ...getMainMenu(ctx)
+    });
+  }
+}
+
+// Process CEFR Letter Grading
+async function processLetterGrading(ctx, letterText) {
+  const user = ctx.state.user;
+
+  if (user.creditCount < 1) {
+    user.currentState = 'START';
+    await user.save();
+
+    const isDiscounted = user.receivedBonusDiscount;
+    const popularPrice = isDiscounted ? '14,900' : '19,900';
+    const popularBadge = isDiscounted
+      ? (user.selectedLanguage === 'uz' ? "(Chegirmali Narx 🔥)" : user.selectedLanguage === 'ru' ? "(Со скидкой 🔥)" : "(Discounted Price 🔥)")
+      : (user.selectedLanguage === 'uz' ? "(Eng Yaxshi Narx)" : user.selectedLanguage === 'ru' ? "(Лучшая Цена)" : "(Best Value)");
+
+    const messageText = ctx.translate('insufficientCredits', {
+      credits: user.creditCount,
+      popularPrice,
+      popularBadge
+    });
+
+    const popularBtnText = ctx.translate('btnPopular').replace('{price}', popularPrice);
+
+    return ctx.reply(messageText, {
+      parse_mode: 'HTML',
+      ...Markup.inlineKeyboard([
+        [Markup.button.callback(ctx.translate('btnStarter'), 'select_pack_starter')],
+        [Markup.button.callback(popularBtnText, 'select_pack_popular')],
+        [Markup.button.callback(ctx.translate('btnPremium'), 'select_pack_premium')]
+      ])
+    });
+  }
+
+  const hasPhotoQuestion = !!user.tempQuestionPhotoId;
+  const processingText = hasPhotoQuestion ? ctx.translate('processingImage') : ctx.translate('processingLetter');
+  const loadingMsg = await ctx.reply(processingText, { parse_mode: 'HTML' });
+
+  try {
+    let questionImageBase64 = null;
+    let questionImageMimeType = null;
+
+    if (hasPhotoQuestion) {
+      const fileLink = await ctx.telegram.getFileLink(user.tempQuestionPhotoId);
+      const response = await fetch(fileLink.href);
+      const arrayBuffer = await response.arrayBuffer();
+      const buffer = Buffer.from(arrayBuffer);
+      questionImageBase64 = buffer.toString('base64');
+      questionImageMimeType = 'image/jpeg';
+    }
+
+    const gradingResult = await gradeCefrLetter(
+      user.tempQuestionText,
+      letterText,
+      questionImageBase64,
+      questionImageMimeType,
+      user.selectedLanguage || 'en'
+    );
+
+    const { bandScore, cefrLevel = bandScore, question, feedback } = gradingResult;
+
+    // Save as Essay record with type: 'letter'
+    let essayId = null;
+    try {
+      const wordCount = letterText.split(/\s+/).filter(Boolean).length;
+      const essay = new Essay({
+        userId: user.userId,
+        questionText: question,
+        essayText: letterText.substring(0, 50000),
+        source: hasPhotoQuestion ? 'image' : 'text',
+        wordCount,
+        geminiReport: feedback,
+        finalBand: cefrLevel,
+        type: 'letter',
+        language: user.selectedLanguage || 'en',
+        processingTime: Date.now() - loadingMsg.date * 1000
+      });
+      await essay.save();
+      essayId = essay._id.toString();
+    } catch (essayError) {
+      console.error('Error saving letter record:', essayError);
+      try {
+        await ctx.telegram.deleteMessage(ctx.chat.id, loadingMsg.message_id);
+      } catch (e) {}
+      return ctx.reply(ctx.translate('errorGeneral'), {
+        parse_mode: 'HTML',
+        ...getMainMenu(ctx)
+      });
+    }
+
+    // Deduct credit
+    user.creditCount = Math.max(0, user.creditCount - 1);
+    user.essaysCount = (user.essaysCount || 0) + 1;
+    user.currentState = 'START';
+    user.tempQuestionText = null;
+    user.tempQuestionPhotoId = null;
+    await user.save();
+
+    try {
+      await ctx.telegram.deleteMessage(ctx.chat.id, loadingMsg.message_id);
+    } catch (e) {}
+
+    await sendLongMessage(ctx, feedback, {
+      parse_mode: 'HTML',
+      ...Markup.inlineKeyboard([
+        [
+          Markup.button.callback(ctx.translate('btnLetterCheck'), 'cmd_letter'),
+          Markup.button.callback(ctx.translate('btnBuyCredits'), 'cmd_buy')
+        ]
+      ])
+    });
+
+  } catch (error) {
+    console.error('Error during letter grading flow:', error);
     try {
       await ctx.telegram.deleteMessage(ctx.chat.id, loadingMsg.message_id);
     } catch (e) {}

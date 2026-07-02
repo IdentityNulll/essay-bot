@@ -19,43 +19,55 @@ const CONTACT_URL = 'https://t.me/+BMjBYcW4_oNjNjNi';
 function getMessage(lang) {
   const messages = {
     // ─── ENGLISH ───────────────────────────────────────────────────────────────
-    en: `🔔 <b>Big update dropping in 12 hours!</b>
+    en: `📩 <b>New Update: CEFR Letter Check is live!</b>
 
-We're about to launch a brand new feature in the <b>IELTS Essay Examiner</b> bot:
+You can now check your <b>formal and informal CEFR letters</b> directly in the bot.
 
-📝 <b>CEFR Letter Checking</b> — coming very soon!
+Send /letter or tap <b>📩 Letter Check</b> in the menu.
 
-Soon you'll be able to check your formal and informal <b>CEFR-level letters</b> and get detailed AI feedback on structure, tone, vocabulary, and grammar — just like with essays.
+Our AI examiner will evaluate your letter by:
+• Task Completion
+• Coherence and Cohesion
+• Lexical Resource
+• Grammar Range and Accuracy
 
-⏳ Stay tuned — it goes live in <b>12 hours!</b>
+You will receive a full report with your estimated <b>CEFR level</b> from A1 to C2.
 
-Make sure to come back and try it out 🚀`,
+Your existing credits work for both <b>Essay Check</b> and <b>Letter Check</b>. Try it today 🚀`,
 
     // ─── UZBEK ─────────────────────────────────────────────────────────────────
-    uz: `🔔 <b>12 soatdan so'ng katta yangilik!</b>
+    uz: `📩 <b>Yangi funksiya: CEFR Maktub tekshiruvi ishga tushdi!</b>
 
-<b>IELTS Essay Examiner</b> botida yangi funksiya kelmoqda:
+Endi bot orqali <b>rasmiy va norasmiy CEFR maktublaringizni</b> tekshirishingiz mumkin.
 
-📝 <b>CEFR LETTER Tekshiruvi</b> — tez orada!
+/letter yuboring yoki menyudan <b>📩 Maktubni tekshirish</b> tugmasini bosing.
 
-Yaqin orada rasmiy va norasmiy <b>CEFR darajasidagi maktublaringizni</b> tekshira olasiz va tuzilish, uslub, so'z boyligi va grammatika bo'yicha batafsil AI fikr-mulohaza olasiz — xuddi insholar kabi.
+AI examiner maktubingizni quyidagilar bo'yicha baholaydi:
+• Vazifani bajarish
+• Mantiqiy bog'lanish
+• So'z boyligi
+• Grammatika diapazoni va aniqligi
 
-⏳ Kuzatib boring — <b>12 soatdan</b> keyin ishga tushadi!
+Siz A1 dan C2 gacha bo'lgan <b>CEFR darajangiz</b> bilan to'liq hisobot olasiz.
 
-Qaytib kelib sinab ko'ring 🚀`,
+Mavjud kreditlaringiz <b>insho</b> va <b>maktub</b> tekshiruvi uchun ishlaydi. Bugun sinab ko'ring 🚀`,
 
     // ─── RUSSIAN ───────────────────────────────────────────────────────────────
-    ru: `🔔 <b>Большое обновление через 12 часов!</b>
+    ru: `📩 <b>Новое обновление: проверка CEFR писем уже доступна!</b>
 
-В боте <b>IELTS Essay Examiner</b> скоро появится новая функция:
+Теперь вы можете проверять <b>формальные и неформальные письма CEFR</b> прямо в боте.
 
-📝 <b>LETTER писем по CEFR</b> — совсем скоро!
+Отправьте /letter или нажмите <b>📩 Проверить письмо</b> в меню.
 
-Вы сможете проверять свои формальные и неформальные <b>письма уровня CEFR</b> и получать подробную обратную связь от ИИ по структуре, тону, лексике и грамматике — так же, как с эссе.
+AI examiner оценит письмо по критериям:
+• Выполнение задания
+• Связность и логика
+• Лексический ресурс
+• Грамматический диапазон и точность
 
-⏳ Следите за обновлениями — запуск через <b>12 часов!</b>
+Вы получите полный отчет с примерным <b>уровнем CEFR</b> от A1 до C2.
 
-Возвращайтесь и попробуйте 🚀`,
+Ваши кредиты подходят и для <b>эссе</b>, и для <b>писем</b>. Попробуйте сегодня 🚀`,
   };
 
   return messages[lang] || messages['en'];
@@ -120,7 +132,7 @@ async function run() {
       return;
     }
 
-    console.log(`📢 Found ${users.length} users. Starting teaser broadcast...\n`);
+    console.log(`📢 Found ${users.length} users. Starting letter update broadcast...\n`);
 
     let successCount = 0;
     let failureCount = 0;
@@ -146,7 +158,7 @@ async function run() {
     }
 
     // ─── STEP 4: Send summary to admin ────────────────────────────────────────
-    const summaryMessage = `📊 <b>[TEASER BROADCAST COMPLETE]</b>
+    const summaryMessage = `📊 <b>[LETTER UPDATE BROADCAST COMPLETE]</b>
 
 ✅ <b>Successfully sent:</b> ${successCount}
 ❌ <b>Failures:</b> ${failureCount}

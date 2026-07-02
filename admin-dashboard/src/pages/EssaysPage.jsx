@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import api from '../services/api.js';
 
 function EssaysPage() {
@@ -11,12 +11,9 @@ function EssaysPage() {
   const [essayDetails, setEssayDetails] = useState(null);
   const [minBand, setMinBand] = useState('');
   const [maxBand, setMaxBand] = useState('');
+  const [typeFilter, setTypeFilter] = useState('');
 
-  useEffect(() => {
-    fetchEssays();
-  }, [page, minBand, maxBand]);
-
-  const fetchEssays = async () => {
+  const fetchEssays = useCallback(async () => {
     try {
       setLoading(true);
       const response = await api.get('/admin/essays', {
@@ -24,7 +21,8 @@ function EssaysPage() {
           page,
           limit: 20,
           minBand: minBand || undefined,
-          maxBand: maxBand || undefined
+          maxBand: maxBand || undefined,
+          type: typeFilter || undefined
         }
       });
       setEssays(response.data.essays);
@@ -35,7 +33,12 @@ function EssaysPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [page, minBand, maxBand, typeFilter]);
+
+  useEffect(() => {
+    const timeoutId = setTimeout(fetchEssays, 0);
+    return () => clearTimeout(timeoutId);
+  }, [fetchEssays]);
 
   const fetchEssayDetails = async (essayId) => {
     try {
@@ -61,12 +64,23 @@ function EssaysPage() {
       {error && <div className="error">{error}</div>}
 
       <div className="section" style={{ marginBottom: '20px' }}>
-        <h3 style={{ marginBottom: '15px' }}>🔍 Filter by Band Score</h3>
+        <h3 style={{ marginBottom: '15px' }}>🔍 Filter Submissions</h3>
         <div style={{
           display: 'grid',
-          gridTemplateColumns: '1fr 1fr auto',
+          gridTemplateColumns: '1fr 1fr 1fr auto',
           gap: '10px'
         }}>
+          <select
+            value={typeFilter}
+            onChange={(e) => {
+              setTypeFilter(e.target.value);
+              setPage(1);
+            }}
+          >
+            <option value="">All Types</option>
+            <option value="essay">Essays</option>
+            <option value="letter">Letters</option>
+          </select>
           <input
             type="number"
             placeholder="Min Band"
@@ -94,6 +108,7 @@ function EssaysPage() {
             onClick={() => {
               setMinBand('');
               setMaxBand('');
+              setTypeFilter('');
               setPage(1);
             }}
           >
@@ -103,13 +118,14 @@ function EssaysPage() {
       </div>
 
       <div className="section">
-        <h2>📝 Essays ({essays.length} on this page)</h2>
+        <h2>📝 Submissions ({essays.length} on this page)</h2>
         <div className="table-wrapper">
           <table>
             <thead>
               <tr>
                 <th>Username</th>
-                <th>Band Score</th>
+                <th>Type</th>
+                <th>Grade / Band Score</th>
                 <th>Word Count</th>
                 <th>Language</th>
                 <th>Date</th>
@@ -120,6 +136,7 @@ function EssaysPage() {
               {essays.map((essay) => (
                 <tr key={essay._id}>
                   <td>@{essay.username || 'Unknown'}</td>
+                  <td>{getSubmissionType(essay.type)}</td>
                   <td>
                     <span className={`badge badge-${getBandColor(essay.finalBand)}`}>
                       {essay.finalBand || 'Pending'}
@@ -171,7 +188,10 @@ function EssaysPage() {
               <strong>Username:</strong> @{essayDetails.user.username || 'N/A'}
             </div>
             <div style={{ marginBottom: '15px' }}>
-              <strong>Band Score:</strong> <span className="badge badge-success">{essayDetails.essay.finalBand || 'N/A'}</span>
+              <strong>Type:</strong> {getSubmissionType(essayDetails.essay.type)}
+            </div>
+            <div style={{ marginBottom: '15px' }}>
+              <strong>Grade / Band Score:</strong> <span className={`badge badge-${getBandColor(essayDetails.essay.finalBand)}`}>{essayDetails.essay.finalBand || 'N/A'}</span>
             </div>
             <div style={{ marginBottom: '15px' }}>
               <strong>Word Count:</strong> {essayDetails.essay.wordCount}
@@ -196,7 +216,7 @@ function EssaysPage() {
               {essayDetails.essay.questionText || '(Question not provided)'}
             </div>
 
-            <h3 style={{ marginBottom: '10px' }}>Essay Text</h3>
+            <h3 style={{ marginBottom: '10px' }}>{essayDetails.essay.type === 'letter' ? 'Letter Text' : 'Essay Text'}</h3>
             <div style={{
               background: '#f7fafc',
               padding: '10px',
@@ -243,9 +263,19 @@ function getLanguageName(code) {
 }
 
 function getBandColor(band) {
+  if (typeof band === 'string') {
+    const level = band.toUpperCase();
+    if (level === 'C1' || level === 'C2') return 'success';
+    if (level === 'B1' || level === 'B2') return 'warning';
+    return 'danger';
+  }
   if (band >= 7.5) return 'success';
   if (band >= 6.5) return 'warning';
   return 'danger';
+}
+
+function getSubmissionType(type) {
+  return type === 'letter' ? 'Letter' : 'Essay';
 }
 
 export default EssaysPage;

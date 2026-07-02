@@ -35,12 +35,21 @@ export const login = async (req, res) => {
 export const getStats = async (req, res) => {
   try {
     const totalUsers = await User.countDocuments();
-    const totalEssays = await Essay.countDocuments();
+    const totalEssays = await Essay.countDocuments({ type: { $ne: 'letter' } });
+    const totalLetters = await Essay.countDocuments({ type: 'letter' });
     const totalCredits = await User.aggregate([
       { $group: { _id: null, total: { $sum: '$creditCount' } } }
     ]);
 
+    // Only aggregate numeric band scores (essays), not CEFR string levels (letters)
     const bandDistribution = await Essay.aggregate([
+      { $match: { type: { $ne: 'letter' } } },
+      { $group: { _id: '$finalBand', count: { $sum: 1 } } },
+      { $sort: { _id: 1 } }
+    ]);
+
+    const cefrDistribution = await Essay.aggregate([
+      { $match: { type: 'letter' } },
       { $group: { _id: '$finalBand', count: { $sum: 1 } } },
       { $sort: { _id: 1 } }
     ]);
@@ -57,11 +66,16 @@ export const getStats = async (req, res) => {
     res.json({
       totalUsers,
       totalEssays,
+      totalLetters,
       totalCredits: totalCredits[0]?.total || 0,
       avgCredits: avgCredits[0]?.avg || 0,
       usersWithDiscount,
       bandDistribution: bandDistribution.map(item => ({
         band: item._id,
+        count: item.count
+      })),
+      cefrDistribution: cefrDistribution.map(item => ({
+        level: item._id,
         count: item.count
       }))
     });
@@ -114,14 +128,18 @@ export const getUserDetail = async (req, res) => {
 
     const essays = await Essay.find({ userId }).sort({ createdAt: -1 });
 
+    // Only average numeric band scores (essays), ignore CEFR string levels (letters)
+    const numericEssays = essays.filter(e => typeof e.finalBand === 'number');
+
     res.json({
       user,
       essays,
       stats: {
-        essaysCount: essays.length,
+        essaysCount: essays.filter(e => e.type !== 'letter').length,
+        lettersCount: essays.filter(e => e.type === 'letter').length,
         totalCredits: user.creditCount,
-        avgBand: essays.length > 0
-          ? (essays.reduce((sum, e) => sum + (e.finalBand || 0), 0) / essays.length).toFixed(2)
+        avgBand: numericEssays.length > 0
+          ? (numericEssays.reduce((sum, e) => sum + (e.finalBand || 0), 0) / numericEssays.length).toFixed(2)
           : 0
       }
     });
@@ -136,11 +154,13 @@ export const getEssays = async (req, res) => {
     const limit = parseInt(req.query.limit) || 20;
     const skip = (page - 1) * limit;
     const userId = req.query.userId || null;
-    const minBand = req.query.minBand ? parseInt(req.query.minBand) : null;
-    const maxBand = req.query.maxBand ? parseInt(req.query.maxBand) : null;
+    const minBand = req.query.minBand ? parseFloat(req.query.minBand) : null;
+    const maxBand = req.query.maxBand ? parseFloat(req.query.maxBand) : null;
 
     let query = {};
     if (userId) query.userId = userId;
+    // Support filtering by type ('essay' or 'letter')
+    if (req.query.type) query.type = req.query.type;
     if (minBand || maxBand) {
       query.finalBand = {};
       if (minBand) query.finalBand.$gte = minBand;

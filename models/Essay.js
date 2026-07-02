@@ -26,7 +26,12 @@ const essaySchema = new mongoose.Schema(
       lexicon: Number,
       coherence: Number
     },
-    finalBand: Number,
+    finalBand: mongoose.Schema.Types.Mixed,
+    type: {
+      type: String,
+      enum: ['essay', 'letter'],
+      default: 'essay'
+    },
     processingTime: Number,
     language: {
       type: String,

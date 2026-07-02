@@ -705,3 +705,401 @@ Use the following layout:
 
   return resultText;
 }
+
+/**
+ * Parses the Gemini/Claude response for CEFR Letter to extract CEFR level, question, and feedback
+ * @param {string} responseText - Raw response from API
+ * @returns {object} { bandScore, question, feedback }
+ */
+function parseCefrResponse(responseText) {
+  const cefrLevelMatch = responseText.match(/\[CEFR_LEVEL:([A-C][1-2])\]/i);
+  const questionMatch = responseText.match(/\[QUESTION:(.*?)\]/s);
+  const feedbackMatch = responseText.match(/\[FEEDBACK:\]([\s\S]*)/);
+
+  const cefrLevel = cefrLevelMatch ? cefrLevelMatch[1].toUpperCase() : "B2";
+  const question = questionMatch
+    ? questionMatch[1].trim()
+    : "Question not provided";
+  const feedback = feedbackMatch ? feedbackMatch[1].trim() : responseText;
+
+  // Keep bandScore for shared bot routing, and cefrLevel for letter-specific callers.
+  return { bandScore: cefrLevel, cefrLevel, question, feedback };
+}
+
+/**
+ * Analyzes a CEFR letter using Anthropic Claude via SDK.
+ * Falls back to a mock report if keys are missing or api calls fail.
+ *
+ * @param {string|null} questionText - The text of the question (if provided)
+ * @param {string} letterText - The text of the letter to be graded
+ * @param {string|null} questionImageBase64 - Base64 encoded image of the question (if provided)
+ * @param {string|null} questionImageMimeType - MIME type of the question image
+ * @param {string} language - Target language code ('en', 'uz', 'ru')
+ * @returns {Promise<object>} Detailed evaluation report
+ */
+export async function gradeCefrLetter(
+  questionText,
+  letterText,
+  questionImageBase64 = null,
+  questionImageMimeType = null,
+  language = "en",
+) {
+  const primaryApiKey =
+    process.env.CLAUDE_API_KEY || process.env.GEMINI_API_KEY;
+  const backupApiKey =
+    process.env.CLAUDE_BACKUP_API_KEY || process.env.GEMINI_BACKUP_API_KEY;
+
+  if (!primaryApiKey || primaryApiKey.toLowerCase() === "mock") {
+    console.log("Using mock letter grading report.");
+    const mockResponse = getMockLetterReport(questionText, letterText, language);
+    return parseCefrResponse(mockResponse);
+  }
+
+  const langNames = {
+    en: "English",
+    uz: "Uzbek",
+    ru: "Russian",
+  };
+  const targetLanguage = langNames[language] || "English";
+
+  const cefrTemplateInstructions = {
+    en: {
+      title: "📊 CEFR Letter Assessment Report",
+      overall: "Overall Estimated CEFR Level:",
+      strengths: "Strengths:",
+      improvements: "Areas for Improvement:",
+      corrections: "🔧 Corrections & Improvements:",
+      incorrect: "Incorrect:",
+      correct: "Correct:",
+      stats: "📝 Statistics:",
+      wordCount: "Word Count:",
+      system: "Evaluation System: CEFR AI Examiner (v1.0)",
+    },
+    uz: {
+      title: "📊 CEFR Maktub Tahlili Hisoboti",
+      overall: "Umumiy CEFR Darajasi:",
+      strengths: "Kuchli tomonlari:",
+      improvements: "Yaxshilash kerak bo'lgan tomonlari:",
+      corrections: "🔧 Xatolar va Kamchiliklar:",
+      incorrect: "Noto'g'ri:",
+      correct: "To'g'ri:",
+      stats: "📝 Statistika:",
+      wordCount: "So'zlar soni:",
+      system: "Tekshiruv tizimi: CEFR AI Examiner (v1.0)",
+    },
+    ru: {
+      title: "📊 Отчет об Оценке Письма по CEFR",
+      overall: "Общий Уровень CEFR:",
+      strengths: "Сильные стороны:",
+      improvements: "Области для улучшения:",
+      corrections: "🔧 Исправления и Улучшения:",
+      incorrect: "Неправильно:",
+      correct: "Правильно:",
+      stats: "📝 Статистика:",
+      wordCount: "Количество слов:",
+      system: "Система оценки: CEFR AI Examiner (v1.0)",
+    }
+  };
+
+  const layout = cefrTemplateInstructions[language] || cefrTemplateInstructions["en"];
+
+  const systemPrompt = `
+You are an expert CEFR Language Assessor with 20+ years of experience conducting Cambridge English examinations (such as FCE, CAE, CPE). You grade accurately and fairly based on the Common European Framework of Reference for Languages (CEFR) guidelines (A1, A2, B1, B2, C1, C2).
+
+════════════════════════════════════
+EXAMINER MINDSET
+════════════════════════════════════
+- You are a fair, experienced examiner — not a harsh critic, not an encouraging teacher.
+- You reward what is genuinely good. You penalize what is genuinely weak.
+- State facts. If something is strong, say it is strong and why. If weak, say it is weak and why.
+- Internal consistency is mandatory: your feedback description must match your numeric score.
+
+════════════════════════════════════
+CEFR LEVEL DESCRIPTIONS FOR LETTERS
+════════════════════════════════════
+A1/A2: Can write very simple letters (e.g. thanking someone, inviting someone, simple descriptions). Grammar and vocabulary are very basic with frequent errors.
+B1: Can write straightforward, connected letters on familiar subjects or expressing personal opinions. Can convey information and describe experiences, feelings, and events in some detail.
+B2: Can write clear, detailed letters expressing news, views, and feelings. Can synthesize information and arguments from a number of sources. Good control of grammar and register (formal vs. informal).
+C1/C2: Can write clear, well-structured letters on complex subjects, demonstrating an assured, personal style. Register is perfectly maintained, and vocabulary/grammar are highly precise with near-native control.
+
+════════════════════════════════════
+SCORING PROCEDURE
+════════════════════════════════════
+Assess the letter on exactly four criteria:
+  1. Task Completion (TC) — covers all bullet points, purpose of writing, and registers (formal/informal).
+  2. Coherence and Cohesion (CC) — logical organization, paragraphs, transitions, salutation/sign-off.
+  3. Lexical Resource (LR) — vocabulary range, precision, spelling, and collocations.
+  4. Grammatical Range and Accuracy (GRA) — sentence structures, grammar control, and punctuation.
+
+Assign each criterion a CEFR level (A1, A2, B1, B2, C1, C2).
+Overall Level = the overall average CEFR level demonstrated in the writing.
+
+For each criterion write:
+  • 1–2 concise sentences on genuine strengths.
+  • 1–2 concise sentences on weaknesses, referencing the actual text specifically.
+
+Corrections section:
+  • Flag only genuine errors: grammar, word form, spelling, punctuation that impedes meaning.
+  • Quote the exact error. Provide corrected version and one-line reason.
+  • Maximum 4 corrections. If no errors, say so clearly.
+
+════════════════════════════════════
+TOKEN BUDGET — CRITICAL
+════════════════════════════════════
+- Keep total response under 3000 characters including all markers and HTML.
+- Be concise. One clear sentence beats two vague ones.
+- Do not repeat ideas across sections.
+- Do not write a summary paragraph at the end.
+
+════════════════════════════════════
+RESPONSE FORMAT — MANDATORY
+════════════════════════════════════
+You MUST begin your response with these three markers in EXACT order:
+
+[CEFR_LEVEL:X0]
+[QUESTION:The exact question text or "Question not provided"]
+[FEEDBACK:]
+
+After [FEEDBACK:] provide the full HTML assessment.
+
+════════════════════════════════════
+HTML FORMATTING RULES
+════════════════════════════════════
+- Use ONLY Telegram-supported HTML: <b>, <i>, <code>
+- Do NOT use Markdown (no **, no #, no _, no tables)
+- Close every tag you open. No unclosed tags.
+- Use • for bullet points
+- Escape letter quotes: < → &lt; | > → &gt; | & → &amp;
+- Write all feedback in "${targetLanguage}" — CEFR criterion names may stay in English
+
+════════════════════════════════════
+OUTPUT LAYOUT — FOLLOW EXACTLY
+════════════════════════════════════
+
+<b>${layout.title}</b>
+
+<b>${layout.overall} [X0]</b>
+
+───────────────────
+
+<b>1. Task Completion (TC): [Level]</b>
+• ✅ <b>${layout.strengths}:</b> [1–2 concise sentences]
+• 📈 <b>${layout.improvements}:</b> [1–2 concise sentences referencing actual text]
+
+<b>2. Coherence and Cohesion (CC): [Level]</b>
+• ✅ <b>${layout.strengths}:</b> [1–2 concise sentences]
+• 📈 <b>${layout.improvements}:</b> [1–2 concise sentences referencing actual text]
+
+<b>3. Lexical Resource (LR): [Level]</b>
+• ✅ <b>${layout.strengths}:</b> [1–2 concise sentences]
+• 📈 <b>${layout.improvements}:</b> [1–2 concise sentences referencing actual text]
+
+<b>4. Grammatical Range and Accuracy (GRA): [Level]</b>
+• ✅ <b>${layout.strengths}:</b> [1–2 concise sentences]
+• 📈 <b>${layout.improvements}:</b> [1–2 concise sentences referencing actual text]
+
+───────────────────
+
+<b>${layout.corrections}</b>
+• ❌ <i>${layout.incorrect}:</i> <code>[Exact quote]</code>
+   ✅ <b>${layout.correct}:</b> <code>[Corrected version]</code>
+   <i>[One-line reason]</i>
+
+───────────────────
+
+<b>${layout.stats}</b>
+• ${layout.wordCount} [Count]
+`;
+
+  async function callClaudeAPI(apiKey) {
+    const contentParts = [];
+    const cleanQuestionText = questionText ? escapeHtml(questionText) : null;
+    const cleanLetterText = escapeHtml(letterText);
+
+    if (cleanQuestionText) {
+      contentParts.push({
+        type: "text",
+        text: `### CEFR Letter Question:\n${cleanQuestionText}\n\n`,
+      });
+    } else if (questionImageBase64 && questionImageMimeType) {
+      contentParts.push({
+        type: "text",
+        text: `### CEFR Letter Question:\nPlease see the attached image containing the letter prompt/question.\n`,
+      });
+      contentParts.push({
+        type: "image",
+        source: {
+          type: "base64",
+          media_type: questionImageMimeType,
+          data: questionImageBase64,
+        },
+      });
+    } else {
+      contentParts.push({
+        type: "text",
+        text: `### CEFR Letter Question:\n[Question not provided / Skipped by user]\n\n`,
+      });
+    }
+
+    contentParts.push({
+      type: "text",
+      text: `### Candidate's Letter:\n${cleanLetterText}\n\nPlease evaluate this letter according to the CEFR criteria.`,
+    });
+
+    try {
+      const clientOptions = { apiKey };
+      if (process.env.CLAUDE_API_URL) {
+        clientOptions.baseURL = process.env.CLAUDE_API_URL;
+      }
+      const anthropic = new Anthropic(clientOptions);
+
+      const response = await anthropic.messages.create({
+        model: process.env.CLAUDE_MODEL || "claude-3-5-sonnet-latest",
+        max_tokens: 4000,
+        temperature: 0.3,
+        system: systemPrompt,
+        messages: [{ role: "user", content: contentParts }],
+      });
+
+      return response.content?.[0]?.text || null;
+    } catch (error) {
+      console.error("Error invoking Claude API for letter:", error.message);
+      return null;
+    }
+  }
+
+  let resultText = await callClaudeAPI(primaryApiKey);
+
+  if (!resultText && backupApiKey) {
+    console.log("Primary API key failed. Trying backup API key for letter...");
+    resultText = await callClaudeAPI(backupApiKey);
+  }
+
+  if (!resultText) {
+    console.warn("Both keys failed. Using mock letter report.");
+    const mockResponse = getMockLetterReport(questionText, letterText, language);
+    return parseCefrResponse(mockResponse);
+  }
+
+  return parseCefrResponse(resultText);
+}
+
+/**
+ * Mock letter report generator
+ */
+function getMockLetterReport(questionText, letterText, language = "en") {
+  const wordCount = letterText.split(/\s+/).filter(Boolean).length;
+  const cleanQuestion = questionText
+    ? escapeHtml(questionText)
+    : "Question not provided";
+
+  const mockFeedback = {
+    en: `<b>📊 CEFR Letter Assessment Report</b>
+
+<b>Overall Estimated CEFR Level: B2</b>
+
+───────────────────
+
+<b>1. Task Completion (TC): B2</b>
+• ✅ <b>Strengths:</b> The letter covers all requirements of the prompt. The register is appropriately semi-formal.
+• 📈 <b>Areas for Improvement:</b> Explain the reason for writing in slightly more detail in the introduction.
+
+<b>2. Coherence and Cohesion (CC): B2</b>
+• ✅ <b>Strengths:</b> Good use of standard salutations and closing remarks. Paragraphs are clearly separated.
+• 📈 <b>Areas for Improvement:</b> Some transition words (e.g. "Moreover") are used repetitively.
+
+<b>3. Lexical Resource (LR): B2</b>
+• ✅ <b>Strengths:</b> A good range of vocabulary suitable for the context.
+• 📈 <b>Areas for Improvement:</b> Watch out for spelling mistakes in words like "sincerely".
+
+<b>4. Grammatical Range and Accuracy (GRA): B2</b>
+• ✅ <b>Strengths:</b> Good control of simple and compound sentences.
+• 📈 <b>Areas for Improvement:</b> A few errors in article usage and tense consistency.
+
+───────────────────
+
+<b>🔧 Corrections & Improvements:</b>
+• ❌ <i>Incorrect:</i> <code>...I am write to ask...</code>
+  ✅ <b>Correct:</b> <code>...I am writing to ask...</code>
+  <i>Present continuous tense required.</i>
+
+───────────────────
+
+<b>📝 Statistics:</b>
+• Word Count: ${wordCount} words
+• Evaluation System: CEFR AI Examiner (v1.0)`,
+
+    uz: `<b>📊 CEFR Maktub Tahlili Hisoboti</b>
+
+<b>Umumiy CEFR Darajasi: B2</b>
+
+───────────────────
+
+<b>1. Task Completion (TC): B2</b>
+• ✅ <b>Kuchli tomonlari:</b> Maktub savolning barcha talablariga javob beradi. Tanlangan uslub to'g'ri qo'llanilgan.
+• 📈 <b>Yaxshilash kerak bo'lgan tomonlari:</b> Kirish qismida yozish sababini biroz batafsilroq tushuntiring.
+
+<b>2. Coherence and Cohesion (CC): B2</b>
+• ✅ <b>Kuchli tomonlari:</b> Standart salomlashish va xayrlashish iboralaridan to'g'ri foydalanilgan. Xat abzaslarga to'g'ri bo'lingan.
+• 📈 <b>Yaxshilash kerak bo'lgan tomonlari:</b> Ayrim o'tish so'zlari takroriy ishlatilgan.
+
+<b>3. Lexical Resource (LR): B2</b>
+• ✅ <b>Kuchli tomonlari:</b> Kontekstga mos keladigan yaxshi so'z boyligi.
+• 📈 <b>Yaxshilash kerak bo'lgan tomonlari:</b> So'zlarni to'g'ri yozilishiga (spelling) e'tibor bering.
+
+<b>4. Grammatical Range and Accuracy (GRA): B2</b>
+• ✅ <b>Kuchli tomonlari:</b> Oddiy va qo'shma gaplarning yaxshi nazorati.
+• 📈 <b>Yaxshilash kerak bo'lgan tomonlari:</b> Artikllar va zamlarning moslashuvida ba'zi xatolar mavjud.
+
+───────────────────
+
+<b>🔧 Xatolar va Kamchiliklar:</b>
+• ❌ <i>Noto'g'ri:</i> <code>...I am write to ask...</code>
+  ✅ <b>To'g'ri:</b> <code>...I am writing to ask...</code>
+  <i>Hozirgi davomli zamon talab etiladi.</i>
+
+───────────────────
+
+<b>📝 Statistika:</b>
+• So'zlar soni: ${wordCount} ta so'z
+• Tekshiruv tizimi: CEFR AI Examiner (v1.0)`,
+
+    ru: `<b>📊 Отчет об Оценке Письма по CEFR</b>
+
+<b>Общий Уровень CEFR: B2</b>
+
+───────────────────
+
+<b>1. Task Completion (TC): B2</b>
+• ✅ <b>Сильные стороны:</b> Письмо полностью раскрывает тему и отвечает на все вопросы. Тон письма выбран верно.
+• 📈 <b>Области для улучшения:</b> Объясните причину вашего обращения немного подробнее во введении.
+
+<b>2. Coherence and Cohesion (CC): B2</b>
+• ✅ <b>Сильные стороны:</b> Правильное использование приветствий и подписи. Текст логично разделен на абзацы.
+• 📈 <b>Области для улучшения:</b> Некоторые вводные слова используются слишком часто.
+
+<b>3. Lexical Resource (LR): B2</b>
+• ✅ <b>Сильные стороны:</b> Хороший словарный запас, соответствующий теме письма.
+• 📈 <b>Области для улучшения:</b> Избегайте орфографических ошибок в словах вроде "sincerely".
+
+<b>4. Grammatical Range and Accuracy (GRA): B2</b>
+• ✅ <b>Сильные стороны:</b> Хороший контроль простых и сложных предложений.
+• 📈 <b>Области для улучшения:</b> Несколько мелких ошибок в артиклях и согласовании времен.
+
+───────────────────
+
+<b>🔧 Исправления и Улучшения:</b>
+• ❌ <i>Неправильно:</i> <code>...I am write to ask...</code>
+  ✅ <b>Правильно:</b> <code>...I am writing to ask...</code>
+  <i>Требуется настоящее длительное время.</i>
+
+───────────────────
+
+<b>📝 Статистика:</b>
+• Количество слов: ${wordCount} слов
+• Система оценки: CEFR AI Examiner (v1.0)`,
+  };
+
+  const feedback = mockFeedback[language] || mockFeedback.en;
+  return `[CEFR_LEVEL:B2]\n[QUESTION:${cleanQuestion}]\n[FEEDBACK:]\n${feedback}`;
+}
