@@ -14,9 +14,9 @@ const CONTACT_URL = 'https://t.me/+BMjBYcW4_oNjNjNi';
 
 // Inline contact button per language
 const CONTACT_BUTTONS = {
-  en: { text: '💬 Contact Support', url: CONTACT_URL },
-  uz: { text: '💬 Yordam olish', url: CONTACT_URL },
-  ru: { text: '💬 Написать нам', url: CONTACT_URL },
+  en: { text: '💬 Share Feedback', url: CONTACT_URL },
+  uz: { text: '💬 Fikr bildirish', url: CONTACT_URL },
+  ru: { text: '💬 Оставить отзыв', url: CONTACT_URL },
 };
 
 /**
@@ -43,7 +43,9 @@ You will receive a full report with your estimated <b>CEFR level</b> from A1 to 
 
 Your current balance: <code>${credits} checks</code>
 
-Your credits work for both <b>Essay Check</b> and <b>Letter Check</b>. Try it today 🚀`,
+Your credits work for both <b>Essay Check</b> and <b>Letter Check</b>. Try it today 🚀
+
+Have feedback, questions, or anything you need us to improve? Tap the button below and share it in our group.`,
 
     // ─── UZBEK ───────────────────────────────────────────────────────────────
     uz: `📩 <b>Yangi funksiya: CEFR Maktub tekshiruvi ishga tushdi!</b>
@@ -62,7 +64,9 @@ Siz A1 dan C2 gacha bo'lgan <b>CEFR darajangiz</b> bilan to'liq hisobot olasiz.
 
 Joriy balansingiz: <code>${credits} ta tekshiruv</code>
 
-Kreditlaringiz <b>insho</b> va <b>maktub</b> tekshiruvi uchun ishlaydi. Bugun sinab ko'ring 🚀`,
+Kreditlaringiz <b>insho</b> va <b>maktub</b> tekshiruvi uchun ishlaydi. Bugun sinab ko'ring 🚀
+
+Fikr-mulohaza, savol yoki yaxshilash kerak bo'lgan narsa bo'lsa, pastdagi tugma orqali guruhimizga yozing.`,
 
     // ─── RUSSIAN ─────────────────────────────────────────────────────────────
     ru: `📩 <b>Новое обновление: проверка CEFR писем уже доступна!</b>
@@ -81,7 +85,9 @@ AI examiner оценит письмо по критериям:
 
 Ваш баланс: <code>${credits} проверок</code>
 
-Ваши кредиты подходят и для <b>эссе</b>, и для <b>писем</b>. Попробуйте сегодня 🚀`,
+Ваши кредиты подходят и для <b>эссе</b>, и для <b>писем</b>. Попробуйте сегодня 🚀
+
+Если у вас есть отзыв, вопрос или пожелание по улучшению, нажмите кнопку ниже и напишите в нашу группу.`,
   };
 
   return messages[lang] || messages['en'];
